@@ -5,10 +5,12 @@ class WindowFilterItem
 public:
 	HWND hwnd;
 	std::wstring title;
+	std::wstring className;
 	
-	WindowFilterItem(HWND const & hwnd, std::wstring const & title) : 
+	WindowFilterItem(HWND const & hwnd, std::wstring const & title, std::wstring const & className) : 
 		hwnd(hwnd),
-		title(title)
+		title(title),
+		className(className)
 	{
 	}
 
@@ -18,15 +20,22 @@ public:
 	}
 };
 
+struct WindowFilterNamedChildItem
+{
+	std::wstring className;
+	bool wasFound;
+};
+
 class WindowFilter
 {
 public:
 	std::vector<WindowFilterItem> items;
-
 	void Execute();
-	bool AddWindow(HWND const & hwnd);
 
 private:
-	static BOOL CALLBACK WindowFilter::FilterWindows(_In_ HWND hwnd, _In_ LPARAM lParam);
+	std::vector<HWND> windows;
+	bool IsFilteredByClassName(std::wstring const & className);
+	bool OwnsWindowWithClassName(HWND const & ownerHwnd, std::wstring const & ownedClassName);
+	static BOOL CALLBACK WindowFilter::AddWindowToList(_In_ HWND hwnd, _In_ LPARAM lParam);
 };
 

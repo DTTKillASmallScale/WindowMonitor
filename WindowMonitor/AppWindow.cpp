@@ -64,7 +64,7 @@ void AppWindow::OnInitialUpdate()
 	WindowHelper::SetIcon(instance, windowHandle, IDW_MAIN, true);
 
 	// Remove title bar
-	SetWindowLong(windowHandle, GWL_STYLE, WS_BORDER | WS_THICKFRAME);
+	SetWindowLong(windowHandle, GWL_STYLE, WS_SIZEBOX);
 	SetWindowPos(windowHandle, HWND_TOPMOST, 50, 50, 300, 200, SWP_SHOWWINDOW);
 
 	// Create menu
@@ -82,11 +82,8 @@ void AppWindow::OnInitialUpdate()
 	AppendMenu(contextMenu, MF_STRING, 0, WindowHelper::LoadString(instance, IDS_EXIT).c_str());
 	AppendMenu(contextMenu, MF_SEPARATOR, 0, NULL);
 
-	// Update
+	// Update menu, filtered windows
 	UpdateMenu();
-
-	// Get filtered windows
-	windowFilter.Execute();
 	
 	// Set thumbnail
 	SelectSource(0);
@@ -222,6 +219,7 @@ void AppWindow::UpdateMenu()
 	int i = SKIP_MENU_ITEMS;
 	for (auto it = windowFilter.items.begin(); it != windowFilter.items.end(); ++it)
 	{
+		//AppendMenu(contextMenu, MF_STRING, i++, ((*it).className + (*it).title).c_str());
 		AppendMenu(contextMenu, MF_STRING, i++, (*it).title.c_str());
 	}
 

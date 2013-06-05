@@ -3,53 +3,98 @@
 
 void WindowFilter::Execute()
 {
+	// Enum windows
+	windows.clear();
+	EnumWindows(WindowFilter::AddWindowToList, LPARAM(&windows));
+
+	// Filter windows
+	HWND hwnd = NULL;
+	const int bufferSize = 256;
+	TCHAR buffer[bufferSize];
+	std::wstring className;
+	std::wstring title;
+
 	// Clear set
 	items.clear();
 
-	// Enum windows
-	EnumWindows(WindowFilter::FilterWindows, (LPARAM)this);
+	// Iterate over windows
+	for (auto iter = windows.begin(); iter != windows.end(); ++iter)
+	{
+		// Get hwnd
+		hwnd = (*iter);
+		
+		// Exit if window not visible
+		if (!IsWindowVisible(hwnd)) continue;
+
+		// Exit if minimized
+		if (IsIconic(hwnd)) continue;
+
+		// Get class name
+		GetClassName(hwnd, buffer, bufferSize);
+		className.assign(buffer);
+
+		// Filter by window class
+		if (IsFilteredByClassName(className)) continue;
+	
+		// Filter windows sidebar backgrounds
+		if (className.compare(L"BasicWindow") == 0 && OwnsWindowWithClassName(hwnd, L"SideBar_HTMLHostWindow"))
+			continue;
+
+		// Get title
+		GetWindowText(hwnd, buffer, bufferSize);
+		title.assign(buffer);
+	
+		// Re-title windows sidebar inner windows
+		if (className.compare(L"SideBar_HTMLHostWindow") == 0)
+		{
+			HWND parent = GetParent(hwnd);
+			if (parent != NULL)
+			{
+				GetWindowText(parent, buffer, bufferSize);
+				title.assign(buffer);
+			}
+		}
+
+		// Filter untitled windows
+		if (title.empty()) continue;
+
+		// Insert item at start
+		items.insert(items.begin(), WindowFilterItem(hwnd, title, className));
+	}
 }
 
-bool WindowFilter::AddWindow(HWND const & hwnd)
+bool WindowFilter::IsFilteredByClassName(std::wstring const & className)
+{
+	if (className.compare(L"Progman") == 0) return true;
+	if (className.compare(L"Shell_TrayWnd") == 0) return true;
+	if (className.compare(L"Button") == 0) return true;
+	if (className.compare(L"DwmWindowMonitorApp") == 0) return true;
+	return false;
+}
+
+bool WindowFilter::OwnsWindowWithClassName(HWND const & ownerHwnd, std::wstring const & ownedClassName)
 {
 	const int bufferSize = 256;
 	TCHAR buffer[bufferSize];
-	std::wstring string;
+	std::wstring testClassName;
 
-	// Exit if window not visible
-	if (!IsWindowVisible(hwnd)) return false;
-
-	// Exit if minimized
-	if (IsIconic(hwnd)) return false;
-
-	// Exit if window class matches blacklist
-	GetClassName(hwnd, buffer, bufferSize);
-	string.assign(buffer);
-	if (string.compare(L"Progman") == 0) return false;
-	if (string.compare(L"Shell_TrayWnd") == 0) return false;
-	if (string.compare(L"Button") == 0) return false;
-	if (string.compare(L"DwmWindowMonitorApp") == 0) return false;
-
-	// Get window text
-	GetWindowText(hwnd, buffer, bufferSize);
-	string.assign(buffer);
-
-	// Check string
-	if (string.empty()) return false;
-
-	// Create item
-	WindowFilterItem item(hwnd, string);
-
-	// Insert at start
-	items.insert(items.begin(), item);
-
-	// Done
-	return true;
+	for (auto iter = windows.begin(); iter != windows.end(); ++iter)
+	{
+		if (GetWindow((*iter), GW_OWNER) == ownerHwnd)
+		{
+			// Test class name
+			GetClassName((*iter), buffer, bufferSize);
+			testClassName.assign(buffer);
+			if (testClassName.compare(ownedClassName) == 0) return true;
+		}
+	}
+	
+	return false;
 }
 
-BOOL CALLBACK WindowFilter::FilterWindows(_In_ HWND hwnd, _In_ LPARAM lParam)
+BOOL CALLBACK WindowFilter::AddWindowToList(_In_ HWND hwnd, _In_ LPARAM lParam)
 {
-	WindowFilter* windowFilter = (WindowFilter*)lParam;
-	windowFilter->AddWindow(hwnd);
+	std::vector<HWND>* windows = (std::vector<HWND>*)lParam;
+	windows->push_back(hwnd);
 	return TRUE;
 }
