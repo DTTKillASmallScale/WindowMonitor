@@ -3,14 +3,16 @@
 #include "Resource.h"
 #include "WindowHelper.h"
 
-const std::size_t AppWindow::SKIP_MENU_ITEMS = 3;
+const int AppWindow::MaxMenuTextLength = 32;
+const int AppWindow::MenuItemBreakPoint = 12;
 
 AppWindow::AppWindow() : 
 	CWindow(),
 	adjustableThumbnail(),
 	sourceWindow(NULL),
 	contextMenu(NULL),
-	sourceIndex(0)
+	sourceIndex(0),
+	baseMenuItemCount(0)
 {
 	lastPos.x = lastPos.y = 0;
 }
@@ -68,7 +70,10 @@ void AppWindow::OnInitialUpdate()
 	SetWindowPos(windowHandle, HWND_TOPMOST, 50, 50, 300, 200, SWP_SHOWWINDOW);
 
 	// Create menu
-	contextMenu = CreatePopupMenu();
+	HMENU menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));
+	contextMenu = GetSubMenu(menu, 0);
+	zoomMenu = GetSubMenu(contextMenu, 2);
+	baseMenuItemCount = GetMenuItemCount(contextMenu);
 
 	// Set menu to send WM_MENUCOMMAND instead of WM_COMMAND
 	MENUINFO menuInfo;
@@ -76,11 +81,6 @@ void AppWindow::OnInitialUpdate()
 	menuInfo.fMask = MIM_STYLE;
 	menuInfo.dwStyle = MNS_NOTIFYBYPOS;
 	SetMenuInfo(contextMenu, &menuInfo);
-
-	// Add default items
-	AppendMenu(contextMenu, MF_STRING, 0, WindowHelper::LoadString(instance, IDS_REFRESH).c_str());
-	AppendMenu(contextMenu, MF_STRING, 0, WindowHelper::LoadString(instance, IDS_EXIT).c_str());
-	AppendMenu(contextMenu, MF_SEPARATOR, 0, NULL);
 
 	// Update menu, filtered windows
 	UpdateMenu();
@@ -102,11 +102,11 @@ void AppWindow::OnDestroy()
 	adjustableThumbnail.UnsetThumbnail();
 
 	// Quit
-	::PostQuitMessage(0);
+	PostQuitMessage(0);
 }
 
 // Scale window via mouse wheel
-bool AppWindow::OnMouseWheel(const WPARAM& wParam, const LPARAM& lParam)
+bool AppWindow::OnMouseWheel(WPARAM const & wParam, LPARAM const & lParam)
 {
 	short zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
 	if (zDelta != 0)
@@ -119,7 +119,7 @@ bool AppWindow::OnMouseWheel(const WPARAM& wParam, const LPARAM& lParam)
 }
 
 // Offset thumbnail
-bool AppWindow::OnMouseMove(const WPARAM& wParam, const LPARAM& lParam)
+bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 {
 	// Offset thumbnail
 	if (wParam == MK_MBUTTON || wParam == (MK_LBUTTON|MK_SHIFT))
@@ -146,7 +146,7 @@ bool AppWindow::OnMouseMove(const WPARAM& wParam, const LPARAM& lParam)
 }
 
 // Handle shortcut keys
-bool AppWindow::OnAccelCommand(const WPARAM& wParam, const LPARAM& lParam)
+bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 {
 	if (HIWORD(wParam) == 1)
 	{
@@ -168,7 +168,7 @@ bool AppWindow::OnAccelCommand(const WPARAM& wParam, const LPARAM& lParam)
 }
 
 // Show context menu
-bool AppWindow::OnContextMenu(const WPARAM& wParam, const LPARAM& lParam)
+bool AppWindow::OnContextMenu(WPARAM const & wParam, LPARAM const & lParam)
 {
 	// Get screen coords
 	int x = GET_X_LPARAM(lParam);
@@ -185,22 +185,49 @@ bool AppWindow::OnContextMenu(const WPARAM& wParam, const LPARAM& lParam)
 }
 
 // Process menu item selection
-bool AppWindow::OnMenuCommand(const WPARAM& wParam, const LPARAM& lParam)
+bool AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 {
-	if (wParam == 0) 
+	HMENU sourceMenu = reinterpret_cast<HMENU>(lParam);
+	MENUITEMINFO mii;
+	mii.cbSize = sizeof(MENUITEMINFO);
+	mii.fMask = MIIM_ID;
+
+	if (sourceMenu == contextMenu)
 	{
-		// Refresh
-		adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
+		GetMenuItemInfo(contextMenu, wParam, TRUE, &mii);
+
+		switch (mii.wID)
+		{
+		case ID_EXIT:
+			SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
+			break;
+		case ID_REFRESH:
+			adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
+			break;
+		default:
+			SelectSource(wParam - baseMenuItemCount);
+			break;
+		}
 	}
-	else if (wParam == 1)
+	else if (sourceMenu == zoomMenu)
 	{
-		// Exit
-		SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
-	}
-	else
-	{
-		// Set thumbnail
-		SelectSource(wParam - SKIP_MENU_ITEMS);
+		GetMenuItemInfo(zoomMenu, wParam, TRUE, &mii);
+		double newScale;
+
+		switch (mii.wID)
+		{
+		case ID_ZOOM_25: newScale = 0.25; break;
+		case ID_ZOOM_50: newScale = 0.5; break;
+		case ID_ZOOM_75: newScale = 0.75; break;
+		case ID_ZOOM_100: newScale = 1.0; break;
+		case ID_ZOOM_125: newScale = 1.25; break;
+		case ID_ZOOM_150: newScale = 1.5; break;
+		case ID_ZOOM_175: newScale = 1.75; break;
+		case ID_ZOOM_200: newScale = 2.0; break;
+		default: return true;
+		}
+		
+		adjustableThumbnail.SetScaleThumbnail(windowHandle, sourceWindow, newScale);
 	}
 	
 	return true;
@@ -209,22 +236,32 @@ bool AppWindow::OnMenuCommand(const WPARAM& wParam, const LPARAM& lParam)
 void AppWindow::UpdateMenu()
 {
 	// Clear
-	while(GetMenuItemCount(contextMenu) > SKIP_MENU_ITEMS)
-		DeleteMenu(contextMenu, SKIP_MENU_ITEMS, MF_BYPOSITION);
+	while(GetMenuItemCount(contextMenu) > baseMenuItemCount)
+		DeleteMenu(contextMenu, baseMenuItemCount, MF_BYPOSITION);
 
 	// Get filtered windows
 	windowFilter.Execute();
 
 	// Add items
-	int i = SKIP_MENU_ITEMS;
+	int i = baseMenuItemCount;
 	for (auto it = windowFilter.items.begin(); it != windowFilter.items.end(); ++it)
 	{
-		//AppendMenu(contextMenu, MF_STRING, i++, ((*it).className + (*it).title).c_str());
-		AppendMenu(contextMenu, MF_STRING, i++, (*it).title.c_str());
+		// Get title text
+		std::wstring text((*it).title.substr(0, AppWindow::MaxMenuTextLength));
+
+		// Truncate
+		if ((*it).title.length() > AppWindow::MaxMenuTextLength) text.append(L"...");
+
+		// Create menu item
+		bool breakMenu = i % AppWindow::MenuItemBreakPoint == 0;
+		AppendMenu(contextMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0), i, text.c_str());
+
+		// Next item
+		++i;
 	}
 
 	// Add blank item if no windows were added
-	if (i == SKIP_MENU_ITEMS) AppendMenu(contextMenu, MF_STRING|MF_GRAYED, 0, 
+	if (i == baseMenuItemCount) AppendMenu(contextMenu, MF_STRING|MF_GRAYED, 0, 
 		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
 }
 

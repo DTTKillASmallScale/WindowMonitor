@@ -11,6 +11,7 @@ public:
 	bool UnsetThumbnail();
 	bool ResizeThumbnail(HWND const & target, HWND const & source);
 	bool StepScaleThumbnail(HWND const & target, HWND const & source, short const & delta);
+	bool SetScaleThumbnail(HWND const & target, HWND const & source, double const & newScale);
 	bool OffsetThumbnail(HWND const & target, HWND const & source, int const & x, int const & y);
 
 private:

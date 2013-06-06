@@ -125,22 +125,23 @@ bool CWindow::MakeWindow(CREATESTRUCT const & cs)
 	if (!windowHandle) return false;
 
 	// Show window
-	::ShowWindow(windowHandle, SW_SHOWNORMAL);
-	::UpdateWindow(windowHandle);
+	ShowWindow(windowHandle, SW_SHOWNORMAL);
+	UpdateWindow(windowHandle);
 
 	return true;
 }
 
 LRESULT CALLBACK CWindow::StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	CWindow * window = (CWindow*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+	CWindow * window = reinterpret_cast<CWindow*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
 	if (window == NULL && message == WM_NCCREATE) 
 	{
 		// Get pointer to object from lpCreateParams and set userdata
 		// This is so we don't lose any messages that are sent before CreateWindowEx exits
-		window = (CWindow*)((CREATESTRUCT*)lParam)->lpCreateParams;
-		::SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)window);
+		CREATESTRUCT * cs = reinterpret_cast<CREATESTRUCT*>(lParam);
+		window = reinterpret_cast<CWindow*>(cs->lpCreateParams);
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)window);
 	}
 
 	if (window == NULL) return DefWindowProc(hWnd, message, wParam, lParam);

@@ -15,11 +15,11 @@ protected:
 
 private:
 	// Events
-	bool OnAccelCommand(const WPARAM& wParam, const LPARAM& lParam);
-	bool OnMenuCommand(const WPARAM& wParam, const LPARAM& lParam);
-	bool OnContextMenu(const WPARAM& wParam, const LPARAM& lParam);
-	bool OnMouseWheel(const WPARAM& wParam, const LPARAM& lParam);
-	bool OnMouseMove(const WPARAM& wParam, const LPARAM& lParam);
+	bool OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnMouseWheel(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnMouseMove(WPARAM const & wParam, LPARAM const & lParam);
 	void OnDestroy();
 
 	void UpdateMenu();
@@ -30,10 +30,15 @@ private:
 	// Vars
 	HWND sourceWindow;
 	HMENU contextMenu;
+	HMENU zoomMenu;
+	int baseMenuItemCount;
+
 	std::size_t sourceIndex;
 	WindowFilter windowFilter;
 	POINTS lastPos;
+
 	AdjustableThumbnail adjustableThumbnail;
 
-	static const std::size_t SKIP_MENU_ITEMS;
+	static const int MaxMenuTextLength;
+	static const int MenuItemBreakPoint;
 };

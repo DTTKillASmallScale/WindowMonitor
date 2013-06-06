@@ -94,7 +94,7 @@ bool WindowFilter::OwnsWindowWithClassName(HWND const & ownerHwnd, std::wstring 
 
 BOOL CALLBACK WindowFilter::AddWindowToList(_In_ HWND hwnd, _In_ LPARAM lParam)
 {
-	std::vector<HWND>* windows = (std::vector<HWND>*)lParam;
+	std::vector<HWND> * windows = reinterpret_cast<std::vector<HWND>*>(lParam);
 	windows->push_back(hwnd);
 	return TRUE;
 }
