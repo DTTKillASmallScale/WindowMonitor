@@ -23,7 +23,7 @@ void CWindow::Create()
 	cs.lpszClass = _T("CustomWindowClass");
 	cs.cx = 640;
 	cs.cy = 480;
-	cs.style = WS_OVERLAPPEDWINDOW|WS_POPUP|WS_VISIBLE|WS_SYSMENU|WS_MAXIMIZEBOX|WS_MINIMIZEBOX;
+	cs.style = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
 	cs.dwExStyle = NULL;
 	cs.lpCreateParams = this;
 

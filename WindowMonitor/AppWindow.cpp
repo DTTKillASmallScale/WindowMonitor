@@ -56,18 +56,18 @@ void AppWindow::PreCreate(CREATESTRUCT& cs)
 {
 	accelerators = LoadAccelerators(cs.hInstance, MAKEINTRESOURCE(IDW_MAIN));
 	cs.lpszClass = _T("DwmWindowMonitorApp");
+	cs.style = WS_POPUP | WS_SIZEBOX | WS_VISIBLE;
 }
 
 void AppWindow::OnInitialUpdate()
 {
 	// Set title and icons
-	SetWindowText(windowHandle, WindowHelper::LoadString(instance, IDS_TITLE).c_str());
-	WindowHelper::SetIcon(instance, windowHandle, IDW_MAIN);
-	WindowHelper::SetIcon(instance, windowHandle, IDW_MAIN, true);
+	WindowHelper::SetTitle(windowHandle, instance, IDS_TITLE);
+	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN);
+	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN, true);
 
-	// Remove title bar
-	SetWindowLong(windowHandle, GWL_STYLE, WS_SIZEBOX);
-	SetWindowPos(windowHandle, HWND_TOPMOST, 50, 50, 300, 200, SWP_SHOWWINDOW);
+	// Set always on top
+	SetWindowPos(windowHandle, HWND_TOPMOST, 50, 50, 0, 0, SWP_NOSIZE);
 
 	// Create menu
 	HMENU menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));

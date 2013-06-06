@@ -29,7 +29,7 @@ namespace WindowHelper
 		return result;
 	}
 
-	inline void SetIcon(HINSTANCE hInstance, HWND hWnd, int nIcon, bool big = false)
+	inline void SetIcon(HWND hWnd, HINSTANCE hInstance, int nIcon, bool big = false)
 	{
 		HICON icon = (HICON) LoadImage(hInstance, 
 			MAKEINTRESOURCE(nIcon), 
@@ -39,5 +39,10 @@ namespace WindowHelper
 			0);
 
 		if (icon) SendMessage(hWnd, WM_SETICON, WPARAM(big ? ICON_BIG : ICON_SMALL), LPARAM(icon));
+	}
+
+	inline void SetTitle(HWND hWnd, HINSTANCE hInstance, UINT nID)
+	{
+		SetWindowText(hWnd, WindowHelper::LoadString(hInstance, nID).c_str());
 	}
 }
