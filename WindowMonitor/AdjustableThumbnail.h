@@ -15,7 +15,7 @@ public:
 	bool OffsetThumbnail(HWND const & target, HWND const & source, int const & x, int const & y);
 
 private:
-	bool UpdateThumbnailScale(HWND const & target, HWND const & source, RECT & rect);
+	bool UpdateThumbnailScale(HWND const & target, HWND const & source);
 	bool ScaleDestRect(HWND const & source, RECT & rect);
 
 	double offsetx;

@@ -15,6 +15,10 @@ protected:
 
 private:
 	// Events
+	bool OnSetCursor(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnLeftButtonDown(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnKeyDown(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnKeyUp(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
@@ -25,13 +29,15 @@ private:
 	void UpdateMenu();
 	void CycleForward();
 	void CycleBack();
-	void SelectSource(const int& index);
+	void SelectSource(int const & index);
+	void SetCurrentCursor(int const & id);
 
 	// Vars
 	HWND sourceWindow;
 	HMENU contextMenu;
 	HMENU zoomMenu;
 	int baseMenuItemCount;
+	int currentCursor;
 
 	std::size_t sourceIndex;
 	WindowFilter windowFilter;
@@ -41,4 +47,6 @@ private:
 
 	static const int MaxMenuTextLength;
 	static const int MenuItemBreakPoint;
+	static const int CursorSizeAll;
+	static const int CursorArrow;
 };

@@ -6,7 +6,7 @@ const double AdjustableThumbnail::SCALE_MAX = 4.0;
 const double AdjustableThumbnail::SCALE_INC = 0.0625;
 
 AdjustableThumbnail::AdjustableThumbnail(void) :
-	scale(0.5),
+	scale(1.0),
 	offsetx(0),
 	offsety(0),
 	thumbnail()
@@ -49,18 +49,7 @@ bool AdjustableThumbnail::ResizeThumbnail(HWND const & target, HWND const & sour
 	if (source == NULL) return false;
 
 	// Update thumbnail
-	RECT rc;
-	if (!UpdateThumbnailScale(target, source, rc)) return false;
-
-	// Adjust rect to size of window accounting for styles
-	LONG dwStyle = GetWindowLong(target, GWL_STYLE);
-	LONG dwExStyle = GetWindowLong(target, GWL_EXSTYLE);
-	AdjustWindowRectEx(&rc, dwStyle, FALSE, dwExStyle);
-
-	// Set window size and position
-	SetWindowPos(target, NULL, 0, 0, (rc.right - rc.left), (rc.bottom - rc.top), SWP_NOMOVE | SWP_NOZORDER);
-
-	return true;
+	return UpdateThumbnailScale(target, source);
 }
 
 bool AdjustableThumbnail::StepScaleThumbnail(HWND const & target, HWND const & source, short const & delta)
@@ -87,26 +76,8 @@ bool AdjustableThumbnail::SetScaleThumbnail(HWND const & target, HWND const & so
 	if (scale < SCALE_MIN) scale = SCALE_MIN;
 	else if (scale > SCALE_MAX) scale = SCALE_MAX;
 
-	RECT rc;
-
 	// Scale thumbnail
-	UpdateThumbnailScale(target, source, rc);
-
-	// Scale window client area
-	GetClientRect(target, &rc);
-	double windowScale = 1.0 - (deltaScale / scale);
-	rc.right = long(double(rc.right) / windowScale);
-	rc.bottom = long(double(rc.bottom) / windowScale);
-
-	// Adjust rect to size of window accounting for styles
-	LONG dwStyle = GetWindowLong(target, GWL_STYLE);
-	LONG dwExStyle = GetWindowLong(target, GWL_EXSTYLE);
-	AdjustWindowRectEx(&rc, dwStyle, FALSE, dwExStyle);
-
-	// Set window size and position
-	SetWindowPos(target, NULL, 0, 0, (rc.right - rc.left), (rc.bottom - rc.top), SWP_NOMOVE | SWP_NOZORDER);
-
-	return true;
+	return UpdateThumbnailScale(target, source);
 }
 
 bool AdjustableThumbnail::OffsetThumbnail(HWND const & target, HWND const & source, int const & x, int const & y)
@@ -116,12 +87,13 @@ bool AdjustableThumbnail::OffsetThumbnail(HWND const & target, HWND const & sour
 	offsety += (double)y / scale;
 
 	// Update
-	RECT rc;
-	return UpdateThumbnailScale(target, source, rc);
+	return UpdateThumbnailScale(target, source);
 }
 
-bool AdjustableThumbnail::UpdateThumbnailScale(HWND const & target, HWND const & source, RECT & rect)
+bool AdjustableThumbnail::UpdateThumbnailScale(HWND const & target, HWND const & source)
 {
+	RECT rect;
+
 	// Get client area rect for target
 	GetClientRect(target, &rect);
 

@@ -4,7 +4,9 @@
 #include "WindowHelper.h"
 
 const int AppWindow::MaxMenuTextLength = 32;
-const int AppWindow::MenuItemBreakPoint = 12;
+const int AppWindow::MenuItemBreakPoint = 24;
+const int AppWindow::CursorSizeAll = 32646;
+const int AppWindow::CursorArrow = 32512;
 
 AppWindow::AppWindow() : 
 	CWindow(),
@@ -12,44 +14,10 @@ AppWindow::AppWindow() :
 	sourceWindow(NULL),
 	contextMenu(NULL),
 	sourceIndex(0),
-	baseMenuItemCount(0)
+	baseMenuItemCount(0),
+	currentCursor(32512)
 {
 	lastPos.x = lastPos.y = 0;
-}
-
-LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-	case WM_LBUTTONDOWN:
-		if (wParam == MK_LBUTTON)
-		{
-			SendMessage(windowHandle, WM_SYSCOMMAND, SC_MOVE|0x0002, NULL);
-			SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW|SWP_NOMOVE|SWP_NOSIZE);
-			return 0;
-		}
-	case WM_MOUSEWHEEL:
-		if (OnMouseWheel(wParam, lParam)) return 0;
-		break;
-	case WM_COMMAND:
-		if (OnAccelCommand(wParam, lParam)) return 0;
-		break;
-	case WM_MOUSEMOVE:
-		if (OnMouseMove(wParam, lParam)) return 0;
-		break;
-	case WM_CONTEXTMENU:
-		if (OnContextMenu(wParam, lParam)) return 0;
-		break;
-	case WM_MENUCOMMAND:
-		if (OnMenuCommand(wParam, lParam)) return 0;
-		break;
-	case WM_DESTROY:
-		OnDestroy();
-		break;
-	}
-
-	// Use the default message handling for remaining messages
-	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 void AppWindow::PreCreate(CREATESTRUCT& cs)
@@ -67,12 +35,12 @@ void AppWindow::OnInitialUpdate()
 	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN, true);
 
 	// Set always on top
-	SetWindowPos(windowHandle, HWND_TOPMOST, 50, 50, 0, 0, SWP_NOSIZE);
+	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
 
 	// Create menu
 	HMENU menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));
 	contextMenu = GetSubMenu(menu, 0);
-	zoomMenu = GetSubMenu(contextMenu, 2);
+	zoomMenu = GetSubMenu(contextMenu, 0);
 	baseMenuItemCount = GetMenuItemCount(contextMenu);
 
 	// Set menu to send WM_MENUCOMMAND instead of WM_COMMAND
@@ -105,13 +73,80 @@ void AppWindow::OnDestroy()
 	PostQuitMessage(0);
 }
 
-// Scale window via mouse wheel
-bool AppWindow::OnMouseWheel(WPARAM const & wParam, LPARAM const & lParam)
+LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	short zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
-	if (zDelta != 0)
+	switch (message)
 	{
-		adjustableThumbnail.StepScaleThumbnail(windowHandle, sourceWindow, zDelta);
+	case WM_KEYDOWN:
+	case WM_MBUTTONDOWN:
+		if (OnKeyDown(wParam, lParam)) return 0;
+		break;
+	case WM_KEYUP:
+	case WM_MBUTTONUP:
+		if (OnKeyUp(wParam, lParam)) return 0;
+		break;
+	case WM_SETCURSOR:
+		if (OnSetCursor(wParam, lParam)) return TRUE;
+		break;
+	case WM_LBUTTONDOWN:
+		if (OnLeftButtonDown(wParam, lParam)) return 0;
+		break;
+	case WM_MOUSEMOVE:
+		if (OnMouseMove(wParam, lParam)) return 0;
+		break;
+	case WM_MOUSEWHEEL:
+		if (OnMouseWheel(wParam, lParam)) return 0;
+		break;
+	case WM_COMMAND:
+		if (OnAccelCommand(wParam, lParam)) return 0;
+		break;
+	case WM_CONTEXTMENU:
+		OnContextMenu(wParam, lParam);
+		break;
+	case WM_MENUCOMMAND:
+		OnMenuCommand(wParam, lParam);
+		break;
+	case WM_DESTROY:
+		OnDestroy();
+		break;
+	}
+
+	// Use the default message handling for remaining messages
+	return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+bool AppWindow::OnKeyDown(WPARAM const & wParam, LPARAM const & lParam)
+{
+	if (wParam == VK_SHIFT || wParam == VK_MBUTTON) SetCurrentCursor(AppWindow::CursorSizeAll);
+	return true;
+}
+
+bool AppWindow::OnKeyUp(WPARAM const & wParam, LPARAM const & lParam)
+{
+	short shift = GetKeyState(VK_SHIFT);
+	short mbutton = GetKeyState(VK_MBUTTON);
+	if (shift > -1 && mbutton > -1) SetCurrentCursor(AppWindow::CursorArrow);
+	return true;
+}
+
+bool AppWindow::OnSetCursor(WPARAM const & wParam, LPARAM const & lParam)
+{
+	if (LOWORD(lParam) == HTCLIENT)
+	{
+		SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(currentCursor)));
+		return true;
+	}
+
+	return false;
+}
+
+bool AppWindow::OnLeftButtonDown(WPARAM const & wParam, LPARAM const & lParam)
+{
+	// Left button only
+	if (wParam == MK_LBUTTON)
+	{
+		SendMessage(windowHandle, WM_SYSCOMMAND, SC_MOVE|0x0002, NULL);
+		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW|SWP_NOMOVE|SWP_NOSIZE);
 		return true;
 	}
 
@@ -140,6 +175,19 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 	else
 	{
 		lastPos.x = lastPos.y = 0;
+	}
+
+	return false;
+}
+
+// Scale window via mouse wheel
+bool AppWindow::OnMouseWheel(WPARAM const & wParam, LPARAM const & lParam)
+{
+	short zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+	if (zDelta != 0)
+	{
+		adjustableThumbnail.StepScaleThumbnail(windowHandle, sourceWindow, zDelta);
+		return true;
 	}
 
 	return false;
@@ -233,6 +281,15 @@ bool AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 	return true;
 }
 
+void AppWindow::SetCurrentCursor(int const & id)
+{
+	if (currentCursor != id)
+	{
+		currentCursor = id;
+		SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(currentCursor)));
+	}
+}
+
 void AppWindow::UpdateMenu()
 {
 	// Clear
@@ -265,7 +322,7 @@ void AppWindow::UpdateMenu()
 		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
 }
 
-void AppWindow::SelectSource(const int& index)
+void AppWindow::SelectSource(int const & index)
 {
 	std::size_t size = windowFilter.items.size();
 
