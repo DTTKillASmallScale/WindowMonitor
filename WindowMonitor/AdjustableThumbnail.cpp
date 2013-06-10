@@ -55,13 +55,14 @@ bool AdjustableThumbnail::ResizeThumbnail(HWND const & target, HWND const & sour
 bool AdjustableThumbnail::StepScaleThumbnail(HWND const & target, HWND const & source, short const & delta)
 {
 	// Check
+	if (delta == 0) return true;
 	if (scale == SCALE_MIN && delta < 0) return true;
 	else if (scale == SCALE_MAX && delta > 0) return true;
 
 	// Get scale inc
 	double deltaScale;
-	if (delta > 0) deltaScale = SCALE_INC;
-	else if (delta < 0) deltaScale = -SCALE_INC;
+	if (delta > 0) deltaScale = SCALE_INC * scale;
+	else if (delta < 0) deltaScale = -SCALE_INC * scale;
 	
 	// Set scale
 	return SetScaleThumbnail(target, source, scale + deltaScale);

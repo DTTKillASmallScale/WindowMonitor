@@ -15,7 +15,8 @@ AppWindow::AppWindow() :
 	contextMenu(NULL),
 	sourceIndex(0),
 	baseMenuItemCount(0),
-	currentCursor(32512)
+	currentCursor(32512),
+	suppressContextMenu(false)
 {
 	lastPos.x = lastPos.y = 0;
 }
@@ -88,8 +89,11 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	case WM_SETCURSOR:
 		if (OnSetCursor(wParam, lParam)) return TRUE;
 		break;
-	case WM_LBUTTONDOWN:
-		if (OnLeftButtonDown(wParam, lParam)) return 0;
+	case WM_LBUTTONUP:
+		if (wParam == MK_RBUTTON) { suppressContextMenu = true; return 0; }
+		break;
+	case WM_RBUTTONUP:
+		if (wParam == MK_LBUTTON) return 0;
 		break;
 	case WM_MOUSEMOVE:
 		if (OnMouseMove(wParam, lParam)) return 0;
@@ -140,44 +144,51 @@ bool AppWindow::OnSetCursor(WPARAM const & wParam, LPARAM const & lParam)
 	return false;
 }
 
-bool AppWindow::OnLeftButtonDown(WPARAM const & wParam, LPARAM const & lParam)
+bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 {
-	// Left button only
-	if (wParam == MK_LBUTTON)
+	POINTS pos = MAKEPOINTS(lParam);
+	bool performOffset = (wParam == MK_MBUTTON) || (wParam == (MK_LBUTTON|MK_SHIFT));
+	bool performScale = (wParam == (MK_LBUTTON|MK_RBUTTON));
+	bool performDrag = (wParam == MK_LBUTTON);
+
+	// Offset thumbnail
+	if (performOffset && !(lastPos.x == 0 && lastPos.y == 0))
+	{
+		adjustableThumbnail.OffsetThumbnail(windowHandle, sourceWindow, 
+			pos.x - lastPos.x,
+			pos.y - lastPos.y
+			);
+	}
+
+	// Scale thumbnail
+	if (performScale)
+	{
+		int dx  = pos.x - lastPos.x;
+		int dy = pos.y - lastPos.y;
+		int d = (dx < 0) ? -1 : (dx > 0) ? 1 : 0;
+		d += (dy < 0) ? -1 : (dy > 0) ? 1 : 0;
+		adjustableThumbnail.StepScaleThumbnail(windowHandle, sourceWindow, d);
+	}
+	
+	// Drag window
+	if (performDrag)
 	{
 		SendMessage(windowHandle, WM_SYSCOMMAND, SC_MOVE|0x0002, NULL);
 		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW|SWP_NOMOVE|SWP_NOSIZE);
-		return true;
 	}
 
-	return false;
-}
-
-// Offset thumbnail
-bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
-{
-	// Offset thumbnail
-	if (wParam == MK_MBUTTON || wParam == (MK_LBUTTON|MK_SHIFT))
+	// Store last mouse position
+	if (performOffset || performScale)
 	{
-		POINTS pos = MAKEPOINTS(lParam);
-		if (!(lastPos.x == 0 && lastPos.y == 0))
-		{
-			adjustableThumbnail.OffsetThumbnail(windowHandle, sourceWindow, 
-				pos.x - lastPos.x,
-				pos.y - lastPos.y
-				);
-		}
-
 		lastPos.x = pos.x;
 		lastPos.y = pos.y;
-		return true;
 	}
 	else
 	{
 		lastPos.x = lastPos.y = 0;
 	}
 
-	return false;
+	return true;
 }
 
 // Scale window via mouse wheel
@@ -218,6 +229,12 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 // Show context menu
 bool AppWindow::OnContextMenu(WPARAM const & wParam, LPARAM const & lParam)
 {
+	if (suppressContextMenu)
+	{
+		suppressContextMenu = false;
+		return true;
+	}
+
 	// Get screen coords
 	int x = GET_X_LPARAM(lParam);
 	int y = GET_Y_LPARAM(lParam);

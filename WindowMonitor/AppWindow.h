@@ -16,7 +16,6 @@ protected:
 private:
 	// Events
 	bool OnSetCursor(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnLeftButtonDown(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnKeyDown(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnKeyUp(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam);
@@ -38,6 +37,7 @@ private:
 	HMENU zoomMenu;
 	int baseMenuItemCount;
 	int currentCursor;
+	bool suppressContextMenu;
 
 	std::size_t sourceIndex;
 	WindowFilter windowFilter;
