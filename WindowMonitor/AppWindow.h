@@ -15,6 +15,7 @@ protected:
 
 private:
 	// Events
+	bool OnDoubleClick(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnSetCursor(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnKeyDown(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnKeyUp(WPARAM const & wParam, LPARAM const & lParam);
@@ -38,6 +39,7 @@ private:
 	int baseMenuItemCount;
 	int currentCursor;
 	bool suppressContextMenu;
+	bool thickFrame;
 
 	std::size_t sourceIndex;
 	WindowFilter windowFilter;
@@ -47,6 +49,7 @@ private:
 
 	static const int MaxMenuTextLength;
 	static const int MenuItemBreakPoint;
-	static const int CursorSizeAll;
 	static const int CursorArrow;
+	static const int CursorMove;
+	static const int CursorScale;
 };

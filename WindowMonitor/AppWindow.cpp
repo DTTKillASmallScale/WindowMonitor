@@ -5,8 +5,9 @@
 
 const int AppWindow::MaxMenuTextLength = 32;
 const int AppWindow::MenuItemBreakPoint = 24;
-const int AppWindow::CursorSizeAll = 32646;
 const int AppWindow::CursorArrow = 32512;
+const int AppWindow::CursorMove = 32646;
+const int AppWindow::CursorScale = 32642;
 
 AppWindow::AppWindow() : 
 	CWindow(),
@@ -16,7 +17,8 @@ AppWindow::AppWindow() :
 	sourceIndex(0),
 	baseMenuItemCount(0),
 	currentCursor(32512),
-	suppressContextMenu(false)
+	suppressContextMenu(false),
+	thickFrame(true)
 {
 	lastPos.x = lastPos.y = 0;
 }
@@ -25,7 +27,7 @@ void AppWindow::PreCreate(CREATESTRUCT& cs)
 {
 	accelerators = LoadAccelerators(cs.hInstance, MAKEINTRESOURCE(IDW_MAIN));
 	cs.lpszClass = _T("DwmWindowMonitorApp");
-	cs.style = WS_POPUP | WS_SIZEBOX | WS_VISIBLE;
+	cs.style = WS_VISIBLE|WS_POPUP|WS_THICKFRAME;
 }
 
 void AppWindow::OnInitialUpdate()
@@ -36,7 +38,7 @@ void AppWindow::OnInitialUpdate()
 	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN, true);
 
 	// Set always on top
-	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE|SWP_NOMOVE);
 
 	// Create menu
 	HMENU menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));
@@ -80,20 +82,27 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	{
 	case WM_KEYDOWN:
 	case WM_MBUTTONDOWN:
+	case WM_LBUTTONDOWN:
+	case WM_RBUTTONDOWN:
 		if (OnKeyDown(wParam, lParam)) return 0;
 		break;
 	case WM_KEYUP:
 	case WM_MBUTTONUP:
 		if (OnKeyUp(wParam, lParam)) return 0;
 		break;
-	case WM_SETCURSOR:
-		if (OnSetCursor(wParam, lParam)) return TRUE;
-		break;
 	case WM_LBUTTONUP:
+		OnKeyUp(wParam, lParam);
 		if (wParam == MK_RBUTTON) { suppressContextMenu = true; return 0; }
 		break;
 	case WM_RBUTTONUP:
+		OnKeyUp(wParam, lParam);
 		if (wParam == MK_LBUTTON) return 0;
+		break;
+	case WM_SETCURSOR:
+		if (OnSetCursor(wParam, lParam)) return TRUE;
+		break;
+	case WM_LBUTTONDBLCLK:
+		if (OnDoubleClick(wParam, lParam)) return 0;
 		break;
 	case WM_MOUSEMOVE:
 		if (OnMouseMove(wParam, lParam)) return 0;
@@ -121,15 +130,25 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 bool AppWindow::OnKeyDown(WPARAM const & wParam, LPARAM const & lParam)
 {
-	if (wParam == VK_SHIFT || wParam == VK_MBUTTON) SetCurrentCursor(AppWindow::CursorSizeAll);
+	if (wParam == VK_SHIFT || wParam == VK_MBUTTON) SetCurrentCursor(AppWindow::CursorMove);
+	if (wParam == VK_CONTROL || wParam == (VK_LBUTTON|VK_RBUTTON)) SetCurrentCursor(AppWindow::CursorScale);
 	return true;
 }
 
 bool AppWindow::OnKeyUp(WPARAM const & wParam, LPARAM const & lParam)
 {
 	short shift = GetKeyState(VK_SHIFT);
+	short control = GetKeyState(VK_CONTROL);
 	short mbutton = GetKeyState(VK_MBUTTON);
-	if (shift > -1 && mbutton > -1) SetCurrentCursor(AppWindow::CursorArrow);
+	short lbutton = GetKeyState(VK_LBUTTON);
+	short rbutton = GetKeyState(VK_RBUTTON);
+
+	if (shift > -1 
+		&& control > -1 
+		&& mbutton > -1 
+		&& (lbutton > -1 || rbutton > -1)) 
+		SetCurrentCursor(AppWindow::CursorArrow);
+
 	return true;
 }
 
@@ -144,11 +163,45 @@ bool AppWindow::OnSetCursor(WPARAM const & wParam, LPARAM const & lParam)
 	return false;
 }
 
+bool AppWindow::OnDoubleClick(WPARAM const & wParam, LPARAM const & lParam)
+{
+	// Calc new style
+	LONG_PTR newStyle = WS_VISIBLE|WS_POPUP;
+	newStyle =  newStyle | (thickFrame ? WS_BORDER : WS_THICKFRAME);
+
+	// Set new style
+	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);
+
+	// Get client area size
+	RECT rect;
+	GetClientRect(windowHandle, &rect);
+	AdjustWindowRect(&rect, newStyle, FALSE);
+
+	// DwmThumbnail writes in the border too
+	// So adjust for this size difference. Bit of a hack.
+	if (thickFrame)
+	{
+		rect.right -= 2;
+		rect.bottom -= 2;
+	}
+	else
+	{
+		rect.right += 2;
+		rect.bottom += 2;
+	}
+
+	// Update window
+	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, rect.right-rect.left, rect.bottom-rect.top, SWP_NOMOVE|SWP_FRAMECHANGED);
+	
+	// Done
+	thickFrame = !thickFrame;
+	return true;
+}
 bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 {
 	POINTS pos = MAKEPOINTS(lParam);
 	bool performOffset = (wParam == MK_MBUTTON) || (wParam == (MK_LBUTTON|MK_SHIFT));
-	bool performScale = (wParam == (MK_LBUTTON|MK_RBUTTON));
+	bool performScale = (wParam == (MK_LBUTTON|MK_RBUTTON)) || (wParam == (MK_LBUTTON|MK_CONTROL));
 	bool performDrag = (wParam == MK_LBUTTON);
 
 	// Offset thumbnail

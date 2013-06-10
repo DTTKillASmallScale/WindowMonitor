@@ -98,7 +98,7 @@ ATOM CWindow::RegisterWindowClass(CREATESTRUCT const & cs)
 	WNDCLASSEX wcex;
 	SecureZeroMemory(&wcex, sizeof(WNDCLASSEX));
 	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 	wcex.lpfnWndProc = CWindow::StaticWndProc;
 	wcex.hInstance = instance;
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
