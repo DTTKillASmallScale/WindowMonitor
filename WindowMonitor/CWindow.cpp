@@ -4,8 +4,7 @@
 CWindow::CWindow() :
 	instance(NULL),
 	windowHandle(NULL),
-	accelerators(NULL),
-	keepRunning(true)
+	accelerators(NULL)
 {
 }
 
@@ -45,15 +44,13 @@ void CWindow::Run()
 	MSG msg;
 	BOOL ret;
 	
-	while (keepRunning && (ret = GetMessage(&msg, NULL, 0, 0)) != 0)
+	while ((ret = GetMessage(&msg, NULL, 0, 0)) != 0)
 	{
 		if (ret == -1)
 		{
-			keepRunning = false;
-			break;
+			// Error
 		}
-
-		if (!PreTranslateMessage(msg))
+		else if (!PreTranslateMessage(msg))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -79,10 +76,6 @@ LRESULT CWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
-	case WM_QUIT:
-	case WM_CLOSE:
-		keepRunning = false;
-		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;

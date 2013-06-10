@@ -84,8 +84,8 @@ bool AdjustableThumbnail::SetScaleThumbnail(HWND const & target, HWND const & so
 bool AdjustableThumbnail::OffsetThumbnail(HWND const & target, HWND const & source, int const & x, int const & y)
 {
 	// Set offset
-	offsetx += (double)x / scale;
-	offsety += (double)y / scale;
+	offsetx += static_cast<double>(x) / scale;
+	offsety += static_cast<double>(y) / scale;
 
 	// Update
 	return UpdateThumbnailScale(target, source);
@@ -113,24 +113,18 @@ bool AdjustableThumbnail::ScaleDestRect(HWND const & source, RECT & rect)
 	// Get source rect
 	RECT sourceRect;
 	BOOL ok = GetClientRect(source, &sourceRect);
+	if (!ok) return false;
 
-	// Check
-	if (!ok)
-	{
-		return false;
-	}
-
-	// Calc width and height
+	// Calc width, height and offset
 	double sourceWidth(sourceRect.right - sourceRect.left);
 	double sourceHeight(sourceRect.bottom - sourceRect.top);
-
-	double x = (double)offsetx * scale;
-	double y = (double)offsety * scale;
+	double x = offsetx * scale;
+	double y = offsety * scale;
 
 	// Set output
-	rect.left = long(x);
-	rect.top = long(y);
-	rect.right = long(ceil(sourceWidth * scale) + x);
-	rect.bottom = long(ceil(sourceHeight * scale) + y);
+	rect.left = static_cast<long>(x);
+	rect.top = static_cast<long>(y);
+	rect.right = static_cast<long>(ceil(sourceWidth * scale) + x);
+	rect.bottom = static_cast<long>(ceil(sourceHeight * scale) + y);
 	return true;
 }

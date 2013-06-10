@@ -15,7 +15,6 @@ protected:
 
 private:
 	// Events
-	bool OnDoubleClick(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnSetCursor(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnKeyDown(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnKeyUp(WPARAM const & wParam, LPARAM const & lParam);
@@ -31,6 +30,7 @@ private:
 	void CycleBack();
 	void SelectSource(int const & index);
 	void SetCurrentCursor(int const & id);
+	bool ToggleBorder();
 
 	// Vars
 	HWND sourceWindow;

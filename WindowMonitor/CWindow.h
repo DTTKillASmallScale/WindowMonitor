@@ -20,8 +20,6 @@ protected:
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
-	bool keepRunning;
-
 	ATOM RegisterWindowClass(CREATESTRUCT const & cs);
 	bool MakeWindow(CREATESTRUCT const & cs);
 	bool PreTranslateMessage(MSG msg);

@@ -102,7 +102,7 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		if (OnSetCursor(wParam, lParam)) return TRUE;
 		break;
 	case WM_LBUTTONDBLCLK:
-		if (OnDoubleClick(wParam, lParam)) return 0;
+		if (ToggleBorder()) return 0;
 		break;
 	case WM_MOUSEMOVE:
 		if (OnMouseMove(wParam, lParam)) return 0;
@@ -163,7 +163,7 @@ bool AppWindow::OnSetCursor(WPARAM const & wParam, LPARAM const & lParam)
 	return false;
 }
 
-bool AppWindow::OnDoubleClick(WPARAM const & wParam, LPARAM const & lParam)
+bool AppWindow::ToggleBorder()
 {
 	// Calc new style
 	LONG_PTR newStyle = WS_VISIBLE|WS_POPUP;
@@ -197,6 +197,7 @@ bool AppWindow::OnDoubleClick(WPARAM const & wParam, LPARAM const & lParam)
 	thickFrame = !thickFrame;
 	return true;
 }
+
 bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 {
 	POINTS pos = MAKEPOINTS(lParam);
@@ -248,6 +249,7 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 bool AppWindow::OnMouseWheel(WPARAM const & wParam, LPARAM const & lParam)
 {
 	short zDelta = GET_WHEEL_DELTA_WPARAM(wParam);
+	
 	if (zDelta != 0)
 	{
 		adjustableThumbnail.StepScaleThumbnail(windowHandle, sourceWindow, zDelta);
@@ -322,8 +324,12 @@ bool AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 		case ID_REFRESH:
 			adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
 			break;
+		case ID_MENU_TOGGLEBORDER:
+			ToggleBorder();
+			break;
 		default:
-			SelectSource(wParam - baseMenuItemCount);
+			if (static_cast<int>(wParam) >= baseMenuItemCount) 
+				SelectSource(wParam - baseMenuItemCount);
 			break;
 		}
 	}
@@ -401,7 +407,7 @@ void AppWindow::SelectSource(int const & index)
 	
 	// Set source index
 	if (index < 0) sourceIndex = size - 1;
-	else if ((size_t)index >= size) sourceIndex = 0;
+	else if (static_cast<size_t>(index) >= size) sourceIndex = 0;
 	else sourceIndex = index;
 
 	// Set thumbnail
@@ -415,7 +421,7 @@ void AppWindow::CycleForward()
 	windowFilter.Execute();
 
 	// Select next source
-	SelectSource((int)sourceIndex + 1);
+	SelectSource(static_cast<int>(sourceIndex) + 1);
 }
 
 void AppWindow::CycleBack()
@@ -424,5 +430,5 @@ void AppWindow::CycleBack()
 	windowFilter.Execute();
 
 	// Select next source
-	SelectSource((int)sourceIndex - 1);
+	SelectSource(static_cast<int>(sourceIndex) - 1);
 }
