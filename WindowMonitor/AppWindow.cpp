@@ -264,6 +264,7 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 {
 	if (HIWORD(wParam) == 1)
 	{
+		// Tab and reset
 		switch (LOWORD(wParam))
 		{
 		case ID_ACCEL_SWITCH:
@@ -276,6 +277,25 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 			adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
 			return true;
 		}
+		
+		// Adjust position
+		int x = 0;
+		int y = 0;
+		switch (LOWORD(wParam))
+		{
+		case ID_ACCEL_UP: y = -1; break;
+		case ID_ACCEL_UPFAST: y = -10; break;
+		case ID_ACCEL_DOWN: y = 1; break;
+		case ID_ACCEL_DOWNFAST: y = 10; break;
+		case ID_ACCEL_LEFT: x = -1; break;
+		case ID_ACCEL_LEFTFAST: x = -10; break;
+		case ID_ACCEL_RIGHT: x = 1; break;
+		case ID_ACCEL_RIGHTFAST: x = 10; break;
+		default: return false;
+		}
+
+		adjustableThumbnail.OffsetThumbnail(windowHandle, sourceWindow, x, y);
+		return true;
 	}
 
 	return false;
