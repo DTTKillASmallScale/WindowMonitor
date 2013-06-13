@@ -61,8 +61,8 @@ bool AdjustableThumbnail::StepScaleThumbnail(HWND const & target, HWND const & s
 
 	// Get scale inc
 	double deltaScale;
-	if (delta > 0) deltaScale = SCALE_INC * scale;
-	else if (delta < 0) deltaScale = -SCALE_INC * scale;
+	if (delta > 0) deltaScale = SCALE_INC;
+	else if (delta < 0) deltaScale = -SCALE_INC;
 	
 	// Set scale
 	return SetScaleThumbnail(target, source, scale + deltaScale);
