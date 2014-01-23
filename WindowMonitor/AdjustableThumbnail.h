@@ -9,12 +9,13 @@ public:
 
 	bool SetThumbnail(HWND const & target, HWND const & source);
 	bool UnsetThumbnail();
+	bool SetSize(RECT const & rect);
+
+private:
 	bool ResizeThumbnail(HWND const & target, HWND const & source);
 	bool StepScaleThumbnail(HWND const & target, HWND const & source, short const & delta);
 	bool SetScaleThumbnail(HWND const & target, HWND const & source, double const & newScale);
 	bool OffsetThumbnail(HWND const & target, HWND const & source, int const & x, int const & y);
-
-private:
 	bool UpdateThumbnailScale(HWND const & target, HWND const & source);
 	bool ScaleDestRect(HWND const & source, RECT & rect);
 

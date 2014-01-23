@@ -91,6 +91,13 @@ bool AdjustableThumbnail::OffsetThumbnail(HWND const & target, HWND const & sour
 	return UpdateThumbnailScale(target, source);
 }
 
+bool AdjustableThumbnail::SetSize(RECT const & rect)
+{
+	//RECT rect;
+	//GetClientRect(target, &rect);
+	return thumbnail.Scale(rect);
+}
+
 bool AdjustableThumbnail::UpdateThumbnailScale(HWND const & target, HWND const & source)
 {
 	RECT rect;

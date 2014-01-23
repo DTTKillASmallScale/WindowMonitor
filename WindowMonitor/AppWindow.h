@@ -15,38 +15,24 @@ protected:
 
 private:
 	// Events
-	bool OnSetCursor(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnKeyDown(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnKeyUp(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnMouseWheel(WPARAM const & wParam, LPARAM const & lParam);
+	void OnSizing(WPARAM const & wParam, LPARAM const & lParam);
+	void OnSize(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnMouseMove(WPARAM const & wParam, LPARAM const & lParam);
 	void OnDestroy();
 
-	void UpdateMenu();
-	void CycleForward();
-	void CycleBack();
+	// Methods
+	void SetWindowSize(double const & scale);
 	void SelectSource(int const & index);
-	void SetCurrentCursor(int const & id);
-	bool ToggleBorder();
 
 	// Vars
-	HWND sourceWindow;
-	HMENU contextMenu;
-	HMENU zoomMenu;
-	int baseMenuItemCount;
-	int currentCursor;
-	bool suppressContextMenu;
-	bool thickFrame;
-
-	std::size_t sourceIndex;
+	RECT selectionRect;
+	int chromeWidth, chromeHeight;
 	WindowFilter windowFilter;
-	POINTS lastPos;
-
+	std::size_t sourceIndex;
+	HWND sourceWindow;
 	AdjustableThumbnail adjustableThumbnail;
 
+	// Constants
 	static const int MaxMenuTextLength;
 	static const int MenuItemBreakPoint;
 	static const int CursorArrow;
