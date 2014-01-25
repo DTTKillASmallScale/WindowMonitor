@@ -16,17 +16,22 @@ protected:
 private:
 	// Events
 	void OnSizing(WPARAM const & wParam, LPARAM const & lParam);
-	void OnSize(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnMouseMove(WPARAM const & wParam, LPARAM const & lParam);
 	void OnDestroy();
 
 	// Methods
+	void SetWindowSize();
 	void SetWindowSize(double const & scale);
+	void ScaleThumbnail();
 	void SelectSource(int const & index);
+	void ToggleBorder();
+	void CalcScale();
 
 	// Vars
 	RECT selectionRect;
 	int chromeWidth, chromeHeight;
+	double scale;
+	POINTS lastPos;
 	WindowFilter windowFilter;
 	std::size_t sourceIndex;
 	HWND sourceWindow;

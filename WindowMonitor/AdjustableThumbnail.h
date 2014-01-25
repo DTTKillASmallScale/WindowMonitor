@@ -13,20 +13,7 @@ public:
 
 private:
 	bool ResizeThumbnail(HWND const & target, HWND const & source);
-	bool StepScaleThumbnail(HWND const & target, HWND const & source, short const & delta);
-	bool SetScaleThumbnail(HWND const & target, HWND const & source, double const & newScale);
-	bool OffsetThumbnail(HWND const & target, HWND const & source, int const & x, int const & y);
-	bool UpdateThumbnailScale(HWND const & target, HWND const & source);
-	bool ScaleDestRect(HWND const & source, RECT & rect);
 
-	double offsetx;
-	double offsety;
-	double scale;
 	DwmThumbnail thumbnail;
-
-	// Constants
-	static const double SCALE_MIN;
-	static const double SCALE_MAX;
-	static const double SCALE_INC;
 };
 

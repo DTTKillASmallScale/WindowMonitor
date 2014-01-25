@@ -13,15 +13,17 @@ const int AppWindow::CursorScale = 32642;
 AppWindow::AppWindow() : 
 	CWindow(),
 	chromeWidth(0),
-	chromeHeight(0)
+	chromeHeight(0),
+	scale(1.0)
 {
+	lastPos.x = lastPos.y = 0;
 }
 
 void AppWindow::PreCreate(CREATESTRUCT& cs)
 {
 	accelerators = LoadAccelerators(cs.hInstance, MAKEINTRESOURCE(IDW_MAIN));
 	cs.lpszClass = _T("DwmWindowMonitorApp");
-	cs.style = WS_VISIBLE | WS_SYSMENU | WS_SIZEBOX;
+	cs.style = WS_VISIBLE | WS_POPUPWINDOW | WS_SIZEBOX;
 }
 
 void AppWindow::OnInitialUpdate()
@@ -38,10 +40,7 @@ void AppWindow::OnInitialUpdate()
 	adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
 
 	// Set source selection
-	selectionRect.left = 4;
-	selectionRect.top = 82;
-	selectionRect.right = 642;
-	selectionRect.bottom = 441;
+	GetClientRect(sourceWindow, &selectionRect);
 
 	// Resize window
 	SetWindowSize(1.0);
@@ -55,10 +54,14 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		OnSizing(wParam, lParam);
 		return TRUE;
 	case WM_SIZE:
-		OnSize(wParam, lParam);
+		ScaleThumbnail();
+		break;
 	case WM_MOUSEMOVE:
 		if (OnMouseMove(wParam, lParam)) return 0;
 		break;
+	case WM_LBUTTONDBLCLK:
+		ToggleBorder();
+		return 0;
 	case WM_DESTROY:
 		OnDestroy();
 		break;
@@ -114,26 +117,8 @@ void AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 		else newRect->left = newValue;
 		break;
 	}
-}
 
-void AppWindow::OnSize(WPARAM const & wParam, LPARAM const & lParam)
-{
-	RECT clientRect;
-	GetClientRect(windowHandle, &clientRect);
-
-	double scale = static_cast<double>(clientRect.right - clientRect.left) / static_cast<double>(selectionRect.right - selectionRect.left);
-
-	RECT sourceRect;
-	GetClientRect(sourceWindow, &sourceRect);
-
-	RECT targetRect{
-		static_cast<long>(static_cast<double>(-selectionRect.left) * scale),
-		static_cast<long>(static_cast<double>(-selectionRect.top) * scale),
-		static_cast<long>(static_cast<double>(sourceRect.right - selectionRect.left) * scale),
-		static_cast<long>(static_cast<double>(sourceRect.bottom - selectionRect.top) * scale)
-	};
-
-	adjustableThumbnail.SetSize(targetRect);
+	CalcScale();
 }
 
 bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
@@ -148,6 +133,36 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 	{
 		SendMessage(windowHandle, WM_SYSCOMMAND, SC_MOVE | 0x0002, NULL);
 		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+		return true;
+	}
+	
+	if (!(lastPos.x == 0 && lastPos.y == 0))
+	{
+		// Shift view
+		if (shiftLmb)
+		{
+			selectionRect.left -= pos.x - lastPos.x;
+			selectionRect.top -= pos.y - lastPos.y;
+			SetWindowSize();
+		}
+		// Crop view
+		else if (ctrlLmb)
+		{
+			selectionRect.right += pos.x - lastPos.x;
+			selectionRect.bottom += pos.y - lastPos.y;
+			SetWindowSize();
+		}
+	}
+
+	// Store last mouse position
+	if (shiftLmb || ctrlLmb)
+	{
+		lastPos.x = pos.x;
+		lastPos.y = pos.y;
+	}
+	else
+	{
+		lastPos.x = lastPos.y = 0;
 	}
 
 	return true;
@@ -155,11 +170,45 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 
 void AppWindow::OnDestroy()
 {
+	adjustableThumbnail.UnsetThumbnail();
+	
 	// Quit
 	PostQuitMessage(0);
 }
 
+void AppWindow::ToggleBorder()
+{
+	// Get old style
+	DWORD oldStyle = (DWORD)GetWindowLong(windowHandle, GWL_STYLE);
+
+	// Calc new style
+	LONG_PTR newStyle = WS_VISIBLE | WS_POPUPWINDOW;
+	if ((oldStyle & WS_SIZEBOX) == false) newStyle = newStyle | WS_SIZEBOX;
+
+	// Set new style
+	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);
+	SetWindowSize();
+}
+
+void AppWindow::CalcScale()
+{
+	RECT baseRect{ 0, 0, selectionRect.right - selectionRect.left, selectionRect.bottom - selectionRect.top };
+	DWORD dwStyle = (DWORD)GetWindowLong(windowHandle, GWL_STYLE);
+	AdjustWindowRect(&baseRect, dwStyle, FALSE);
+
+	RECT windowRect;
+	GetWindowRect(windowHandle, &windowRect);
+
+	scale = static_cast<double>(windowRect.right - windowRect.left) / static_cast<double>(baseRect.right - baseRect.left);
+}
+
 void AppWindow::SetWindowSize(double const & scale)
+{
+	this->scale = scale;
+	SetWindowSize();
+}
+
+void AppWindow::SetWindowSize()
 {
 	long width = static_cast<long>(static_cast<double>(selectionRect.right - selectionRect.left) * scale);
 	long height = static_cast<long>(static_cast<double>(selectionRect.bottom - selectionRect.top) * scale);
@@ -175,6 +224,19 @@ void AppWindow::SetWindowSize(double const & scale)
 	// Get size of window chrome
 	chromeWidth = (windowRect.right - windowRect.left) - (selectionRect.right - selectionRect.left);
 	chromeHeight = (windowRect.bottom - windowRect.top) - (selectionRect.bottom - selectionRect.top);
+}
+
+void AppWindow::ScaleThumbnail()
+{
+	RECT sourceRect;
+	GetClientRect(sourceWindow, &sourceRect);
+
+	sourceRect.left = static_cast<long>(static_cast<double>(-selectionRect.left) * scale);
+	sourceRect.top = static_cast<long>(static_cast<double>(-selectionRect.top) * scale);
+	sourceRect.right = static_cast<long>(static_cast<double>(sourceRect.right - selectionRect.left) * scale);
+	sourceRect.bottom = static_cast<long>(static_cast<double>(sourceRect.bottom - selectionRect.top) * scale);
+
+	adjustableThumbnail.SetSize(sourceRect);
 }
 
 void AppWindow::SelectSource(int const & index)
