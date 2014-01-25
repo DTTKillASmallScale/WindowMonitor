@@ -65,6 +65,9 @@
     <ClCompile Include="AdjustableThumbnail.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AppWindow.WndProc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WindowMonitor.rc">

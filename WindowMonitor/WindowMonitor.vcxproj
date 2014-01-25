@@ -178,6 +178,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppWindow.cpp" />
+    <ClCompile Include="AppWindow.WndProc.cpp" />
     <ClCompile Include="CWindow.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="DwmThumbnail.cpp" />
