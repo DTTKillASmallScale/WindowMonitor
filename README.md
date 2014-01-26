@@ -4,7 +4,7 @@ WindowMonitor
 WindowMonitor displays a scalable DWM thumbnail for a selected window
 
 - Left mouse drag to move window
-- Shift + left mouse drag to shift view
+- Shift + left mouse drag to pan view
 - Ctrl + left mouse drag to crop view
 - Resize window to scale view
 - Right mouse click to open menu
