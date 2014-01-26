@@ -168,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="AppWindow.h" />
     <ClInclude Include="CWindow.h" />
+    <ClInclude Include="DoubleRect.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="DwmThumbnail.h" />
     <ClInclude Include="stdafx.h" />
@@ -180,6 +181,7 @@
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="AppWindow.WndProc.cpp" />
     <ClCompile Include="CWindow.cpp" />
+    <ClCompile Include="DoubleRect.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="DwmThumbnail.cpp" />
     <ClCompile Include="stdafx.cpp">

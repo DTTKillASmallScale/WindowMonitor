@@ -1,5 +1,6 @@
 #pragma once
 #include "CWindow.h"
+#include "DoubleRect.h"
 #include "AdjustableThumbnail.h"
 #include "WindowFilter.h"
 
@@ -36,6 +37,7 @@ private:
 	void SetCurrentCursor(int const & id);
 	void CycleForward();
 	void CycleBack();
+	void Reset();
 
 	// Vars
 	AdjustableThumbnail adjustableThumbnail;
@@ -43,9 +45,9 @@ private:
 	WindowFilter windowFilter;
 	std::size_t sourceIndex;
 
-	RECT selectionRect;
-	int chromeWidth, chromeHeight;
+	DoubleRect selectionRect;
 	double scale;
+	int chromeWidth, chromeHeight;
 
 	HMENU contextMenu;
 	HMENU zoomMenu;

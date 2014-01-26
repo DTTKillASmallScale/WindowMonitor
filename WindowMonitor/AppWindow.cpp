@@ -93,7 +93,7 @@ void AppWindow::ToggleBorder()
 
 void AppWindow::CalcScale()
 {
-	RECT baseRect{ 0, 0, selectionRect.right - selectionRect.left, selectionRect.bottom - selectionRect.top };
+	RECT baseRect{ 0, 0, static_cast<long>(selectionRect.right - selectionRect.left), static_cast<long>(selectionRect.bottom - selectionRect.top) };
 	DWORD dwStyle = (DWORD)GetWindowLong(windowHandle, GWL_STYLE);
 	AdjustWindowRect(&baseRect, dwStyle, FALSE);
 
@@ -123,8 +123,8 @@ void AppWindow::SetWindowSize()
 	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE);
 
 	// Get size of window chrome
-	chromeWidth = (windowRect.right - windowRect.left) - (selectionRect.right - selectionRect.left);
-	chromeHeight = (windowRect.bottom - windowRect.top) - (selectionRect.bottom - selectionRect.top);
+	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(selectionRect.right - selectionRect.left);
+	chromeHeight = (windowRect.bottom - windowRect.top) - static_cast<long>(selectionRect.bottom - selectionRect.top);
 }
 
 void AppWindow::ScaleThumbnail()
@@ -191,7 +191,7 @@ void AppWindow::SelectSource(int const & index)
 	adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
 
 	// Reset view
-	GetClientRect(sourceWindow, &selectionRect);
+	selectionRect.SetFromClientRect(sourceWindow);
 	SetWindowSize(1.0);
 }
 
@@ -211,4 +211,11 @@ void AppWindow::CycleBack()
 
 	// Select next source
 	SelectSource(static_cast<int>(sourceIndex)-1);
+}
+
+void AppWindow::Reset()
+{
+	selectionRect.SetFromClientRect(sourceWindow);
+	SetWindowSize(1.0);
+	ScaleThumbnail();
 }

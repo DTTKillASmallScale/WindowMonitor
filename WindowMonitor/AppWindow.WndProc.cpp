@@ -126,17 +126,17 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 		// Shift view
 		if (shiftLmb)
 		{
-			selectionRect.left -= x;
-			selectionRect.top -= y;
-			selectionRect.right -= x;
-			selectionRect.bottom -= y;
+			selectionRect.left -= x / scale;
+			selectionRect.top -= y / scale;
+			selectionRect.right -= x / scale;
+			selectionRect.bottom -= y / scale;
 			ScaleThumbnail();
 		}
 		// Crop view
 		else if (ctrlLmb)
 		{
-			selectionRect.right += x;
-			selectionRect.bottom += y;
+			selectionRect.right += x / scale;
+			selectionRect.bottom += y / scale;
 			SetWindowSize();
 		}
 	}
@@ -194,8 +194,7 @@ bool AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 			SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
 			break;
 		case ID_REFRESH:
-			GetClientRect(sourceWindow, &selectionRect);
-			SetWindowSize(1.0);
+			Reset();
 			break;
 		case ID_MENU_TOGGLEBORDER:
 			ToggleBorder();
@@ -243,8 +242,7 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 			CycleBack();
 			return true;
 		case ID_ACCEL_REFRESH:
-			GetClientRect(sourceWindow, &selectionRect);
-			SetWindowSize(1.0);
+			Reset();
 			return true;
 		}
 	}
