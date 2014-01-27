@@ -83,7 +83,7 @@ void AppWindow::OnDestroy()
 void AppWindow::ToggleBorder()
 {
 	// Get old style
-	DWORD oldStyle = (DWORD)GetWindowLong(windowHandle, GWL_STYLE);
+	DWORD oldStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
 
 	// Calc new style
 	LONG_PTR newStyle = WS_VISIBLE | WS_POPUPWINDOW;
@@ -96,12 +96,14 @@ void AppWindow::ToggleBorder()
 
 void AppWindow::CalcScale()
 {
-	RECT baseRect{ 0, 0, static_cast<long>(selectionRect.right - selectionRect.left), static_cast<long>(selectionRect.bottom - selectionRect.top) };
-	DWORD dwStyle = (DWORD)GetWindowLong(windowHandle, GWL_STYLE);
-	AdjustWindowRect(&baseRect, dwStyle, FALSE);
+	RECT baseRect;
+	baseRect.left = 0;
+	baseRect.top = 0;
+	baseRect.right = static_cast<long>(round(selectionRect.right - selectionRect.left));
+	baseRect.bottom = static_cast<long>(round(selectionRect.bottom - selectionRect.top));
 
 	RECT windowRect;
-	GetWindowRect(windowHandle, &windowRect);
+	GetClientRect(windowHandle, &windowRect);
 
 	scale = static_cast<double>(windowRect.right - windowRect.left) / static_cast<double>(baseRect.right - baseRect.left);
 }
@@ -119,7 +121,7 @@ void AppWindow::SetWindowSize()
 
 	// Calc window size
 	RECT windowRect{ 0, 0, width, height };
-	DWORD dwStyle = (DWORD)GetWindowLong(windowHandle, GWL_STYLE);
+	DWORD dwStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
 	AdjustWindowRect(&windowRect, dwStyle, FALSE);
 
 	// Set window size
