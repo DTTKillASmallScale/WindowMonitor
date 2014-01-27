@@ -112,10 +112,6 @@ bool CWindow::MakeWindow(CREATESTRUCT const & cs)
 
 	if (!windowHandle) return false;
 
-	// Show window
-	ShowWindow(windowHandle, SW_SHOWNORMAL);
-	UpdateWindow(windowHandle);
-
 	return true;
 }
 
