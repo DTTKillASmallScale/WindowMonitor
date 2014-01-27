@@ -29,6 +29,12 @@ void WindowFilter::Execute()
 		// Exit if minimized
 		if (IsIconic(hwnd)) continue;
 
+		// Check client area size
+		RECT clientRect;
+		GetClientRect(hwnd, &clientRect);
+		if (clientRect.bottom - clientRect.top < 1 || clientRect.right - clientRect.left < 1)
+			continue;
+
 		// Get class name
 		GetClassName(hwnd, buffer, bufferSize);
 		className.assign(buffer);
