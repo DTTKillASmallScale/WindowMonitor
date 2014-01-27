@@ -31,8 +31,8 @@ private:
 	void OnDestroy();
 
 	// Methods
-	void UpdateWindow(bool const & center);
-	void ScaleThumbnail();
+	void UpdateWindow();
+	void UpdateThumbnail();
 	void SelectSource(int const & index);
 	void CycleForward();
 	void CycleBack();
@@ -40,6 +40,7 @@ private:
 	void ToggleBorder();
 	void SetContextualCursor();
 	void UpdateMenu();
+	void GetMonitorRect(RECT & rect);
 
 	// Vars
 	AdjustableThumbnail adjustableThumbnail;
@@ -58,6 +59,7 @@ private:
 	int currentCursor;
 	bool cursorSet;
 	POINTS lastPos;
+	double maxResetRatio;
 
 	// Constants
 	static const int MaxMenuTextLength;

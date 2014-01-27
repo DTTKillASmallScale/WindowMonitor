@@ -24,7 +24,8 @@ AppWindow::AppWindow() :
 	baseMenuItemCount(0),
 	suppressContextMenu(false),
 	currentCursor(0),
-	cursorSet(false)
+	cursorSet(false),
+	maxResetRatio(0.9)
 {
 	lastPos.x = lastPos.y = 0;
 }
@@ -72,33 +73,25 @@ void AppWindow::OnDestroy()
 	PostQuitMessage(0);
 }
 
-void AppWindow::UpdateWindow(bool const & center)
+void AppWindow::UpdateWindow()
 {
 	long width = static_cast<long>(static_cast<double>(selectionRect.right - selectionRect.left) * scale);
 	long height = static_cast<long>(static_cast<double>(selectionRect.bottom - selectionRect.top) * scale);
 
-	// Calc window size
+	// Calc window dimensions
 	RECT windowRect{ 0, 0, width, height };
 	DWORD dwStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
 	AdjustWindowRect(&windowRect, dwStyle, FALSE);
 
-	RECT desktopRect;
-	GetClientRect(GetDesktopWindow(), &desktopRect);
-
-	// Set window size
-	SetWindowPos(windowHandle, HWND_TOPMOST,
-		(desktopRect.right - windowRect.right + windowRect.left) / 2,
-		(desktopRect.bottom - windowRect.bottom + windowRect.top) / 2,
-		windowRect.right - windowRect.left,
-		windowRect.bottom - windowRect.top,
-		SWP_FRAMECHANGED | (center ? 0 : SWP_NOMOVE));
+	// Set window pos
+	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE);
 
 	// Get size of window chrome
 	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(selectionRect.right - selectionRect.left);
 	chromeHeight = (windowRect.bottom - windowRect.top) - static_cast<long>(selectionRect.bottom - selectionRect.top);
 }
 
-void AppWindow::ScaleThumbnail()
+void AppWindow::UpdateThumbnail()
 {
 	RECT sourceRect;
 	GetClientRect(sourceWindow, &sourceRect);
@@ -129,12 +122,8 @@ void AppWindow::SelectSource(int const & index)
 	// Set thumbnail to source
 	adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
 
-	// Reset selection
-	selectionRect.SetFromClientRect(sourceWindow);
-
-	// Update window
-	scale = 1.0;
-	UpdateWindow(true);
+	// Reset
+	Reset();
 }
 
 void AppWindow::CycleForward()
@@ -157,10 +146,29 @@ void AppWindow::CycleBack()
 
 void AppWindow::Reset()
 {
-	scale = 1.0;
+	// Set selection
 	selectionRect.SetFromClientRect(sourceWindow);
-	UpdateWindow(true);
-	ScaleThumbnail();
+
+	// Set scale
+	RECT monitorRect;
+	GetMonitorRect(monitorRect);
+	double sourceMonitorRatio = static_cast<double>(selectionRect.right - selectionRect.left) / static_cast<double>(monitorRect.right - monitorRect.left);
+	sourceMonitorRatio = max(sourceMonitorRatio, static_cast<double>(selectionRect.bottom - selectionRect.top) / static_cast<double>(monitorRect.bottom - monitorRect.top));
+	if (sourceMonitorRatio > maxResetRatio) scale = maxResetRatio / sourceMonitorRatio;
+	else scale = 1.0;
+
+	// Update window
+	UpdateWindow();
+
+	// Center window
+	RECT windowRect;
+	GetWindowRect(windowHandle, &windowRect);
+	int x = (monitorRect.right + monitorRect.left - windowRect.right + windowRect.left) / 2;
+	int y = (monitorRect.bottom + monitorRect.top - windowRect.bottom + windowRect.top) / 2;
+	SetWindowPos(windowHandle, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE);
+
+	// Update thumbnail
+	UpdateThumbnail();
 }
 
 void AppWindow::ToggleBorder()
@@ -174,7 +182,7 @@ void AppWindow::ToggleBorder()
 
 	// Set new style
 	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);
-	UpdateWindow(false);
+	UpdateWindow();
 }
 
 void AppWindow::SetContextualCursor()
@@ -225,4 +233,16 @@ void AppWindow::UpdateMenu()
 	// Add blank item if no windows were added
 	if (i == baseMenuItemCount) AppendMenu(contextMenu, MF_STRING | MF_GRAYED, 0,
 		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
+}
+
+void AppWindow::GetMonitorRect(RECT & rect)
+{
+	HMONITOR monitor = MonitorFromWindow(windowHandle, MONITOR_DEFAULTTONEAREST);
+	MONITORINFO monitorInfo;
+	monitorInfo.cbSize = sizeof(MONITORINFO);
+	GetMonitorInfo(monitor, &monitorInfo);
+	rect.bottom = monitorInfo.rcMonitor.bottom;
+	rect.left = monitorInfo.rcMonitor.left;
+	rect.right = monitorInfo.rcMonitor.right;
+	rect.top = monitorInfo.rcMonitor.top;
 }

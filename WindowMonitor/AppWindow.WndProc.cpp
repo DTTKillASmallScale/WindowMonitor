@@ -97,6 +97,9 @@ bool AppWindow::OnSetCursor(WPARAM const & wParam, LPARAM const & lParam)
 		return true;
 	}
 
+	if (LOWORD(lParam) != HTCLIENT && cursorSet)
+		cursorSet = false;
+
 	return false;
 }
 
@@ -127,14 +130,14 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 			selectionRect.top -= y / scale;
 			selectionRect.right -= x / scale;
 			selectionRect.bottom -= y / scale;
-			ScaleThumbnail();
+			UpdateThumbnail();
 		}
 		// Crop view
 		else if (ctrlLmb)
 		{
 			selectionRect.right += x / scale;
 			selectionRect.bottom += y / scale;
-			UpdateWindow(false);
+			UpdateWindow();
 		}
 	}
 
@@ -200,16 +203,16 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 	}
 
 	// Calculate scale
-	RECT windowRect;
-	GetClientRect(windowHandle, &windowRect);
-	scale = static_cast<double>(windowRect.right - windowRect.left) / round(selectionRect.right - selectionRect.left);
+	RECT clientRect;
+	GetClientRect(windowHandle, &clientRect);
+	scale = static_cast<double>(clientRect.right - clientRect.left) / ceil(selectionRect.right - selectionRect.left);
 
 	return true;
 }
 
 bool AppWindow::OnSize(WPARAM const & wParam, LPARAM const & lParam)
 {
-	ScaleThumbnail();
+	UpdateThumbnail();
 	return true;
 }
 
@@ -305,6 +308,6 @@ void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 		default: return;
 		}
 
-		UpdateWindow(false);
+		UpdateWindow();
 	}
 }
