@@ -15,11 +15,12 @@ AppWindow::AppWindow() :
 	CWindow(),
 	adjustableThumbnail(),
 	sourceWindow(NULL),
-	contextMenu(NULL),
+	sourceIndex(0),
 	scale(1.0),
 	chromeWidth(0),
 	chromeHeight(0),
-	sourceIndex(0),
+	contextMenu(NULL),
+	zoomMenu(NULL),
 	baseMenuItemCount(0),
 	suppressContextMenu(false),
 	currentCursor(0),
@@ -61,15 +62,6 @@ void AppWindow::OnInitialUpdate()
 
 	// Select source window
 	SelectSource(0);
-
-	// Center window
-	RECT desktopRect, windowRect;
-	GetClientRect(GetDesktopWindow(), &desktopRect);
-	GetWindowRect(windowHandle, &windowRect);
-	SetWindowPos(windowHandle, HWND_TOPMOST, 
-		(desktopRect.right - desktopRect.left - windowRect.right - windowRect.left) / 2, 
-		(desktopRect.bottom - desktopRect.top - windowRect.bottom - windowRect.top) / 2, 
-		0, 0, SWP_NOSIZE);
 }
 
 void AppWindow::OnDestroy()
@@ -80,41 +72,7 @@ void AppWindow::OnDestroy()
 	PostQuitMessage(0);
 }
 
-void AppWindow::ToggleBorder()
-{
-	// Get old style
-	DWORD oldStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
-
-	// Calc new style
-	LONG_PTR newStyle = WS_VISIBLE | WS_POPUPWINDOW;
-	if ((oldStyle & WS_SIZEBOX) == false) newStyle = newStyle | WS_SIZEBOX;
-
-	// Set new style
-	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);
-	SetWindowSize();
-}
-
-void AppWindow::CalcScale()
-{
-	RECT baseRect;
-	baseRect.left = 0;
-	baseRect.top = 0;
-	baseRect.right = static_cast<long>(round(selectionRect.right - selectionRect.left));
-	baseRect.bottom = static_cast<long>(round(selectionRect.bottom - selectionRect.top));
-
-	RECT windowRect;
-	GetClientRect(windowHandle, &windowRect);
-
-	scale = static_cast<double>(windowRect.right - windowRect.left) / static_cast<double>(baseRect.right - baseRect.left);
-}
-
-void AppWindow::SetWindowSize(double const & scale)
-{
-	this->scale = scale;
-	SetWindowSize();
-}
-
-void AppWindow::SetWindowSize()
+void AppWindow::UpdateWindow(bool const & center)
 {
 	long width = static_cast<long>(static_cast<double>(selectionRect.right - selectionRect.left) * scale);
 	long height = static_cast<long>(static_cast<double>(selectionRect.bottom - selectionRect.top) * scale);
@@ -124,8 +82,16 @@ void AppWindow::SetWindowSize()
 	DWORD dwStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
 	AdjustWindowRect(&windowRect, dwStyle, FALSE);
 
+	RECT desktopRect;
+	GetClientRect(GetDesktopWindow(), &desktopRect);
+
 	// Set window size
-	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE);
+	SetWindowPos(windowHandle, HWND_TOPMOST,
+		(desktopRect.right - windowRect.right + windowRect.left) / 2,
+		(desktopRect.bottom - windowRect.bottom + windowRect.top) / 2,
+		windowRect.right - windowRect.left,
+		windowRect.bottom - windowRect.top,
+		SWP_FRAMECHANGED | (center ? 0 : SWP_NOMOVE));
 
 	// Get size of window chrome
 	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(selectionRect.right - selectionRect.left);
@@ -141,6 +107,92 @@ void AppWindow::ScaleThumbnail()
 	sourceRect.right = static_cast<long>(static_cast<double>(sourceRect.right - selectionRect.left) * scale);
 	sourceRect.bottom = static_cast<long>(static_cast<double>(sourceRect.bottom - selectionRect.top) * scale);
 	adjustableThumbnail.SetSize(sourceRect);
+}
+
+void AppWindow::SelectSource(int const & index)
+{
+	// Get filtered windows
+	windowFilter.Execute();
+
+	// Get size
+	std::size_t size = windowFilter.items.size();
+	if (size < 1) return;
+
+	// Set source index
+	if (index < 0) sourceIndex = size - 1;
+	else if (static_cast<size_t>(index) >= size) sourceIndex = 0;
+	else sourceIndex = index;
+
+	// Get source window handle
+	sourceWindow = windowFilter.items.at(sourceIndex).hwnd;
+
+	// Set thumbnail to source
+	adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
+
+	// Reset selection
+	selectionRect.SetFromClientRect(sourceWindow);
+
+	// Update window
+	scale = 1.0;
+	UpdateWindow(true);
+}
+
+void AppWindow::CycleForward()
+{
+	// Refresh list
+	windowFilter.Execute();
+
+	// Select next source
+	SelectSource(static_cast<int>(sourceIndex)+1);
+}
+
+void AppWindow::CycleBack()
+{
+	// Refresh list
+	windowFilter.Execute();
+
+	// Select next source
+	SelectSource(static_cast<int>(sourceIndex)-1);
+}
+
+void AppWindow::Reset()
+{
+	scale = 1.0;
+	selectionRect.SetFromClientRect(sourceWindow);
+	UpdateWindow(true);
+	ScaleThumbnail();
+}
+
+void AppWindow::ToggleBorder()
+{
+	// Get old style
+	DWORD oldStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+
+	// Calc new style
+	LONG_PTR newStyle = WS_VISIBLE | WS_POPUPWINDOW;
+	if ((oldStyle & WS_SIZEBOX) == false) newStyle = newStyle | WS_SIZEBOX;
+
+	// Set new style
+	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);
+	UpdateWindow(false);
+}
+
+void AppWindow::SetContextualCursor()
+{
+	int prevCursor = currentCursor;
+	bool shift = static_cast<unsigned short>(GetKeyState(VK_SHIFT)) >> 15 == 1;
+	bool control = static_cast<unsigned short>(GetKeyState(VK_CONTROL)) >> 15 == 1;
+
+	if (shift && !control) currentCursor = CursorPan;
+	else if (!shift && control) currentCursor = CursorScale;
+	else if (shift && control) currentCursor = CursorNoFunction;
+	else currentCursor = 0;
+
+	if (prevCursor != currentCursor) 
+	{
+		cursorSet = false;
+		SendMessage(windowHandle, WM_SETCURSOR, WPARAM(windowHandle), (LPARAM)MAKELONG(HTCLIENT, WM_MOUSEMOVE));
+	}
 }
 
 void AppWindow::UpdateMenu()
@@ -173,72 +225,4 @@ void AppWindow::UpdateMenu()
 	// Add blank item if no windows were added
 	if (i == baseMenuItemCount) AppendMenu(contextMenu, MF_STRING | MF_GRAYED, 0,
 		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
-}
-
-void AppWindow::SelectSource(int const & index)
-{
-	// Get filtered windows
-	windowFilter.Execute();
-
-	// Get size
-	std::size_t size = windowFilter.items.size();
-	if (size < 1) return;
-
-	// Set source index
-	if (index < 0) sourceIndex = size - 1;
-	else if (static_cast<size_t>(index) >= size) sourceIndex = 0;
-	else sourceIndex = index;
-
-	// Get source window handle
-	sourceWindow = windowFilter.items.at(sourceIndex).hwnd;
-
-	// Set thumbnail to source
-	adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
-
-	// Reset view
-	selectionRect.SetFromClientRect(sourceWindow);
-	SetWindowSize(1.0);
-}
-
-void AppWindow::CycleForward()
-{
-	// Refresh list
-	windowFilter.Execute();
-
-	// Select next source
-	SelectSource(static_cast<int>(sourceIndex)+1);
-}
-
-void AppWindow::CycleBack()
-{
-	// Refresh list
-	windowFilter.Execute();
-
-	// Select next source
-	SelectSource(static_cast<int>(sourceIndex)-1);
-}
-
-void AppWindow::Reset()
-{
-	selectionRect.SetFromClientRect(sourceWindow);
-	SetWindowSize(1.0);
-	ScaleThumbnail();
-}
-
-void AppWindow::SetContextualCursor()
-{
-	int prevCursor = currentCursor;
-	bool shift = static_cast<unsigned short>(GetKeyState(VK_SHIFT)) >> 15 == 1;
-	bool control = static_cast<unsigned short>(GetKeyState(VK_CONTROL)) >> 15 == 1;
-
-	if (shift && !control) currentCursor = CursorPan;
-	else if (!shift && control) currentCursor = CursorScale;
-	else if (shift && control) currentCursor = CursorNoFunction;
-	else currentCursor = 0;
-
-	if (prevCursor != currentCursor) 
-	{
-		cursorSet = false;
-		SendMessage(windowHandle, WM_SETCURSOR, WPARAM(windowHandle), (LPARAM)MAKELONG(HTCLIENT, WM_MOUSEMOVE));
-	}
 }

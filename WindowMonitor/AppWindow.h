@@ -16,33 +16,36 @@ protected:
 
 private:
 	// Events
-	void OnSizing(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnMouseMove(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnKeyDown(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnKeyUp(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnLeftButtonUp(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnRightButtonUp(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnSetCursor(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnMouseMove(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnSizing(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnSize(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnLeftDoubleClick(WPARAM const & wParam, LPARAM const & lParam);
+	bool OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam);
+	void OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
+	void OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam);
 	void OnDestroy();
 
 	// Methods
-	void SetWindowSize();
-	void SetWindowSize(double const & scale);
+	void UpdateWindow(bool const & center);
 	void ScaleThumbnail();
 	void SelectSource(int const & index);
-	void ToggleBorder();
-	void CalcScale();
-	void UpdateMenu();
 	void CycleForward();
 	void CycleBack();
 	void Reset();
+	void ToggleBorder();
 	void SetContextualCursor();
+	void UpdateMenu();
 
 	// Vars
 	AdjustableThumbnail adjustableThumbnail;
 	HWND sourceWindow;
-	WindowFilter windowFilter;
 	std::size_t sourceIndex;
+	WindowFilter windowFilter;
 
 	DoubleRect selectionRect;
 	double scale;
