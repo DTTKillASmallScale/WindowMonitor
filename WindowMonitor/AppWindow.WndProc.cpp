@@ -12,8 +12,8 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		if (OnKeyDown(wParam, lParam)) return 0;
 		break;
 	case WM_KEYUP:
-		if (OnKeyUp(wParam, lParam)) return 0;
-		break;
+		SetContextualCursor();
+		return 0;
 	case WM_LBUTTONUP:
 		if (wParam == MK_RBUTTON) { suppressContextMenu = true; return 0; }
 		break;
@@ -252,33 +252,27 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 
 bool AppWindow::OnKeyDown(WPARAM const & wParam, LPARAM const & lParam)
 {
-	if (wParam == VK_SHIFT) SetCurrentCursor(AppWindow::CursorMove);
-	if (wParam == VK_CONTROL) SetCurrentCursor(AppWindow::CursorScale);
-	return true;
-}
+	bool repeated = (lParam & 0x40000000) == 0;
 
-bool AppWindow::OnKeyUp(WPARAM const & wParam, LPARAM const & lParam)
-{
-	short shift = GetKeyState(VK_SHIFT);
-	short control = GetKeyState(VK_CONTROL);
-	short mbutton = GetKeyState(VK_MBUTTON);
-	short lbutton = GetKeyState(VK_LBUTTON);
-	short rbutton = GetKeyState(VK_RBUTTON);
+	if (repeated)
+	{
+		SetContextualCursor();
+		return true;
+	}
 
-	if (shift > -1
-		&& control > -1
-		&& mbutton > -1
-		&& (lbutton > -1 || rbutton > -1))
-		SetCurrentCursor(AppWindow::CursorArrow);
-
-	return true;
+	return false;
 }
 
 bool AppWindow::OnSetCursor(WPARAM const & wParam, LPARAM const & lParam)
 {
-	if (LOWORD(lParam) == HTCLIENT)
+	if (LOWORD(lParam) == HTCLIENT && currentCursor != 0)
 	{
-		SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(currentCursor)));
+		if (cursorSet == false) 
+		{
+			cursorSet = true;
+			SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(currentCursor)));
+		}
+		
 		return true;
 	}
 

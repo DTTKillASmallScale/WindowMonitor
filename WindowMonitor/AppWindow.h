@@ -11,7 +11,7 @@ public:
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 protected:
-	virtual void PreCreate(CREATESTRUCT& cs);
+	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
 	virtual void OnInitialUpdate();
 
 private:
@@ -22,7 +22,6 @@ private:
 	bool OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnKeyDown(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnKeyUp(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnSetCursor(WPARAM const & wParam, LPARAM const & lParam);
 	void OnDestroy();
 
@@ -34,10 +33,10 @@ private:
 	void ToggleBorder();
 	void CalcScale();
 	void UpdateMenu();
-	void SetCurrentCursor(int const & id);
 	void CycleForward();
 	void CycleBack();
 	void Reset();
+	void SetContextualCursor();
 
 	// Vars
 	AdjustableThumbnail adjustableThumbnail;
@@ -54,12 +53,14 @@ private:
 	int baseMenuItemCount;
 	bool suppressContextMenu;
 	int currentCursor;
+	bool cursorSet;
 	POINTS lastPos;
 
 	// Constants
 	static const int MaxMenuTextLength;
 	static const int MenuItemBreakPoint;
-	static const int CursorArrow;
 	static const int CursorMove;
+	static const int CursorPan;
 	static const int CursorScale;
+	static const int CursorNoFunction;
 };

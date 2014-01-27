@@ -6,9 +6,10 @@
 
 const int AppWindow::MaxMenuTextLength = 32;
 const int AppWindow::MenuItemBreakPoint = 24;
-const int AppWindow::CursorArrow = 32512;
 const int AppWindow::CursorMove = 32646;
+const int AppWindow::CursorPan = 32649;
 const int AppWindow::CursorScale = 32642;
+const int AppWindow::CursorNoFunction = 32648;
 
 AppWindow::AppWindow() :
 	CWindow(),
@@ -21,16 +22,18 @@ AppWindow::AppWindow() :
 	sourceIndex(0),
 	baseMenuItemCount(0),
 	suppressContextMenu(false),
-	currentCursor(32512)
+	currentCursor(0),
+	cursorSet(false)
 {
 	lastPos.x = lastPos.y = 0;
 }
 
-void AppWindow::PreCreate(CREATESTRUCT& cs)
+void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 {
 	accelerators = LoadAccelerators(cs.hInstance, MAKEINTRESOURCE(IDW_MAIN));
 	cs.lpszClass = _T("DwmWindowMonitorApp");
 	cs.style = WS_VISIBLE | WS_POPUPWINDOW | WS_SIZEBOX;
+	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorMove));
 }
 
 void AppWindow::OnInitialUpdate()
@@ -58,6 +61,15 @@ void AppWindow::OnInitialUpdate()
 
 	// Select source window
 	SelectSource(0);
+
+	// Center window
+	RECT desktopRect, windowRect;
+	GetClientRect(GetDesktopWindow(), &desktopRect);
+	GetWindowRect(windowHandle, &windowRect);
+	SetWindowPos(windowHandle, HWND_TOPMOST, 
+		(desktopRect.right - desktopRect.left - windowRect.right - windowRect.left) / 2, 
+		(desktopRect.bottom - desktopRect.top - windowRect.bottom - windowRect.top) / 2, 
+		0, 0, SWP_NOSIZE);
 }
 
 void AppWindow::OnDestroy()
@@ -66,15 +78,6 @@ void AppWindow::OnDestroy()
 
 	// Quit
 	PostQuitMessage(0);
-}
-
-void AppWindow::SetCurrentCursor(int const & id)
-{
-	if (currentCursor != id)
-	{
-		currentCursor = id;
-		SetCursor(LoadCursor(NULL, MAKEINTRESOURCE(currentCursor)));
-	}
 }
 
 void AppWindow::ToggleBorder()
@@ -218,4 +221,22 @@ void AppWindow::Reset()
 	selectionRect.SetFromClientRect(sourceWindow);
 	SetWindowSize(1.0);
 	ScaleThumbnail();
+}
+
+void AppWindow::SetContextualCursor()
+{
+	int prevCursor = currentCursor;
+	bool shift = static_cast<unsigned short>(GetKeyState(VK_SHIFT)) >> 15 == 1;
+	bool control = static_cast<unsigned short>(GetKeyState(VK_CONTROL)) >> 15 == 1;
+
+	if (shift && !control) currentCursor = CursorPan;
+	else if (!shift && control) currentCursor = CursorScale;
+	else if (shift && control) currentCursor = CursorNoFunction;
+	else currentCursor = 0;
+
+	if (prevCursor != currentCursor) 
+	{
+		cursorSet = false;
+		SendMessage(windowHandle, WM_SETCURSOR, WPARAM(windowHandle), (LPARAM)MAKELONG(HTCLIENT, WM_MOUSEMOVE));
+	}
 }

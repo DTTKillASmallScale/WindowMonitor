@@ -14,27 +14,36 @@ void CWindow::Create()
 	
 	CREATESTRUCT cs;
 	SecureZeroMemory(&cs, sizeof(CREATESTRUCT));
-
-	cs.hInstance = instance;
 	cs.hwndParent = NULL;
 	cs.hMenu = NULL;
 	cs.lpszName = _T("New Window");
 	cs.lpszClass = _T("CustomWindowClass");
+	cs.x = 0;
+	cs.y = 0;
 	cs.cx = 640;
 	cs.cy = 480;
 	cs.style = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
 	cs.dwExStyle = NULL;
+
+	WNDCLASSEX wcex;
+	SecureZeroMemory(&wcex, sizeof(WNDCLASSEX));
+	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+
+	// Let child classes override settings
+	PreCreate(cs, wcex);
+
+	// Make sure critical values are set
+	cs.hInstance = instance;
 	cs.lpCreateParams = this;
+	wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.hInstance = instance;
+	wcex.lpfnWndProc = CWindow::StaticWndProc;
+	wcex.lpszClassName = cs.lpszClass;
 
-	PreCreate(cs);
-
-	// Center window
-	RECT rc;
-	GetClientRect(GetDesktopWindow(), &rc);
-	cs.x = (rc.right - rc.left - cs.cx) / 2;
-	cs.y = (rc.bottom - rc.top - cs.cy) / 2;
-
-	RegisterWindowClass(cs);
+	// Create window
+	RegisterClassEx(&wcex);
 	MakeWindow(cs);
 	OnInitialUpdate();
 }
@@ -84,20 +93,6 @@ LRESULT CWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	
 	return 0;
-}
-
-ATOM CWindow::RegisterWindowClass(CREATESTRUCT const & cs)
-{
-	WNDCLASSEX wcex;
-	SecureZeroMemory(&wcex, sizeof(WNDCLASSEX));
-	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-	wcex.lpfnWndProc = CWindow::StaticWndProc;
-	wcex.hInstance = instance;
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
-	wcex.lpszClassName = cs.lpszClass;
-	return RegisterClassEx(&wcex);
 }
 
 bool CWindow::MakeWindow(CREATESTRUCT const & cs)

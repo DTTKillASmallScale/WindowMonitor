@@ -15,12 +15,11 @@ protected:
 	HWND windowHandle;
 	HACCEL accelerators;
 
-	virtual void PreCreate(CREATESTRUCT & cs) { }
+	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex) { }
 	virtual void OnInitialUpdate() { }
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
-	ATOM RegisterWindowClass(CREATESTRUCT const & cs);
 	bool MakeWindow(CREATESTRUCT const & cs);
 	bool PreTranslateMessage(MSG msg);
 	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
