@@ -56,7 +56,11 @@ void WindowFilter::Execute()
 		}
 
 		// Filter untitled windows
-		if (title.empty()) continue;
+		if (title.empty()) 
+		{
+			if (EmptyTitleAllowedByClassName(className)) title.assign(className);
+			else continue;
+		}
 
 		// Insert item at start
 		items.insert(items.begin(), WindowFilterItem(hwnd, title, className));
@@ -69,6 +73,12 @@ bool WindowFilter::IsFilteredByClassName(std::wstring const & className)
 	if (className.compare(L"Shell_TrayWnd") == 0) return true;
 	if (className.compare(L"Button") == 0) return true;
 	if (className.compare(L"DwmWindowMonitorApp") == 0) return true;
+	return false;
+}
+
+bool WindowFilter::EmptyTitleAllowedByClassName(std::wstring const & className)
+{
+	if (className.compare(L"Chrome_WidgetWin_1") == 0) return true;
 	return false;
 }
 
