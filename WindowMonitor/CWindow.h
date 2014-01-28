@@ -7,8 +7,10 @@ class CWindow
 public:
 	CWindow();
 	void Create();
-	void Run();
+	void Destroy();
 	inline HWND GetWindowHandle() { return windowHandle; }
+	inline HINSTANCE GetInstance() { return instance; }
+	static void Run();
 
 protected:
 	HINSTANCE instance;
@@ -21,6 +23,6 @@ protected:
 
 private:
 	bool MakeWindow(CREATESTRUCT const & cs);
-	bool PreTranslateMessage(MSG msg);
+	static bool PreTranslateMessage(MSG msg);
 	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 };

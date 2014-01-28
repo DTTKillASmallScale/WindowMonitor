@@ -7,8 +7,12 @@
 
 int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
+	// Create main window
 	AppWindow window;
 	window.Create();
-	window.Run();
+	
+	// Run loop
+	CWindow::Run();
+	
 	return 0;
 }

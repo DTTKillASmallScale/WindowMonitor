@@ -48,37 +48,9 @@ void CWindow::Create()
 	OnInitialUpdate();
 }
 
-void CWindow::Run()
+void CWindow::Destroy()
 {
-	MSG msg;
-	BOOL ret;
-	
-	while ((ret = GetMessage(&msg, NULL, 0, 0)) != 0)
-	{
-		if (ret == -1)
-		{
-			// Error
-		}
-		else if (!PreTranslateMessage(msg))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-	}
-}
-
-bool CWindow::PreTranslateMessage(MSG msg)
-{
-	bool processed = false;
-	
-	if ((msg.message >= WM_KEYFIRST && msg.message <= WM_KEYLAST) || 
-		(msg.message >= WM_MOUSEFIRST && msg.message <= WM_MOUSELAST))
-	{
-		if (TranslateAccelerator(windowHandle, accelerators, &msg)) 
-			processed = true;
-	}
-	
-	return processed;
+	DestroyWindow(windowHandle);
 }
 
 LRESULT CWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -113,6 +85,40 @@ bool CWindow::MakeWindow(CREATESTRUCT const & cs)
 	if (!windowHandle) return false;
 
 	return true;
+}
+
+void CWindow::Run()
+{
+	MSG msg;
+	BOOL ret;
+
+	while ((ret = GetMessage(&msg, NULL, 0, 0)) != 0)
+	{
+		if (ret == -1)
+		{
+			// Error
+		}
+		else if (!PreTranslateMessage(msg))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+}
+
+bool CWindow::PreTranslateMessage(MSG msg)
+{
+	bool processed = false;
+
+	if ((msg.message >= WM_KEYFIRST && msg.message <= WM_KEYLAST) ||
+		(msg.message >= WM_MOUSEFIRST && msg.message <= WM_MOUSELAST))
+	{
+		CWindow * window = reinterpret_cast<CWindow*>(GetWindowLongPtr(msg.hwnd, GWLP_USERDATA));
+		if (window != NULL && TranslateAccelerator(msg.hwnd, window->accelerators, &msg))
+			processed = true;
+	}
+
+	return processed;
 }
 
 LRESULT CALLBACK CWindow::StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
