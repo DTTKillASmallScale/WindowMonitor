@@ -6,6 +6,7 @@
 
 const int AppWindow::MaxMenuTextLength = 32;
 const int AppWindow::MenuItemBreakPoint = 24;
+const int AppWindow::CursorArrow = 32512;
 const int AppWindow::CursorMove = 32646;
 const int AppWindow::CursorPan = 32649;
 const int AppWindow::CursorScale = 32642;
@@ -35,7 +36,7 @@ void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 	accelerators = LoadAccelerators(cs.hInstance, MAKEINTRESOURCE(IDW_MAIN));
 	cs.lpszClass = _T("DwmWindowMonitorApp");
 	cs.style = WS_POPUPWINDOW | WS_SIZEBOX;
-	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorMove));
+	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorArrow));
 }
 
 void AppWindow::OnInitialUpdate()
@@ -191,10 +192,12 @@ void AppWindow::ToggleBorder()
 void AppWindow::SetContextualCursor()
 {
 	int prevCursor = currentCursor;
+	bool lmb = static_cast<unsigned short>(GetKeyState(VK_LBUTTON)) >> 15 == 1;
 	bool shift = static_cast<unsigned short>(GetKeyState(VK_SHIFT)) >> 15 == 1;
 	bool control = static_cast<unsigned short>(GetKeyState(VK_CONTROL)) >> 15 == 1;
 
-	if (shift && !control) currentCursor = CursorPan;
+	if (lmb && !shift && !control) currentCursor = CursorMove;
+	else if (shift && !control) currentCursor = CursorPan;
 	else if (!shift && control) currentCursor = CursorScale;
 	else if (shift && control) currentCursor = CursorNoFunction;
 	else currentCursor = 0;

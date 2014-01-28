@@ -8,6 +8,7 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 {
 	switch (message)
 	{
+	case WM_LBUTTONDOWN:
 	case WM_KEYDOWN:
 		if (OnKeyDown(wParam, lParam)) return 0;
 		break;
@@ -75,6 +76,7 @@ bool AppWindow::OnKeyUp(WPARAM const & wParam, LPARAM const & lParam)
 
 bool AppWindow::OnLeftButtonUp(WPARAM const & wParam, LPARAM const & lParam)
 {
+	SetContextualCursor();
 	if (wParam == MK_RBUTTON) { suppressContextMenu = true; return true; }
 	return false;
 }
@@ -115,7 +117,7 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 	if (lmb)
 	{
 		SendMessage(windowHandle, WM_SYSCOMMAND, SC_MOVE | 0x0002, NULL);
-		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOMOVE | SWP_NOSIZE);
+		SetContextualCursor();
 		return true;
 	}
 

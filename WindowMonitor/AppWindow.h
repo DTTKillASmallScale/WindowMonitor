@@ -64,6 +64,7 @@ private:
 	// Constants
 	static const int MaxMenuTextLength;
 	static const int MenuItemBreakPoint;
+	static const int CursorArrow;
 	static const int CursorMove;
 	static const int CursorPan;
 	static const int CursorScale;
