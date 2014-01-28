@@ -42,7 +42,7 @@
     <ClInclude Include="AdjustableThumbnail.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DoubleRect.h">
+    <ClInclude Include="ViewSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -71,7 +71,7 @@
     <ClCompile Include="AppWindow.WndProc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DoubleRect.cpp">
+    <ClCompile Include="ViewSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

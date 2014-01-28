@@ -17,7 +17,7 @@ AppWindow::AppWindow() :
 	adjustableThumbnail(),
 	sourceWindow(NULL),
 	sourceIndex(0),
-	scale(1.0),
+	currentViewSetting(),
 	chromeWidth(0),
 	chromeHeight(0),
 	contextMenu(NULL),
@@ -25,8 +25,7 @@ AppWindow::AppWindow() :
 	baseMenuItemCount(0),
 	suppressContextMenu(false),
 	currentCursor(0),
-	cursorSet(false),
-	maxResetRatio(0.9)
+	cursorSet(false)
 {
 	lastPos.x = lastPos.y = 0;
 }
@@ -79,8 +78,8 @@ void AppWindow::OnDestroy()
 
 void AppWindow::UpdateWindow()
 {
-	long width = static_cast<long>(static_cast<double>(selectionRect.right - selectionRect.left) * scale);
-	long height = static_cast<long>(static_cast<double>(selectionRect.bottom - selectionRect.top) * scale);
+	long width, height;
+	currentViewSetting.GetScaledDimensions(width, height);
 
 	// Calc window dimensions
 	RECT windowRect{ 0, 0, width, height };
@@ -91,18 +90,15 @@ void AppWindow::UpdateWindow()
 	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE);
 
 	// Get size of window chrome
-	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(selectionRect.right - selectionRect.left);
-	chromeHeight = (windowRect.bottom - windowRect.top) - static_cast<long>(selectionRect.bottom - selectionRect.top);
+	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(currentViewSetting.GetWidth());
+	chromeHeight = (windowRect.bottom - windowRect.top) - static_cast<long>(currentViewSetting.GetHeight());
 }
 
 void AppWindow::UpdateThumbnail()
 {
 	RECT sourceRect;
 	GetClientRect(sourceWindow, &sourceRect);
-	sourceRect.left = static_cast<long>(static_cast<double>(-selectionRect.left) * scale);
-	sourceRect.top = static_cast<long>(static_cast<double>(-selectionRect.top) * scale);
-	sourceRect.right = static_cast<long>(static_cast<double>(sourceRect.right - selectionRect.left) * scale);
-	sourceRect.bottom = static_cast<long>(static_cast<double>(sourceRect.bottom - selectionRect.top) * scale);
+	currentViewSetting.GetScaledRect(static_cast<double>(sourceRect.right), static_cast<double>(sourceRect.bottom), sourceRect);
 	adjustableThumbnail.SetSize(sourceRect);
 }
 
@@ -151,15 +147,12 @@ void AppWindow::CycleBack()
 void AppWindow::Reset()
 {
 	// Set selection
-	selectionRect.SetFromClientRect(sourceWindow);
+	currentViewSetting.SetFromClientRect(sourceWindow);
 
 	// Set scale
 	RECT monitorRect;
 	GetMonitorRect(monitorRect);
-	double sourceMonitorRatio = static_cast<double>(selectionRect.right - selectionRect.left) / static_cast<double>(monitorRect.right - monitorRect.left);
-	sourceMonitorRatio = max(sourceMonitorRatio, static_cast<double>(selectionRect.bottom - selectionRect.top) / static_cast<double>(monitorRect.bottom - monitorRect.top));
-	if (sourceMonitorRatio > maxResetRatio) scale = maxResetRatio / sourceMonitorRatio;
-	else scale = 1.0;
+	currentViewSetting.SetScaleToMonitorSize(monitorRect);
 
 	// Update window
 	UpdateWindow();

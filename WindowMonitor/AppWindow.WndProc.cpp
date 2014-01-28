@@ -129,17 +129,13 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 		// Shift view
 		if (shiftLmb)
 		{
-			selectionRect.left -= x / scale;
-			selectionRect.top -= y / scale;
-			selectionRect.right -= x / scale;
-			selectionRect.bottom -= y / scale;
+			currentViewSetting.Shift(x, y);
 			UpdateThumbnail();
 		}
 		// Crop view
 		else if (ctrlLmb)
 		{
-			selectionRect.right += x / scale;
-			selectionRect.bottom += y / scale;
+			currentViewSetting.Crop(x, y);
 			UpdateWindow();
 		}
 	}
@@ -163,7 +159,7 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 	LPRECT newRect = (LPRECT)lParam;
 	double width = static_cast<double>(newRect->right - newRect->left - chromeWidth);
 	double height = static_cast<double>(newRect->bottom - newRect->top - chromeHeight);
-	double aspect = static_cast<double>(selectionRect.right - selectionRect.left) / static_cast<double>(selectionRect.bottom - selectionRect.top);
+	double aspect = currentViewSetting.GetAspect();
 	long newWidth = static_cast<long>(height * aspect);
 	long newHeight = static_cast<long>(width * (1.0 / aspect));
 	long newValue;
@@ -208,7 +204,7 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 	// Calculate scale
 	RECT clientRect;
 	GetClientRect(windowHandle, &clientRect);
-	scale = static_cast<double>(clientRect.right - clientRect.left) / ceil(selectionRect.right - selectionRect.left);
+	currentViewSetting.SetScaleToWindow(clientRect);
 
 	return true;
 }
@@ -300,14 +296,14 @@ void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 
 		switch (mii.wID)
 		{
-		case ID_ZOOM_25: scale = 0.25; break;
-		case ID_ZOOM_50: scale = 0.5; break;
-		case ID_ZOOM_75: scale = 0.75; break;
-		case ID_ZOOM_100: scale = 1.0; break;
-		case ID_ZOOM_125: scale = 1.25; break;
-		case ID_ZOOM_150: scale = 1.5; break;
-		case ID_ZOOM_175: scale = 1.75; break;
-		case ID_ZOOM_200: scale = 2.0; break;
+		case ID_ZOOM_25: currentViewSetting.SetScale(0.25); break;
+		case ID_ZOOM_50: currentViewSetting.SetScale(0.5); break;
+		case ID_ZOOM_75: currentViewSetting.SetScale(0.75); break;
+		case ID_ZOOM_100: currentViewSetting.SetScale(1.0); break;
+		case ID_ZOOM_125: currentViewSetting.SetScale(1.25); break;
+		case ID_ZOOM_150: currentViewSetting.SetScale(1.5); break;
+		case ID_ZOOM_175: currentViewSetting.SetScale(1.75); break;
+		case ID_ZOOM_200: currentViewSetting.SetScale(2.0); break;
 		default: return;
 		}
 

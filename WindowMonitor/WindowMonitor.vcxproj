@@ -168,12 +168,12 @@
   <ItemGroup>
     <ClInclude Include="AppWindow.h" />
     <ClInclude Include="CWindow.h" />
-    <ClInclude Include="DoubleRect.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="DwmThumbnail.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="AdjustableThumbnail.h" />
+    <ClInclude Include="ViewSetting.h" />
     <ClInclude Include="WindowFilter.h" />
     <ClInclude Include="WindowHelper.h" />
   </ItemGroup>
@@ -181,7 +181,6 @@
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="AppWindow.WndProc.cpp" />
     <ClCompile Include="CWindow.cpp" />
-    <ClCompile Include="DoubleRect.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="DwmThumbnail.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -191,6 +190,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="AdjustableThumbnail.cpp" />
+    <ClCompile Include="ViewSetting.cpp" />
     <ClCompile Include="WindowFilter.cpp" />
   </ItemGroup>
   <ItemGroup>

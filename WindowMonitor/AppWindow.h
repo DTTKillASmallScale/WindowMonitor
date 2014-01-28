@@ -1,6 +1,6 @@
 #pragma once
 #include "CWindow.h"
-#include "DoubleRect.h"
+#include "ViewSetting.h"
 #include "AdjustableThumbnail.h"
 #include "WindowFilter.h"
 
@@ -48,8 +48,7 @@ private:
 	std::size_t sourceIndex;
 	WindowFilter windowFilter;
 
-	DoubleRect selectionRect;
-	double scale;
+	ViewSetting currentViewSetting;
 	int chromeWidth, chromeHeight;
 
 	HMENU contextMenu;
@@ -59,7 +58,6 @@ private:
 	int currentCursor;
 	bool cursorSet;
 	POINTS lastPos;
-	double maxResetRatio;
 
 	// Constants
 	static const int MaxMenuTextLength;
