@@ -180,7 +180,7 @@ void AppWindow::ToggleBorder()
 	DWORD oldStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
 
 	// Calc new style
-	LONG_PTR newStyle = WS_POPUPWINDOW;
+	LONG_PTR newStyle = WS_VISIBLE | WS_POPUPWINDOW;
 	if ((oldStyle & WS_SIZEBOX) == false) newStyle = newStyle | WS_SIZEBOX;
 
 	// Set new style
