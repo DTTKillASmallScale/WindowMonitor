@@ -55,9 +55,10 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 bool AppWindow::OnKeyDown(WPARAM const & wParam, LPARAM const & lParam)
 {
-	bool repeated = (lParam & 0x40000000) == 0;
+	// Bit 30: The value is 1 if the key is down before the message is sent, or it is zero if the key is up.
+	bool notRepeated = (lParam & 0x40000000) == 0;
 
-	if (repeated)
+	if (notRepeated)
 	{
 		SetContextualCursor();
 		return true;
