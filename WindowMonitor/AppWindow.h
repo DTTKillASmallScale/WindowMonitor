@@ -38,6 +38,7 @@ private:
 	void CycleBack();
 	void Reset();
 	void ToggleBorder();
+	void ToggleClickThrough();
 	void SetContextualCursor();
 	void UpdateMenu();
 	void GetMonitorRect(RECT & rect);

@@ -36,6 +36,7 @@ void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 	cs.lpszClass = _T("DwmWindowMonitorApp");
 	cs.style = WS_POPUPWINDOW | WS_SIZEBOX;
 	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorArrow));
+	wcex.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
 }
 
 void AppWindow::OnInitialUpdate()
@@ -44,6 +45,9 @@ void AppWindow::OnInitialUpdate()
 	WindowHelper::SetTitle(windowHandle, instance, IDS_TITLE);
 	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN);
 	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN, true);
+
+	// Set transparency key
+	SetLayeredWindowAttributes(windowHandle, RGB(255, 255, 255), 0, LWA_COLORKEY);
 
 	// Create menu
 	HMENU menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));
@@ -179,6 +183,20 @@ void AppWindow::ToggleBorder()
 
 	// Set new style
 	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);
+	UpdateWindow();
+}
+
+void AppWindow::ToggleClickThrough()
+{
+	// Get old style
+	DWORD oldStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_EXSTYLE));
+
+	// Calc new style
+	LONG_PTR newStyle = NULL;
+	if ((oldStyle & WS_EX_TRANSPARENT) == false) newStyle = newStyle | WS_EX_TRANSPARENT | WS_EX_LAYERED;
+
+	// Set new style
+	SetWindowLongPtr(windowHandle, GWL_EXSTYLE, newStyle);
 	UpdateWindow();
 }
 

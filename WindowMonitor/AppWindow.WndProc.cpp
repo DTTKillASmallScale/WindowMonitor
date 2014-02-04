@@ -237,6 +237,9 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 		case ID_ACCEL_REFRESH:
 			Reset();
 			return true;
+		case ID_ACCEL_CLICKTHROUGH:
+			ToggleClickThrough();
+			return true;
 		}
 	}
 

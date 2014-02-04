@@ -2,13 +2,14 @@
 // Microsoft Visual C++ generated include file.
 // Used by WindowMonitor.rc
 //
-#define APP_PRODUCT_VERSION "1.0.9"
-#define APP_PRODUCT_VERSION_NUM 1,0,9,0
+#define APP_PRODUCT_VERSION "1.0.10"
+#define APP_PRODUCT_VERSION_NUM 1,0,10,0
 
 #define IDW_MAIN                        51
 #define ID_ACCEL_SWITCH                 101
 #define ID_ACCEL_RSWITCH                102
 #define ID_ACCEL_REFRESH                103
+#define ID_ACCEL_CLICKTHROUGH           104
 #define IDS_TITLE                       120
 #define IDS_NOWINDOWSFOUND              123
 #define IDR_CTXMENU                     150
