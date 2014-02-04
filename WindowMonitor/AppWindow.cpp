@@ -227,25 +227,26 @@ void AppWindow::UpdateMenu()
 	windowFilter.Execute();
 
 	// Add items
-	int i = baseMenuItemCount;
+	std::wstring text;
+	int identifier = baseMenuItemCount;
 	for (auto it = windowFilter.items.begin(); it != windowFilter.items.end(); ++it)
 	{
 		// Get title text
-		std::wstring text((*it).title.substr(0, AppWindow::MaxMenuTextLength));
+		text.assign(it->title.substr(0, AppWindow::MaxMenuTextLength));
 
-		// Truncate
-		if ((*it).title.length() > AppWindow::MaxMenuTextLength) text.append(L"...");
+		// Add ellipsis if truncated
+		if (it->title.length() > AppWindow::MaxMenuTextLength) text.append(L"...");
 
 		// Create menu item
-		bool breakMenu = i % AppWindow::MenuItemBreakPoint == 0;
-		AppendMenu(contextMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0), i, text.c_str());
+		bool breakMenu = identifier % AppWindow::MenuItemBreakPoint == 0;
+		AppendMenu(contextMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0), identifier, text.c_str());
 
 		// Next item
-		++i;
+		++identifier;
 	}
 
 	// Add blank item if no windows were added
-	if (i == baseMenuItemCount) AppendMenu(contextMenu, MF_STRING | MF_GRAYED, 0,
+	if (identifier == baseMenuItemCount) AppendMenu(contextMenu, MF_STRING | MF_GRAYED, 0,
 		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
 }
 
