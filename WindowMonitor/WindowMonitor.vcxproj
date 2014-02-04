@@ -175,6 +175,7 @@
     <ClInclude Include="AdjustableThumbnail.h" />
     <ClInclude Include="ViewSetting.h" />
     <ClInclude Include="WindowFilter.h" />
+    <ClInclude Include="WindowFilterItem.h" />
     <ClInclude Include="WindowHelper.h" />
   </ItemGroup>
   <ItemGroup>
@@ -192,6 +193,7 @@
     <ClCompile Include="AdjustableThumbnail.cpp" />
     <ClCompile Include="ViewSetting.cpp" />
     <ClCompile Include="WindowFilter.cpp" />
+    <ClCompile Include="WindowFilterItem.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="WindowMonitor.rc" />
