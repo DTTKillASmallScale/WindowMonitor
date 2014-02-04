@@ -277,7 +277,7 @@ void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 
 	if (sourceMenu == contextMenu)
 	{
-		GetMenuItemInfo(contextMenu, wParam, TRUE, &mii);
+		GetMenuItemInfo(contextMenu, static_cast<unsigned int>(wParam), TRUE, &mii);
 
 		switch (mii.wID)
 		{
@@ -292,13 +292,13 @@ void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 			break;
 		default:
 			if (static_cast<int>(wParam) >= baseMenuItemCount)
-				SelectSource(wParam - baseMenuItemCount);
+				SelectSource(static_cast<int>(wParam) - baseMenuItemCount);
 			break;
 		}
 	}
 	else if (sourceMenu == zoomMenu)
 	{
-		GetMenuItemInfo(zoomMenu, wParam, TRUE, &mii);
+		GetMenuItemInfo(zoomMenu, static_cast<unsigned int>(wParam), TRUE, &mii);
 
 		switch (mii.wID)
 		{
