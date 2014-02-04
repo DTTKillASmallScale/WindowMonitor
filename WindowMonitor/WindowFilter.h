@@ -20,11 +20,6 @@ public:
 	}
 };
 
-struct WindowFilterNamedChildItem
-{
-	std::wstring className;
-	bool wasFound;
-};
 
 class WindowFilter
 {
