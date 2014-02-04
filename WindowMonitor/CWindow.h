@@ -17,12 +17,11 @@ protected:
 	HWND windowHandle;
 	HACCEL accelerators;
 
-	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex) { }
-	virtual void OnInitialUpdate() { }
+	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
+	virtual void OnInitialUpdate();
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
-	bool MakeWindow(CREATESTRUCT const & cs);
 	static bool PreTranslateMessage(MSG msg);
 	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 };

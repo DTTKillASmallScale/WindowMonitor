@@ -12,7 +12,6 @@ public:
 
 protected:
 	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
-	virtual void OnInitialUpdate();
 
 private:
 	// Events
@@ -28,6 +27,7 @@ private:
 	bool OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam);
 	void OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
 	void OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam);
+	void OnCreate();
 	void OnDestroy();
 
 	// Methods

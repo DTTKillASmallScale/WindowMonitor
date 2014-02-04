@@ -44,13 +44,33 @@ void CWindow::Create()
 
 	// Create window
 	RegisterClassEx(&wcex);
-	MakeWindow(cs);
+
+	CreateWindowEx(
+		cs.dwExStyle,
+		cs.lpszClass,
+		cs.lpszName,
+		cs.style,
+		cs.x, cs.y,
+		cs.cx, cs.cy,
+		cs.hwndParent,
+		cs.hMenu,
+		cs.hInstance,
+		cs.lpCreateParams);
+
 	OnInitialUpdate();
 }
 
 void CWindow::Destroy()
 {
 	DestroyWindow(windowHandle);
+}
+
+void CWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
+{
+}
+
+void CWindow::OnInitialUpdate()
+{
 }
 
 LRESULT CWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -65,26 +85,6 @@ LRESULT CWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	
 	return 0;
-}
-
-bool CWindow::MakeWindow(CREATESTRUCT const & cs)
-{
-	// Create window
-	windowHandle = CreateWindowEx(
-		cs.dwExStyle, 
-		cs.lpszClass, 
-		cs.lpszName, 
-		cs.style, 
-		cs.x, cs.y, 
-		cs.cx, cs.cy, 
-		cs.hwndParent, 
-		cs.hMenu, 
-		cs.hInstance, 
-		cs.lpCreateParams);
-
-	if (!windowHandle) return false;
-
-	return true;
 }
 
 void CWindow::Run()
@@ -134,6 +134,16 @@ LRESULT CALLBACK CWindow::StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, 
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)window);
 	}
 
-	if (window == NULL) return DefWindowProc(hWnd, message, wParam, lParam);
-	else return window->WndProc(hWnd, message, wParam, lParam);
+	if (window == NULL) 
+	{
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+	else 
+	{
+		// Store handle
+		if (WM_CREATE) window->windowHandle = hWnd;
+		
+		// Run window process
+		return window->WndProc(hWnd, message, wParam, lParam);
+	}
 }

@@ -34,12 +34,12 @@ void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 {
 	accelerators = LoadAccelerators(cs.hInstance, MAKEINTRESOURCE(IDW_MAIN));
 	cs.lpszClass = _T("DwmWindowMonitorApp");
-	cs.style = WS_POPUPWINDOW | WS_SIZEBOX;
+	cs.style = WS_VISIBLE | WS_POPUPWINDOW | WS_THICKFRAME;
 	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorArrow));
 	wcex.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
 }
 
-void AppWindow::OnInitialUpdate()
+void AppWindow::OnCreate()
 {
 	// Set title and icons
 	WindowHelper::SetTitle(windowHandle, instance, IDS_TITLE);
@@ -67,9 +67,6 @@ void AppWindow::OnInitialUpdate()
 
 	// Select source window
 	SelectSource(0);
-
-	// Show window
-	ShowWindow(windowHandle, SW_SHOWNORMAL);
 }
 
 void AppWindow::OnDestroy()
@@ -179,7 +176,7 @@ void AppWindow::ToggleBorder()
 
 	// Calc new style
 	LONG_PTR newStyle = WS_VISIBLE | WS_POPUPWINDOW;
-	if ((oldStyle & WS_SIZEBOX) == false) newStyle = newStyle | WS_SIZEBOX;
+	if ((oldStyle & WS_THICKFRAME) == false) newStyle = newStyle | WS_THICKFRAME;
 
 	// Set new style
 	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);

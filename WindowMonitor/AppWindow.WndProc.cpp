@@ -45,6 +45,9 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	case WM_MENUCOMMAND:
 		OnMenuCommand(wParam, lParam);
 		break;
+	case WM_CREATE:
+		OnCreate();
+		return 0;
 	case WM_DESTROY:
 		OnDestroy();
 		break;
