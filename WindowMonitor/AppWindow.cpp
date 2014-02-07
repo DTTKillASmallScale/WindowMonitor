@@ -109,7 +109,7 @@ void AppWindow::SelectSource(int const & index)
 	windowFilter.Execute();
 
 	// Get size
-	std::size_t size = windowFilter.items.size();
+	std::size_t size = windowFilter.ItemCount();
 	if (size < 1) return;
 
 	// Set source index
@@ -118,7 +118,7 @@ void AppWindow::SelectSource(int const & index)
 	else sourceIndex = index;
 
 	// Get source window handle
-	sourceWindow = windowFilter.items.at(sourceIndex).hwnd;
+	sourceWindow = windowFilter.GetWindowHandle(sourceIndex);
 
 	// Set thumbnail to source
 	adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
@@ -229,13 +229,13 @@ void AppWindow::UpdateMenu()
 	// Add items
 	std::wstring text;
 	int identifier = baseMenuItemCount;
-	for (auto it = windowFilter.items.begin(); it != windowFilter.items.end(); ++it)
+	windowFilter.IterateItems([&](WindowFilterItem const & item)
 	{
 		// Get title text
-		text.assign(it->title.substr(0, AppWindow::MaxMenuTextLength));
+		text.assign(item.title.substr(0, AppWindow::MaxMenuTextLength));
 
 		// Add ellipsis if truncated
-		if (it->title.length() > AppWindow::MaxMenuTextLength) text.append(L"...");
+		if (item.title.length() > AppWindow::MaxMenuTextLength) text.append(L"...");
 
 		// Create menu item
 		bool breakMenu = identifier % AppWindow::MenuItemBreakPoint == 0;
@@ -243,7 +243,7 @@ void AppWindow::UpdateMenu()
 
 		// Next item
 		++identifier;
-	}
+	});
 
 	// Add blank item if no windows were added
 	if (identifier == baseMenuItemCount) AppendMenu(contextMenu, MF_STRING | MF_GRAYED, 0,

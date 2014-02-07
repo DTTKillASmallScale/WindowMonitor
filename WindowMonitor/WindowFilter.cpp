@@ -1,6 +1,24 @@
 #include "stdafx.h"
 #include "WindowFilter.h"
 
+std::size_t WindowFilter::ItemCount()
+{
+	return items.size();
+}
+
+HWND WindowFilter::GetWindowHandle(std::size_t const & index)
+{
+	return items.at(index).hwnd;
+}
+
+void WindowFilter::IterateItems(std::function<void(WindowFilterItem const &)> step)
+{
+	for (auto it = items.begin(); it != items.end(); ++it)
+	{
+		step(*it);
+	}
+}
+
 void WindowFilter::Execute()
 {
 	// Enum windows
