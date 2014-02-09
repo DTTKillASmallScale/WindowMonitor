@@ -1,13 +1,15 @@
 #pragma once
 #include "CWindow.h"
-#include "ViewSetting.h"
 #include "AdjustableThumbnail.h"
-#include "WindowFilter.h"
+#include "ViewSetting.h"
+
+class WindowFilter;
+class PresetManager;
 
 class AppWindow : public CWindow
 {
 public:
-	AppWindow();
+	AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager);
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 protected:
@@ -47,7 +49,6 @@ private:
 	AdjustableThumbnail adjustableThumbnail;
 	HWND sourceWindow;
 	std::size_t sourceIndex;
-	WindowFilter windowFilter;
 
 	ViewSetting currentViewSetting;
 	int chromeWidth, chromeHeight;
@@ -59,6 +60,9 @@ private:
 	int currentCursor;
 	bool cursorSet;
 	POINTS lastPos;
+
+	WindowFilter * windowFilter;
+	PresetManager * presetManager;
 
 	// Constants
 	static const int MaxMenuTextLength;

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "AppWindow.h"
 #include "Resource.h"
+#include "WindowFilter.h"
+#include "PresetManager.h"
 #include "WindowHelper.h"
 #include <sstream>
 
@@ -12,8 +14,10 @@ const int AppWindow::CursorPan = 32649;
 const int AppWindow::CursorScale = 32642;
 const int AppWindow::CursorNoFunction = 32648;
 
-AppWindow::AppWindow() :
+AppWindow::AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager) :
 	CWindow(),
+	windowFilter(windowFilter),
+	presetManager(presetManager),
 	adjustableThumbnail(),
 	sourceWindow(NULL),
 	sourceIndex(0),
@@ -106,10 +110,10 @@ void AppWindow::UpdateThumbnail()
 void AppWindow::SelectSource(int const & index)
 {
 	// Get filtered windows
-	windowFilter.Execute();
+	windowFilter->Refresh();
 
 	// Get size
-	std::size_t size = windowFilter.ItemCount();
+	std::size_t size = windowFilter->ItemCount();
 	if (size < 1) return;
 
 	// Set source index
@@ -118,7 +122,7 @@ void AppWindow::SelectSource(int const & index)
 	else sourceIndex = index;
 
 	// Get source window handle
-	sourceWindow = windowFilter.GetWindowHandle(sourceIndex);
+	sourceWindow = windowFilter->GetWindowHandle(sourceIndex);
 
 	// Set thumbnail to source
 	adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
@@ -130,7 +134,7 @@ void AppWindow::SelectSource(int const & index)
 void AppWindow::CycleForward()
 {
 	// Refresh list
-	windowFilter.Execute();
+	windowFilter->Refresh();
 
 	// Select next source
 	SelectSource(static_cast<int>(sourceIndex)+1);
@@ -139,7 +143,7 @@ void AppWindow::CycleForward()
 void AppWindow::CycleBack()
 {
 	// Refresh list
-	windowFilter.Execute();
+	windowFilter->Refresh();
 
 	// Select next source
 	SelectSource(static_cast<int>(sourceIndex)-1);
@@ -224,12 +228,12 @@ void AppWindow::UpdateMenu()
 		DeleteMenu(contextMenu, baseMenuItemCount, MF_BYPOSITION);
 
 	// Get filtered windows
-	windowFilter.Execute();
+	windowFilter->Refresh();
 
 	// Add items
 	std::wstring text;
 	int identifier = baseMenuItemCount;
-	windowFilter.IterateItems([&](WindowFilterItem const & item)
+	windowFilter->IterateItems([&](WindowFilterItem const & item)
 	{
 		// Get title text
 		text.assign(item.title.substr(0, AppWindow::MaxMenuTextLength));
