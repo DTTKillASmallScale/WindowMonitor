@@ -12,8 +12,6 @@ public:
 	bool SetSize(RECT const & rect);
 
 private:
-	bool ResizeThumbnail(HWND const & target, HWND const & source);
-
 	DwmThumbnail thumbnail;
 };
 
