@@ -19,7 +19,7 @@ void WindowFilter::IterateItems(std::function<void(WindowFilterItem const &)> st
 	}
 }
 
-void WindowFilter::Execute()
+void WindowFilter::Refresh()
 {
 	// Enum windows
 	windows.clear();
