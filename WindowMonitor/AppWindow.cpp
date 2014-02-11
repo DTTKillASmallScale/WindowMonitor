@@ -53,6 +53,7 @@ void AppWindow::OnCreate()
 
 	// Set transparency key
 	SetLayeredWindowAttributes(windowHandle, RGB(255, 255, 255), 0, LWA_COLORKEY);
+	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 	// Create menu
 	menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));
@@ -93,8 +94,8 @@ void AppWindow::UpdateWindow()
 	DWORD dwStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
 	AdjustWindowRect(&windowRect, dwStyle, FALSE);
 
-	// Set window pos
-	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE);
+	// Set window size
+	SetWindowPos(windowHandle, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 
 	// Get size of window chrome
 	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(currentViewSetting.GetWidth());
@@ -169,7 +170,7 @@ void AppWindow::Reset()
 	GetWindowRect(windowHandle, &windowRect);
 	int x = (monitorRect.right + monitorRect.left - windowRect.right + windowRect.left) / 2;
 	int y = (monitorRect.bottom + monitorRect.top - windowRect.bottom + windowRect.top) / 2;
-	SetWindowPos(windowHandle, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE);
+	SetWindowPos(windowHandle, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 
 	// Update thumbnail
 	UpdateThumbnail();
