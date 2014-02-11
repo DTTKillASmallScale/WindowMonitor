@@ -40,7 +40,7 @@ void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 {
 	accelerators = LoadAccelerators(cs.hInstance, MAKEINTRESOURCE(IDW_MAIN));
 	cs.lpszClass = _T("DwmWindowMonitorApp");
-	cs.style = WS_VISIBLE | WS_POPUPWINDOW | WS_THICKFRAME;
+	cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER;
 	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorArrow));
 	wcex.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
 }
@@ -184,8 +184,8 @@ void AppWindow::ToggleBorder()
 	DWORD oldStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
 
 	// Calc new style
-	LONG_PTR newStyle = WS_VISIBLE | WS_POPUPWINDOW;
-	if ((oldStyle & WS_THICKFRAME) == false) newStyle = newStyle | WS_THICKFRAME;
+	LONG_PTR newStyle = WS_VISIBLE | WS_POPUP | WS_SYSMENU;
+	if ((oldStyle & WS_THICKFRAME) == 0) newStyle = newStyle | WS_THICKFRAME | WS_BORDER;
 
 	// Set new style
 	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);
