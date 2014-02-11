@@ -22,11 +22,16 @@ PresetWindow::PresetWindow(PresetManager * const presetManager, ViewSetting * co
 
 void PresetWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 {
+	RECT monitorRect;
+	WindowHelper::GetMonitorRect(windowHandle, monitorRect);
+
 	cs.lpszClass = _T("DwmWindowMonitorPresets");
 	cs.style = WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
 	cs.lpszName = L"Manage Presets";
 	cs.cx = 400;
 	cs.cy = 220;
+	cs.x = (monitorRect.right + monitorRect.left - cs.cx) / 2;
+	cs.y = (monitorRect.bottom + monitorRect.top - cs.cy) / 2;
 	wcex.hIcon = LoadIcon(instance, MAKEINTRESOURCE(IDW_MAIN));
 	wcex.hbrBackground = CreateSolidBrush(RGB(240, 240, 240));
 }
