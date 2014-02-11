@@ -8,7 +8,7 @@
 #define IDW_MAIN                        51
 #define ID_ACCEL_SWITCH                 101
 #define ID_ACCEL_RSWITCH                102
-#define ID_ACCEL_REFRESH                103
+#define ID_ACCEL_RESET                  103
 #define ID_ACCEL_CLICKTHROUGH           104
 #define IDS_TITLE                       120
 #define IDS_NOWINDOWSFOUND              123

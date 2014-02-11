@@ -237,7 +237,7 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 		case ID_ACCEL_RSWITCH:
 			CycleBack();
 			return true;
-		case ID_ACCEL_REFRESH:
+		case ID_ACCEL_RESET:
 			Reset();
 			return true;
 		case ID_ACCEL_CLICKTHROUGH:
