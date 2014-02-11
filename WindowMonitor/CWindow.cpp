@@ -10,6 +10,9 @@ CWindow::CWindow() :
 
 void CWindow::Create()
 {
+	// Check current window handle
+	if (windowHandle != NULL) return;
+
 	instance = GetModuleHandle(NULL);
 	
 	CREATESTRUCT cs;
@@ -62,7 +65,7 @@ void CWindow::Create()
 
 void CWindow::Destroy()
 {
-	DestroyWindow(windowHandle);
+	if (windowHandle != NULL) DestroyWindow(windowHandle);
 }
 
 void CWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
@@ -141,9 +144,15 @@ LRESULT CALLBACK CWindow::StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, 
 	else 
 	{
 		// Store handle
-		if (WM_CREATE) window->windowHandle = hWnd;
+		if (message == WM_CREATE) window->windowHandle = hWnd;
 		
 		// Run window process
-		return window->WndProc(hWnd, message, wParam, lParam);
+		LRESULT result = window->WndProc(hWnd, message, wParam, lParam);
+
+		// Remove handle if destroyed
+		if (message == WM_DESTROY && result == 0) window->windowHandle = NULL;
+
+		// Return
+		return result;
 	}
 }

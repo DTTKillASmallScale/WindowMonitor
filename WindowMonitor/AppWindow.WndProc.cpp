@@ -50,7 +50,7 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		return 0;
 	case WM_DESTROY:
 		OnDestroy();
-		break;
+		return 0;
 	}
 
 	// Use the default message handling for remaining messages
