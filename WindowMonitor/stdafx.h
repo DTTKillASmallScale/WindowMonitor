@@ -16,7 +16,12 @@
 #include <memory>
 #include <vector>
 #include <set>
+#include <map>
 #include <algorithm>
+#include <filesystem>
+#include <sstream>
+#include <iomanip>
+#include <functional>
 
 #include <shellapi.h>
 #include <Dwmapi.h>

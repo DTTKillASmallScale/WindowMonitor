@@ -1,6 +1,5 @@
 #pragma once
 #include "WindowFilterItem.h"
-#include <functional>
 
 class WindowFilter
 {

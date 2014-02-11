@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "DwmThumbnail.h"
-#include <sstream>
 
 DwmThumbnail::DwmThumbnail(void) : 
 	thumbnail(NULL)

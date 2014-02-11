@@ -4,7 +4,6 @@
 #include "WindowFilter.h"
 #include "PresetManager.h"
 #include "WindowHelper.h"
-#include <sstream>
 
 const int AppWindow::MaxMenuTextLength = 32;
 const int AppWindow::MenuItemBreakPoint = 24;

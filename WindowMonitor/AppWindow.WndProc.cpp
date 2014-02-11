@@ -2,7 +2,6 @@
 #include "AppWindow.h"
 #include "Resource.h"
 #include "WindowHelper.h"
-#include <sstream>
 
 LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
