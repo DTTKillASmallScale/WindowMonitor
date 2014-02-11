@@ -152,6 +152,7 @@ BEGIN
             MENUITEM "200%",                        ID_ZOOM_200
         END
 		MENUITEM "Toggle Border", ID_MENU_TOGGLEBORDER
+		MENUITEM "Manage Presets", ID_MENU_MANAGEPRESETS
 		MENUITEM "Reset", ID_REFRESH
 		MENUITEM "Exit", ID_EXIT
         MENUITEM SEPARATOR

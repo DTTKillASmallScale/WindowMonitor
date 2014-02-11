@@ -3,6 +3,7 @@
 #include "Resource.h"
 #include "WindowFilter.h"
 #include "PresetManager.h"
+#include "ViewSetting.h"
 #include "WindowHelper.h"
 
 const int AppWindow::MaxMenuTextLength = 32;
@@ -13,14 +14,15 @@ const int AppWindow::CursorPan = 32649;
 const int AppWindow::CursorScale = 32642;
 const int AppWindow::CursorNoFunction = 32648;
 
-AppWindow::AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager) :
+AppWindow::AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting) :
 	CWindow(),
 	windowFilter(windowFilter),
 	presetManager(presetManager),
+	currentViewSetting(currentViewSetting),
+	presetWindow(presetManager, currentViewSetting),
 	adjustableThumbnail(),
 	sourceWindow(NULL),
 	sourceIndex(0),
-	currentViewSetting(),
 	chromeWidth(0),
 	chromeHeight(0),
 	menu(NULL),
@@ -45,12 +47,10 @@ void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 
 void AppWindow::OnCreate()
 {
-	// Set title and icons
+	// Set window options
 	WindowHelper::SetTitle(windowHandle, instance, IDS_TITLE);
 	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN);
 	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN, true);
-
-	// Set transparency key
 	SetLayeredWindowAttributes(windowHandle, RGB(255, 255, 255), 0, LWA_COLORKEY);
 	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
@@ -72,21 +72,24 @@ void AppWindow::OnCreate()
 
 	// Select source window
 	SelectSource(0);
+
+	// Add view setting observer
+	currentViewSetting->RegisterObserver(this);
 }
 
 void AppWindow::OnDestroy()
 {
+	presetWindow.Destroy();
+	currentViewSetting->UnregisterObserver(this);
 	adjustableThumbnail.UnsetThumbnail();
 	DestroyMenu(menu);
-
-	// Quit
 	PostQuitMessage(0);
 }
 
 void AppWindow::UpdateWindow()
 {
 	long width, height;
-	currentViewSetting.GetScaledDimensions(width, height);
+	currentViewSetting->GetScaledDimensions(width, height);
 
 	// Calc window dimensions
 	RECT windowRect{ 0, 0, width, height };
@@ -97,15 +100,15 @@ void AppWindow::UpdateWindow()
 	SetWindowPos(windowHandle, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
 
 	// Get size of window chrome
-	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(currentViewSetting.GetWidth());
-	chromeHeight = (windowRect.bottom - windowRect.top) - static_cast<long>(currentViewSetting.GetHeight());
+	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(currentViewSetting->GetWidth());
+	chromeHeight = (windowRect.bottom - windowRect.top) - static_cast<long>(currentViewSetting->GetHeight());
 }
 
 void AppWindow::UpdateThumbnail()
 {
 	RECT sourceRect;
 	GetClientRect(sourceWindow, &sourceRect);
-	currentViewSetting.GetScaledRect(static_cast<double>(sourceRect.right), static_cast<double>(sourceRect.bottom), sourceRect);
+	currentViewSetting->GetScaledRect(static_cast<double>(sourceRect.right), static_cast<double>(sourceRect.bottom), sourceRect);
 	adjustableThumbnail.SetSize(sourceRect);
 }
 
@@ -154,12 +157,12 @@ void AppWindow::CycleBack()
 void AppWindow::Reset()
 {
 	// Set selection
-	currentViewSetting.SetFromClientRect(sourceWindow);
+	currentViewSetting->SetFromClientRect(sourceWindow);
 
 	// Set scale
 	RECT monitorRect;
 	GetMonitorRect(monitorRect);
-	currentViewSetting.SetScaleToMonitorSize(monitorRect);
+	currentViewSetting->SetScaleToMonitorSize(monitorRect);
 
 	// Update window
 	UpdateWindow();
@@ -266,4 +269,13 @@ void AppWindow::GetMonitorRect(RECT & rect)
 	rect.left = monitorInfo.rcMonitor.left;
 	rect.right = monitorInfo.rcMonitor.right;
 	rect.top = monitorInfo.rcMonitor.top;
+}
+
+void AppWindow::ViewSettingUpdated(ViewSettingObserverState const & state)
+{
+	if (state == ViewSettingObserverState::CopyFrom)
+	{
+		UpdateWindow();
+		UpdateThumbnail();
+	}
 }

@@ -1,16 +1,19 @@
 #pragma once
 #include "CWindow.h"
 #include "AdjustableThumbnail.h"
-#include "ViewSetting.h"
+#include "ViewSettingObserver.h"
+#include "PresetWindow.h"
 
 class WindowFilter;
 class PresetManager;
+class ViewSetting;
 
-class AppWindow : public CWindow
+class AppWindow : public CWindow, public ViewSettingObserver
 {
 public:
-	AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager);
+	AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting);
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	void ViewSettingUpdated(ViewSettingObserverState const & state);
 
 protected:
 	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
@@ -46,11 +49,11 @@ private:
 	void GetMonitorRect(RECT & rect);
 
 	// Vars
+	PresetWindow presetWindow;
 	AdjustableThumbnail adjustableThumbnail;
 	HWND sourceWindow;
 	std::size_t sourceIndex;
 
-	ViewSetting currentViewSetting;
 	int chromeWidth, chromeHeight;
 
 	HMENU menu, contextMenu, zoomMenu;
@@ -62,6 +65,7 @@ private:
 
 	WindowFilter * windowFilter;
 	PresetManager * presetManager;
+	ViewSetting * currentViewSetting;
 
 	// Constants
 	static const int MaxMenuTextLength;

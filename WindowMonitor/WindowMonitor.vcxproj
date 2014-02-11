@@ -89,7 +89,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib;Shlwapi.lib</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -107,7 +107,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib;Shlwapi.lib</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -128,7 +128,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib;Shlwapi.lib</AdditionalDependencies>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
@@ -155,7 +155,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib;Shlwapi.lib</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -164,12 +164,16 @@
   <ItemGroup>
     <ClInclude Include="AppWindow.h" />
     <ClInclude Include="CWindow.h" />
+    <ClInclude Include="DoubleRect.h" />
+    <ClInclude Include="PresetManager.h" />
+    <ClInclude Include="PresetWindow.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="DwmThumbnail.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="AdjustableThumbnail.h" />
     <ClInclude Include="ViewSetting.h" />
+    <ClInclude Include="ViewSettingObserver.h" />
     <ClInclude Include="WindowFilter.h" />
     <ClInclude Include="WindowFilterItem.h" />
     <ClInclude Include="WindowHelper.h" />
@@ -178,6 +182,8 @@
     <ClCompile Include="AppWindow.cpp" />
     <ClCompile Include="AppWindow.WndProc.cpp" />
     <ClCompile Include="CWindow.cpp" />
+    <ClCompile Include="PresetManager.cpp" />
+    <ClCompile Include="PresetWindow.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="DwmThumbnail.cpp" />
     <ClCompile Include="stdafx.cpp">

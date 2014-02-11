@@ -97,6 +97,7 @@ bool WindowFilter::IsFilteredByClassName(std::wstring const & className)
 	if (className.compare(L"Shell_TrayWnd") == 0) return true;
 	if (className.compare(L"Button") == 0) return true;
 	if (className.compare(L"DwmWindowMonitorApp") == 0) return true;
+	if (className.compare(L"DwmWindowMonitorPresets") == 0) return true;
 	return false;
 }
 

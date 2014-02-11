@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "AppWindow.h"
 #include "Resource.h"
+#include "PresetManager.h"
+#include "ViewSetting.h"
 #include "WindowHelper.h"
 
 LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -131,13 +133,13 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 		// Shift view
 		if (shiftLmb)
 		{
-			currentViewSetting.Shift(x, y);
+			currentViewSetting->Shift(x, y);
 			UpdateThumbnail();
 		}
 		// Crop view
 		else if (ctrlLmb)
 		{
-			currentViewSetting.Crop(x, y);
+			currentViewSetting->Crop(x, y);
 			UpdateWindow();
 		}
 	}
@@ -161,7 +163,7 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 	LPRECT newRect = (LPRECT)lParam;
 	double width = static_cast<double>(newRect->right - newRect->left - chromeWidth);
 	double height = static_cast<double>(newRect->bottom - newRect->top - chromeHeight);
-	double aspect = currentViewSetting.GetAspect();
+	double aspect = currentViewSetting->GetAspect();
 	long newWidth = static_cast<long>(height * aspect);
 	long newHeight = static_cast<long>(width * (1.0 / aspect));
 	long newValue;
@@ -206,7 +208,7 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 	// Calculate scale
 	RECT clientRect;
 	GetClientRect(windowHandle, &clientRect);
-	currentViewSetting.SetScaleToWindow(clientRect);
+	currentViewSetting->SetScaleToWindow(clientRect);
 
 	return true;
 }
@@ -289,6 +291,9 @@ void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 		case ID_MENU_TOGGLEBORDER:
 			ToggleBorder();
 			break;
+		case ID_MENU_MANAGEPRESETS:
+			presetWindow.Create();
+			break;
 		default:
 			if (static_cast<int>(wParam) >= baseMenuItemCount)
 				SelectSource(static_cast<int>(wParam) - baseMenuItemCount);
@@ -301,14 +306,14 @@ void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 
 		switch (mii.wID)
 		{
-		case ID_ZOOM_25: currentViewSetting.SetScale(0.25); break;
-		case ID_ZOOM_50: currentViewSetting.SetScale(0.5); break;
-		case ID_ZOOM_75: currentViewSetting.SetScale(0.75); break;
-		case ID_ZOOM_100: currentViewSetting.SetScale(1.0); break;
-		case ID_ZOOM_125: currentViewSetting.SetScale(1.25); break;
-		case ID_ZOOM_150: currentViewSetting.SetScale(1.5); break;
-		case ID_ZOOM_175: currentViewSetting.SetScale(1.75); break;
-		case ID_ZOOM_200: currentViewSetting.SetScale(2.0); break;
+		case ID_ZOOM_25: currentViewSetting->SetScale(0.25); break;
+		case ID_ZOOM_50: currentViewSetting->SetScale(0.5); break;
+		case ID_ZOOM_75: currentViewSetting->SetScale(0.75); break;
+		case ID_ZOOM_100: currentViewSetting->SetScale(1.0); break;
+		case ID_ZOOM_125: currentViewSetting->SetScale(1.25); break;
+		case ID_ZOOM_150: currentViewSetting->SetScale(1.5); break;
+		case ID_ZOOM_175: currentViewSetting->SetScale(1.75); break;
+		case ID_ZOOM_200: currentViewSetting->SetScale(2.0); break;
 		default: return;
 		}
 

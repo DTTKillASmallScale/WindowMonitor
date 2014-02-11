@@ -1,13 +1,10 @@
 #include "stdafx.h"
 #include "ViewSetting.h"
+#include "ViewSettingObserver.h"
 
 const double ViewSetting::MaxResetRatio = 0.9;
 
-ViewSetting::ViewSetting():
-	bottom(0.0),
-	left(0.0),
-	right(0.0),
-	top(0.0),
+ViewSetting::ViewSetting() :
 	scale(1.0)
 {
 }
@@ -25,6 +22,7 @@ void ViewSetting::SetFromClientRect(HWND const & hWnd)
 		left = static_cast<double>(tmp.left);
 		right = static_cast<double>(tmp.right);
 		top = static_cast<double>(tmp.top);
+		NotifyObservers(ViewSettingObserverState::SetFromClientRect);
 	}
 }
 
@@ -34,12 +32,20 @@ void ViewSetting::Shift(long x, long y)
 	top -= y / scale;
 	right -= x / scale;
 	bottom -= y / scale;
+	NotifyObservers(ViewSettingObserverState::Shift);
 }
 
 void ViewSetting::Crop(long x, long y)
 {
 	right += x / scale;
 	bottom += y / scale;
+	NotifyObservers(ViewSettingObserverState::Crop);
+}
+
+void ViewSetting::CopyFrom(DoubleRect const & other)
+{
+	DoubleRect::CopyFrom(other);
+	NotifyObservers(ViewSettingObserverState::CopyFrom);
 }
 
 double ViewSetting::GetAspect()
@@ -87,4 +93,22 @@ void ViewSetting::SetScaleToMonitorSize(RECT const & monitorRect)
 	sourceMonitorRatio = max(sourceMonitorRatio, (bottom - top) / static_cast<double>(monitorRect.bottom - monitorRect.top));
 	if (sourceMonitorRatio > MaxResetRatio) scale = MaxResetRatio / sourceMonitorRatio;
 	else scale = 1.0;
+}
+
+void ViewSetting::RegisterObserver(ViewSettingObserver * obs)
+{
+	observers.push_back(obs);
+}
+
+void ViewSetting::UnregisterObserver(ViewSettingObserver * obs)
+{
+	observers.erase(std::remove(observers.begin(), observers.end(), obs), observers.end());
+}
+
+void ViewSetting::NotifyObservers(ViewSettingObserverState const & state)
+{
+	for (auto it = observers.begin(); it != observers.end(); ++it)
+	{
+		(*it)->ViewSettingUpdated(state);
+	}
 }
