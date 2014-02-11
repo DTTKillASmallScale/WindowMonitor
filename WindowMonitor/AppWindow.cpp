@@ -97,7 +97,7 @@ void AppWindow::UpdateWindow()
 	AdjustWindowRect(&windowRect, dwStyle, FALSE);
 
 	// Set window size
-	SetWindowPos(windowHandle, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+	SetWindowPos(windowHandle, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE | SWP_NOACTIVATE);
 
 	// Get size of window chrome
 	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(currentViewSetting->GetWidth());
@@ -172,7 +172,7 @@ void AppWindow::Reset()
 	GetWindowRect(windowHandle, &windowRect);
 	int x = (monitorRect.right + monitorRect.left - windowRect.right + windowRect.left) / 2;
 	int y = (monitorRect.bottom + monitorRect.top - windowRect.bottom + windowRect.top) / 2;
-	SetWindowPos(windowHandle, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+	SetWindowPos(windowHandle, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE);
 
 	// Update thumbnail
 	UpdateThumbnail();
