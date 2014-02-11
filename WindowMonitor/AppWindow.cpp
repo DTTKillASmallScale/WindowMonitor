@@ -24,6 +24,7 @@ AppWindow::AppWindow(WindowFilter * const windowFilter, PresetManager * const pr
 	currentViewSetting(),
 	chromeWidth(0),
 	chromeHeight(0),
+	menu(NULL),
 	contextMenu(NULL),
 	zoomMenu(NULL),
 	baseMenuItemCount(0),
@@ -54,7 +55,7 @@ void AppWindow::OnCreate()
 	SetLayeredWindowAttributes(windowHandle, RGB(255, 255, 255), 0, LWA_COLORKEY);
 
 	// Create menu
-	HMENU menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));
+	menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));
 	contextMenu = GetSubMenu(menu, 0);
 	zoomMenu = GetSubMenu(contextMenu, 0);
 	baseMenuItemCount = GetMenuItemCount(contextMenu);
@@ -76,6 +77,7 @@ void AppWindow::OnCreate()
 void AppWindow::OnDestroy()
 {
 	adjustableThumbnail.UnsetThumbnail();
+	DestroyMenu(menu);
 
 	// Quit
 	PostQuitMessage(0);

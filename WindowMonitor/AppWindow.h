@@ -53,8 +53,7 @@ private:
 	ViewSetting currentViewSetting;
 	int chromeWidth, chromeHeight;
 
-	HMENU contextMenu;
-	HMENU zoomMenu;
+	HMENU menu, contextMenu, zoomMenu;
 	int baseMenuItemCount;
 	bool suppressContextMenu;
 	int currentCursor;
