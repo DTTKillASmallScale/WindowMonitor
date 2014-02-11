@@ -99,4 +99,16 @@ namespace WindowHelper
 		// Set output string
 		text.assign(&buffer[0]);
 	}
+
+	inline void GetMonitorRect(HWND const & hWnd, RECT & rect)
+	{
+		HMONITOR monitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+		MONITORINFO monitorInfo;
+		monitorInfo.cbSize = sizeof(MONITORINFO);
+		GetMonitorInfo(monitor, &monitorInfo);
+		rect.bottom = monitorInfo.rcMonitor.bottom;
+		rect.left = monitorInfo.rcMonitor.left;
+		rect.right = monitorInfo.rcMonitor.right;
+		rect.top = monitorInfo.rcMonitor.top;
+	}
 }

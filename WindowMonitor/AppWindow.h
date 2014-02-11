@@ -46,7 +46,6 @@ private:
 	void ToggleClickThrough();
 	void SetContextualCursor();
 	void UpdateMenu();
-	void GetMonitorRect(RECT & rect);
 
 	// Vars
 	PresetWindow presetWindow;

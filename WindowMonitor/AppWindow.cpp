@@ -161,7 +161,7 @@ void AppWindow::Reset()
 
 	// Set scale
 	RECT monitorRect;
-	GetMonitorRect(monitorRect);
+	WindowHelper::GetMonitorRect(windowHandle, monitorRect);
 	currentViewSetting->SetScaleToMonitorSize(monitorRect);
 
 	// Update window
@@ -257,18 +257,6 @@ void AppWindow::UpdateMenu()
 	// Add blank item if no windows were added
 	if (identifier == baseMenuItemCount) AppendMenu(contextMenu, MF_STRING | MF_GRAYED, 0,
 		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
-}
-
-void AppWindow::GetMonitorRect(RECT & rect)
-{
-	HMONITOR monitor = MonitorFromWindow(windowHandle, MONITOR_DEFAULTTONEAREST);
-	MONITORINFO monitorInfo;
-	monitorInfo.cbSize = sizeof(MONITORINFO);
-	GetMonitorInfo(monitor, &monitorInfo);
-	rect.bottom = monitorInfo.rcMonitor.bottom;
-	rect.left = monitorInfo.rcMonitor.left;
-	rect.right = monitorInfo.rcMonitor.right;
-	rect.top = monitorInfo.rcMonitor.top;
 }
 
 void AppWindow::ViewSettingUpdated(ViewSettingObserverState const & state)
