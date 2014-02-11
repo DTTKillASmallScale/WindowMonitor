@@ -45,4 +45,58 @@ namespace WindowHelper
 	{
 		SetWindowText(hWnd, WindowHelper::LoadString(hInstance, nID).c_str());
 	}
+
+	inline HFONT CreateFont(HWND hWnd, LPCWSTR const & faceName, double const & points, int const & weight,
+		bool const & italic, bool const & underline, bool const & strikeout)
+	{
+		HDC hdc = GetDC(hWnd);
+
+		int fontHeight = -static_cast<int>((points * static_cast<double>(GetDeviceCaps(hdc, LOGPIXELSY))) / 72.0);
+
+		return ::CreateFont(
+			fontHeight,
+			0, 0, 0,
+			weight,
+			italic ? TRUE : FALSE,
+			underline ? TRUE : FALSE,
+			strikeout ? TRUE : FALSE,
+			ANSI_CHARSET, OUT_DEVICE_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE,
+			faceName);
+	}
+
+	inline void GetEditText(HWND const & hWnd, std::wstring & text)
+	{
+		// Get number of characters + null terminator
+		int textLength = static_cast<int>(SendMessage(hWnd, WM_GETTEXTLENGTH, 0, 0)) + 1;
+
+		// Create buffer
+		std::vector<wchar_t> buffer(textLength, '\0');
+
+		// Get winapi-friendly pointer to buffer
+		wchar_t* bufferPointer = reinterpret_cast<wchar_t*>(&buffer[0]);
+
+		// Get text from control
+		SendMessage(hWnd, WM_GETTEXT, static_cast<WPARAM>(textLength), reinterpret_cast<LPARAM>(bufferPointer));
+
+		// Set output string
+		text.assign(&buffer[0]);
+	}
+
+	inline void GetListboxItemText(HWND const & hWnd, int const & index, std::wstring & text)
+	{
+		// Get number of characters for selected listbox item
+		int textLength = static_cast<int>(SendMessage(hWnd, LB_GETTEXTLEN, static_cast<WPARAM>(index), 0));
+
+		// Create buffer + null terminator
+		std::vector<wchar_t> buffer(textLength + 1, '\0');
+
+		// Get winapi-friendly pointer to buffer
+		wchar_t* bufferPointer = reinterpret_cast<wchar_t*>(&buffer[0]);
+
+		// Get text from control
+		SendMessage(hWnd, LB_GETTEXT, static_cast<WPARAM>(index), reinterpret_cast<LPARAM>(bufferPointer));
+
+		// Set output string
+		text.assign(&buffer[0]);
+	}
 }
