@@ -200,6 +200,7 @@
     <ClCompile Include="WindowFilter.cpp" />
     <ClCompile Include="WindowFilterBlacklistItem.cpp" />
     <ClCompile Include="WindowFilterItem.cpp" />
+    <ClCompile Include="WindowHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Res\Bevel-And-Emboss-Media-Tv.ico" />
