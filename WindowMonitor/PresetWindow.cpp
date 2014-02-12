@@ -27,12 +27,10 @@ void PresetWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 
 	cs.lpszClass = _T("DwmWindowMonitorPresets");
 	cs.style = WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
-	cs.lpszName = L"Manage Presets";
 	cs.cx = 400;
 	cs.cy = 220;
 	cs.x = (monitorRect.right + monitorRect.left - cs.cx) / 2;
 	cs.y = (monitorRect.bottom + monitorRect.top - cs.cy) / 2;
-	wcex.hIcon = LoadIcon(instance, MAKEINTRESOURCE(IDW_MAIN));
 	wcex.hbrBackground = CreateSolidBrush(RGB(240, 240, 240));
 }
 
@@ -60,7 +58,10 @@ LRESULT PresetWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPa
 
 void PresetWindow::OnCreate()
 {
-	// Set always on top
+	// Set window options
+	WindowHelper::SetTitle(windowHandle, instance, IDS_PRESETS);
+	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN);
+	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN, true);
 	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 	// Create controls

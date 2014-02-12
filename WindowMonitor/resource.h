@@ -10,6 +10,7 @@
 #define IDS_NOWINDOWSFOUND                      40001
 #define ID_ACCEL_SWITCH                         40001
 #define ID_ZOOM_50                              40001
+#define IDS_PRESETS                             40002
 #define ID_ACCEL_RSWITCH                        40002
 #define ID_ZOOM_75                              40002
 #define ID_ACCEL_CLICKTHROUGH                   40003

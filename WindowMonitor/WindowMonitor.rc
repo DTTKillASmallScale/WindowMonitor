@@ -51,6 +51,7 @@ STRINGTABLE
 {
     IDS_TITLE                     "Window Monitor"
     IDS_NOWINDOWSFOUND            "No windows found"
+    IDS_PRESETS                   "Manage Presets"
 }
 
 
