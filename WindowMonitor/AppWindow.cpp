@@ -204,15 +204,13 @@ void AppWindow::ToggleBorder()
 
 void AppWindow::ToggleClickThrough()
 {
-	// Get old style
-	DWORD oldStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_EXSTYLE));
-
-	// Calc new style
-	LONG_PTR newStyle = NULL;
-	if ((oldStyle & WS_EX_TRANSPARENT) == false) newStyle = newStyle | WS_EX_TRANSPARENT | WS_EX_LAYERED;
+	// Toggle window transparency
+	DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_EXSTYLE));
+	style ^= WS_EX_TRANSPARENT;
+	style ^= WS_EX_LAYERED;
 
 	// Set new style
-	SetWindowLongPtr(windowHandle, GWL_EXSTYLE, newStyle);
+	SetWindowLongPtr(windowHandle, GWL_EXSTYLE, style);
 	UpdateWindow();
 }
 
