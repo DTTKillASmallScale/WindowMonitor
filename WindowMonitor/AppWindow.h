@@ -31,7 +31,9 @@ private:
 	bool OnLeftDoubleClick(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam);
 	void OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
-	void OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam);
+	void OnOptionsMenuCmd(WPARAM const & wParam);
+	void OnPresetsMenuCmd(WPARAM const & wParam);
+	void OnZoomMenuCmd(WPARAM const & wParam);
 	void OnCreate();
 	void OnDestroy();
 
@@ -45,7 +47,8 @@ private:
 	void ToggleBorder();
 	void ToggleClickThrough();
 	void SetContextualCursor();
-	void UpdateMenu();
+	void UpdateSourceMenu();
+	void UpdatePresetMenu();
 
 	// Vars
 	AdjustableThumbnail adjustableThumbnail;

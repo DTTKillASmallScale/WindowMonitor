@@ -43,9 +43,13 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	case WM_CONTEXTMENU:
 		OnContextMenu(wParam, lParam);
 		break;
-	case WM_MENUCOMMAND:
-		OnMenuCommand(wParam, lParam);
+	case WM_MENUCOMMAND: {
+		HMENU sourceMenu = reinterpret_cast<HMENU>(lParam);
+		if (sourceMenu == contextMenu) OnOptionsMenuCmd(wParam);
+		else if (sourceMenu == presetsMenu) OnPresetsMenuCmd(wParam);
+		else if (sourceMenu == zoomMenu) OnZoomMenuCmd(wParam);
 		break;
+	}
 	case WM_CREATE:
 		OnCreate();
 		return 0;
@@ -265,66 +269,91 @@ void AppWindow::OnContextMenu(WPARAM const & wParam, LPARAM const & lParam)
 	// TODO Check x and y for -1
 
 	// Show menu
-	UpdateMenu();
+	UpdateSourceMenu();
+	UpdatePresetMenu();
 	TrackPopupMenu(contextMenu, TPM_LEFTALIGN | TPM_TOPALIGN, x, y, 0, windowHandle, NULL);
 }
 
-void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
+void AppWindow::OnOptionsMenuCmd(WPARAM const & wParam)
 {
-	HMENU sourceMenu = reinterpret_cast<HMENU>(lParam);
+	int selection = static_cast<unsigned int>(wParam);
 	MENUITEMINFO mii;
 	mii.cbSize = sizeof(MENUITEMINFO);
 	mii.fMask = MIIM_ID;
+	GetMenuItemInfo(contextMenu, selection, TRUE, &mii);
 
-	if (sourceMenu == contextMenu)
+	switch (mii.wID)
 	{
-		GetMenuItemInfo(contextMenu, static_cast<unsigned int>(wParam), TRUE, &mii);
-
-		switch (mii.wID)
-		{
-		case ID_MENU_TOGGLEBORDER:
-			ToggleBorder();
-			break;
-		case ID_MENU_RESET:
-			Reset();
-			break;
-		case ID_MENU_EXIT:
-			SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
-			break;
-		default:
-			if (static_cast<int>(wParam) >= baseMenuItemCount)
-				SelectSource(static_cast<int>(wParam) - baseMenuItemCount);
-			break;
-		}
+	case ID_MENU_TOGGLEBORDER:
+		ToggleBorder();
+		break;
+	case ID_MENU_RESET:
+		Reset();
+		break;
+	case ID_MENU_EXIT:
+		SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
+		break;
+	default:
+		if (selection >= baseMenuItemCount)
+			SelectSource(selection - baseMenuItemCount);
+		break;
 	}
-	else if (sourceMenu == presetsMenu)
+}
+
+void AppWindow::OnPresetsMenuCmd(WPARAM const & wParam)
+{
+	int selection = static_cast<unsigned int>(wParam);
+	MENUITEMINFO mii;
+	mii.cbSize = sizeof(MENUITEMINFO);
+	mii.fMask = MIIM_ID;
+	GetMenuItemInfo(presetsMenu, selection, TRUE, &mii);
+
+	switch (mii.wID)
 	{
-		GetMenuItemInfo(presetsMenu, static_cast<unsigned int>(wParam), TRUE, &mii);
-		switch (mii.wID)
+	case ID_MENU_MANAGEPRESETS:
+		presetWindow->Create();
+		break;
+	default: {
+		if (selection >= 2)
 		{
-		case ID_MENU_MANAGEPRESETS:
-			presetWindow->Create();
-			break;
-		default: return;
+			// Get string size
+			mii.fMask = MIIM_STRING;
+			mii.dwTypeData = NULL;
+			GetMenuItemInfo(presetsMenu, selection, TRUE, &mii);
+
+			// Get string
+			std::wstring buffer(mii.cch, '\0');
+			mii.dwTypeData = &buffer[0];
+			mii.cch++;
+			GetMenuItemInfo(presetsMenu, selection, TRUE, &mii);
+
+			// Select preset
+			presetManager->GetPreset(buffer, *currentViewSetting);
 		}
+		break;
 	}
-	else if (sourceMenu == zoomMenu)
+	}
+}
+
+void AppWindow::OnZoomMenuCmd(WPARAM const & wParam)
+{
+	MENUITEMINFO mii;
+	mii.cbSize = sizeof(MENUITEMINFO);
+	mii.fMask = MIIM_ID;
+	GetMenuItemInfo(zoomMenu, static_cast<unsigned int>(wParam), TRUE, &mii);
+
+	switch (mii.wID)
 	{
-		GetMenuItemInfo(zoomMenu, static_cast<unsigned int>(wParam), TRUE, &mii);
-
-		switch (mii.wID)
-		{
-		case ID_ZOOM_25: currentViewSetting->SetScale(0.25); break;
-		case ID_ZOOM_50: currentViewSetting->SetScale(0.5); break;
-		case ID_ZOOM_75: currentViewSetting->SetScale(0.75); break;
-		case ID_ZOOM_100: currentViewSetting->SetScale(1.0); break;
-		case ID_ZOOM_125: currentViewSetting->SetScale(1.25); break;
-		case ID_ZOOM_150: currentViewSetting->SetScale(1.5); break;
-		case ID_ZOOM_175: currentViewSetting->SetScale(1.75); break;
-		case ID_ZOOM_200: currentViewSetting->SetScale(2.0); break;
-		default: return;
-		}
-
-		UpdateWindow();
+	case ID_ZOOM_25: currentViewSetting->SetScale(0.25); break;
+	case ID_ZOOM_50: currentViewSetting->SetScale(0.5); break;
+	case ID_ZOOM_75: currentViewSetting->SetScale(0.75); break;
+	case ID_ZOOM_100: currentViewSetting->SetScale(1.0); break;
+	case ID_ZOOM_125: currentViewSetting->SetScale(1.25); break;
+	case ID_ZOOM_150: currentViewSetting->SetScale(1.5); break;
+	case ID_ZOOM_175: currentViewSetting->SetScale(1.75); break;
+	case ID_ZOOM_200: currentViewSetting->SetScale(2.0); break;
+	default: return;
 	}
+
+	UpdateWindow();
 }

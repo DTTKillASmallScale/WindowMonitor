@@ -68,9 +68,6 @@ void AppWindow::OnCreate()
 	menuInfo.dwStyle = MNS_NOTIFYBYPOS;
 	SetMenuInfo(contextMenu, &menuInfo);
 
-	// Update menu, filtered windows
-	UpdateMenu();
-
 	// Select source window
 	SelectSource(0);
 
@@ -235,7 +232,7 @@ void AppWindow::SetContextualCursor()
 	}
 }
 
-void AppWindow::UpdateMenu()
+void AppWindow::UpdateSourceMenu()
 {
 	// Clear
 	while (GetMenuItemCount(contextMenu) > baseMenuItemCount)
@@ -257,7 +254,8 @@ void AppWindow::UpdateMenu()
 
 		// Create menu item
 		bool breakMenu = identifier % AppWindow::MenuItemBreakPoint == 0;
-		AppendMenu(contextMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0), identifier, text.c_str());
+		bool checked = (item.hwnd == sourceWindow);
+		AppendMenu(contextMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0) | (checked ? MF_CHECKED : 0), identifier, text.c_str());
 
 		// Next item
 		++identifier;
@@ -265,6 +263,44 @@ void AppWindow::UpdateMenu()
 
 	// Add blank item if no windows were added
 	if (identifier == baseMenuItemCount) AppendMenu(contextMenu, MF_STRING | MF_GRAYED, 0,
+		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
+}
+
+void AppWindow::UpdatePresetMenu()
+{
+	// Clear
+	while (GetMenuItemCount(presetsMenu) > 2)
+		DeleteMenu(presetsMenu, 2, MF_BYPOSITION);
+
+	// Load data
+	try
+	{
+		presetManager->LoadFromBinaryFile();
+	}
+	catch (std::runtime_error e)
+	{
+		std::stringstream ss;
+		ss << "There was a problem reading the preset file.\n\n'";
+		ss << e.what();
+		ss << "'\n\nYou should probably close the program before something terrible happens.";
+		MessageBoxA(windowHandle, ss.str().c_str(), "Window Monitor Error", MB_OK);
+	}
+
+	// Add items
+	std::wstring text;
+	int identifier = 2;
+	presetManager->IterateNames([&](std::wstring const & name)
+	{
+		// Create menu item
+		bool breakMenu = identifier % AppWindow::MenuItemBreakPoint == 0;
+		AppendMenu(presetsMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0), identifier, name.c_str());
+
+		// Next item
+		++identifier;
+	});
+
+	// Add blank item if no windows were added
+	if (identifier == 2) AppendMenu(presetsMenu, MF_STRING | MF_GRAYED, 0,
 		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
 }
 
