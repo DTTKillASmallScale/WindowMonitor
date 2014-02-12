@@ -13,8 +13,7 @@ PresetManager::PresetManager() :
 	GetModuleFileNameW(hModule, path, MAX_PATH);
 	PathRemoveFileSpecW(path);
 	filename.assign(path);
-	filename.append(L"\\");
-	filename.append(L"config.dat");
+	filename.append(L"\\config.dat");
 }
 
 void PresetManager::SavePreset(std::wstring const & name, DoubleRect const & dimensions)
