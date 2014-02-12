@@ -13,7 +13,7 @@ public:
 	void SetFromClientRect(HWND const & hWnd);
 	void Shift(long x, long y);
 	void Crop(long x, long y);
-	void CopyFrom(DoubleRect const & other);
+	virtual void CopyFrom(DoubleRect const & other);
 
 	void SetScale(double const & newScale);
 	void SetScaleToWindow(RECT const & clientRect);

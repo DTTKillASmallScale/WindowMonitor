@@ -13,7 +13,7 @@ public:
 	{
 	}
 
-	void CopyFrom(DoubleRect const & other)
+	virtual void CopyFrom(DoubleRect const & other)
 	{
 		bottom = other.bottom;
 		left = other.left;
