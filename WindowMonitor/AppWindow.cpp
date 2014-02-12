@@ -289,7 +289,7 @@ void AppWindow::UpdatePresetMenu()
 	}
 	catch (std::runtime_error e)
 	{
-		WindowHelper::DisplayExceptionMessage("Window Monitor Error", IDS_PRESETFILEERR, e);
+		WindowHelper::DisplayExceptionMessage(L"Window Monitor Error", IDS_PRESETFILEERR, e);
 	}
 
 	// Add items
