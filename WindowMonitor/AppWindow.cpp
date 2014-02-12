@@ -319,4 +319,12 @@ void AppWindow::ViewSettingUpdated(ViewSettingObserverState const & state)
 		UpdateWindow();
 		UpdateThumbnail();
 	}
+	else if (state == ViewSettingObserverState::Shift)
+	{
+		UpdateThumbnail();
+	}
+	else if (state == ViewSettingObserverState::Crop)
+	{
+		UpdateWindow();
+	}
 }

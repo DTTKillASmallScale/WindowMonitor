@@ -138,13 +138,11 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 		if (shiftLmb)
 		{
 			currentViewSetting->Shift(x, y);
-			UpdateThumbnail();
 		}
 		// Crop view
 		else if (ctrlLmb)
 		{
 			currentViewSetting->Crop(x, y);
-			UpdateWindow();
 		}
 	}
 
