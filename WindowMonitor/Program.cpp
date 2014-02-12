@@ -14,8 +14,11 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 	PresetManager presetManager;
 	ViewSetting currentViewSetting;
 
+	// Create preset window
+	PresetWindow presetWindow(&presetManager, &currentViewSetting);
+
 	// Create main window
-	AppWindow appWindow(&windowFilter, &presetManager, &currentViewSetting);
+	AppWindow appWindow(&windowFilter, &presetManager, &currentViewSetting, &presetWindow);
 	appWindow.Create();
 
 	// Run loop

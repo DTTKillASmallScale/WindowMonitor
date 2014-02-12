@@ -14,12 +14,12 @@ const int AppWindow::CursorPan = 32649;
 const int AppWindow::CursorScale = 32642;
 const int AppWindow::CursorNoFunction = 32648;
 
-AppWindow::AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting) :
+AppWindow::AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting, PresetWindow * const presetWindow) :
 	CWindow(),
 	windowFilter(windowFilter),
 	presetManager(presetManager),
 	currentViewSetting(currentViewSetting),
-	presetWindow(presetManager, currentViewSetting),
+	presetWindow(presetWindow),
 	adjustableThumbnail(),
 	sourceWindow(NULL),
 	sourceIndex(0),
@@ -79,7 +79,7 @@ void AppWindow::OnCreate()
 
 void AppWindow::OnDestroy()
 {
-	presetWindow.Destroy();
+	presetWindow->Destroy();
 	currentViewSetting->UnregisterObserver(this);
 	adjustableThumbnail.UnsetThumbnail();
 	DestroyMenu(menu);

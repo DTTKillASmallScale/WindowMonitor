@@ -11,7 +11,7 @@ class ViewSetting;
 class AppWindow : public CWindow, public ViewSettingObserver
 {
 public:
-	AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting);
+	AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting, PresetWindow * const presetWindow);
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void ViewSettingUpdated(ViewSettingObserverState const & state);
 
@@ -48,7 +48,6 @@ private:
 	void UpdateMenu();
 
 	// Vars
-	PresetWindow presetWindow;
 	AdjustableThumbnail adjustableThumbnail;
 	HWND sourceWindow;
 	std::size_t sourceIndex;
@@ -65,6 +64,7 @@ private:
 	WindowFilter * windowFilter;
 	PresetManager * presetManager;
 	ViewSetting * currentViewSetting;
+	PresetWindow * presetWindow;
 
 	// Constants
 	static const int MaxMenuTextLength;

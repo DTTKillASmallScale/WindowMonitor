@@ -292,7 +292,7 @@ void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 			ToggleBorder();
 			break;
 		case ID_MENU_MANAGEPRESETS:
-			presetWindow.Create();
+			presetWindow->Create();
 			break;
 		default:
 			if (static_cast<int>(wParam) >= baseMenuItemCount)
