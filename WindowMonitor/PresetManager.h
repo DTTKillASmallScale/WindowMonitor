@@ -9,10 +9,9 @@ public:
 	bool GetPreset(std::wstring const & name, DoubleRect & dimensions);
 	bool RenamePreset(std::wstring const & currentName, std::wstring const & newName);
 	bool RemovePreset(std::wstring const & name);
-	void SaveToBinaryFile();
-	void LoadFromBinaryFile();
-	char FileUpdatedSinceLastRead();
 	void IterateNames(std::function<void(std::wstring const &)> step);
+	void SaveToBinaryFile();
+	void LoadFromBinaryFile(bool const & skipIfCurrent = true);
 
 private:
 	std::map<std::wstring, DoubleRect> presets;

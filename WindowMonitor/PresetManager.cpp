@@ -63,6 +63,13 @@ bool PresetManager::RemovePreset(std::wstring const & name)
 	return found;
 }
 
+void PresetManager::IterateNames(std::function<void(std::wstring const &)> step)
+{
+	for (auto it = presets.begin(); it != presets.end(); ++it)
+	{
+		step(it->first);
+	}
+}
 void PresetManager::SaveToBinaryFile()
 {
 	// Open file
@@ -102,7 +109,7 @@ void PresetManager::SaveToBinaryFile()
 	out.close();
 }
 
-void PresetManager::LoadFromBinaryFile()
+void PresetManager::LoadFromBinaryFile(bool const & skipIfCurrent)
 {
 	// Open file
 	std::ifstream in(filename, std::ios::binary);
@@ -122,7 +129,12 @@ void PresetManager::LoadFromBinaryFile()
 	}
 
 	// Read save time
-	in.read(reinterpret_cast<char*>(&lastSaveTime), sizeof(lastSaveTime));
+	time_t fileTime;
+	in.read(reinterpret_cast<char*>(&fileTime), sizeof(fileTime));
+
+	// Compare times
+	if (skipIfCurrent == true && fileTime <= lastSaveTime) return;
+	else lastSaveTime = fileTime;
 
 	// Read item count
 	unsigned long long count = 0;
@@ -172,41 +184,5 @@ void PresetManager::LoadFromBinaryFile()
 
 		// Add to map
 		presets.emplace(std::make_pair(name, dimensions));
-	}
-}
-
-char PresetManager::FileUpdatedSinceLastRead()
-{
-	// Open file
-	std::ifstream in(filename, std::ios::binary);
-
-	// Check file is open
-	if (!in) return -1;
-
-	// Read file version
-	unsigned char version = 0;
-	in.read(reinterpret_cast<char*>(&version), sizeof(version));
-
-	// Check version
-	if (version != PresetManager::FileVersion)
-	{
-		throw std::runtime_error("Preset Manager: File version is unsupported");
-		return -1;
-	}
-
-	// Read save time
-	time_t fileTime;
-	in.read(reinterpret_cast<char*>(&fileTime), sizeof(fileTime));
-
-	// Compare times
-	if (fileTime > lastSaveTime) return 1;
-	return 0;
-}
-
-void PresetManager::IterateNames(std::function<void(std::wstring const &)> step)
-{
-	for (auto it = presets.begin(); it != presets.end(); ++it)
-	{
-		step(it->first);
 	}
 }
