@@ -20,7 +20,9 @@
 #define ID_ZOOM_125                             40004
 #define IDS_PRESET_ERROR_TITLE                  40005
 #define ID_ZOOM_150                             40005
+#define IDS_BLACKLIST_ERROR_FILE                40006
 #define ID_ZOOM_175                             40006
+#define IDS_BLACKLIST_ERROR_TITLE               40007
 #define ID_ZOOM_200                             40007
 #define ID_MENU_TOGGLEBORDER                    40008
 #define ID_MENU_MANAGEPRESETS                   40009

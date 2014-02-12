@@ -19,9 +19,11 @@
 #include <map>
 #include <algorithm>
 #include <filesystem>
+#include <iostream>
 #include <sstream>
 #include <iomanip>
 #include <functional>
+#include <regex>
 
 #include <shellapi.h>
 #include <Dwmapi.h>

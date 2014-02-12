@@ -55,6 +55,8 @@ STRINGTABLE
     IDS_NOPRESETSFOUND            "No presets found"
     IDS_PRESET_ERROR_FILE         "Failed to read presets. You should probably close the program before something terrible happens.\n\n(%1)"
     IDS_PRESET_ERROR_TITLE        "Preset File Error"
+    IDS_BLACKLIST_ERROR_FILE      "Failed to read window blacklist. You should probably close the program before something terrible happens.\n\n(%1)"
+    IDS_BLACKLIST_ERROR_TITLE     "Blacklist File Error"
 }
 
 

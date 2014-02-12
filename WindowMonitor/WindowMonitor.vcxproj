@@ -177,6 +177,7 @@
     <ClInclude Include="ViewSetting.h" />
     <ClInclude Include="ViewSettingObserver.h" />
     <ClInclude Include="WindowFilter.h" />
+    <ClInclude Include="WindowFilterBlacklistItem.h" />
     <ClInclude Include="WindowFilterItem.h" />
     <ClInclude Include="WindowHelper.h" />
   </ItemGroup>
@@ -197,6 +198,7 @@
     <ClCompile Include="AdjustableThumbnail.cpp" />
     <ClCompile Include="ViewSetting.cpp" />
     <ClCompile Include="WindowFilter.cpp" />
+    <ClCompile Include="WindowFilterBlacklistItem.cpp" />
     <ClCompile Include="WindowFilterItem.cpp" />
   </ItemGroup>
   <ItemGroup>
