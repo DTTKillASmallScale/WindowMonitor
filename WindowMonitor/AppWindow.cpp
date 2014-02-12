@@ -180,16 +180,24 @@ void AppWindow::Reset()
 
 void AppWindow::ToggleBorder()
 {
-	// Get old style
+	// Get current border status
 	DWORD oldStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+	bool hasBorder = (oldStyle & WS_THICKFRAME) != 0;
 
 	// Calc new style
-	LONG_PTR newStyle = WS_VISIBLE | WS_POPUP | WS_SYSMENU;
-	if ((oldStyle & WS_THICKFRAME) == 0) newStyle = newStyle | WS_THICKFRAME | WS_BORDER;
+	LONG_PTR newStyle = WS_VISIBLE | WS_POPUP | WS_SYSMENU | (hasBorder ? 0 : WS_THICKFRAME | WS_BORDER);
 
 	// Set new style
 	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);
 	UpdateWindow();
+
+	// Update content menu
+	MENUITEMINFO mii;
+	mii.cbSize = sizeof(MENUITEMINFO);
+	mii.fMask = MIIM_STATE;
+	GetMenuItemInfo(contextMenu, ID_MENU_TOGGLEBORDER, FALSE, &mii);
+	mii.fState ^= MFS_CHECKED;
+	SetMenuItemInfo(contextMenu, ID_MENU_TOGGLEBORDER, FALSE, &mii);
 }
 
 void AppWindow::ToggleClickThrough()
