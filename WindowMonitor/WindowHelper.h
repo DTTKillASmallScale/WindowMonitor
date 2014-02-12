@@ -74,6 +74,21 @@ namespace WindowHelper
 		text.assign(&buffer[0]);
 	}
 
+	inline void GetClassNameText(HWND const & hWnd, std::wstring & text)
+	{
+		// Get number of characters + null terminator
+		int textLength = 257;
+
+		// Create buffer
+		std::vector<wchar_t> buffer(textLength, '\0');
+
+		// Get classname
+		GetClassNameW(hWnd, &buffer[0], textLength);
+
+		// Set output string
+		text.assign(&buffer[0]);
+	}
+
 	inline void GetListboxItemText(HWND const & hWnd, int const & index, std::wstring & text)
 	{
 		// Get number of characters for selected listbox item

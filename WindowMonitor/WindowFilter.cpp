@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "WindowFilter.h"
+#include "WindowHelper.h"
 #include "Shlwapi.h"
 
 WindowFilter::WindowFilter() :
@@ -36,8 +37,6 @@ void WindowFilter::Refresh()
 
 	// Filter windows
 	HWND hwnd = NULL;
-	const int bufferSize = 256;
-	TCHAR buffer[bufferSize];
 	std::wstring className;
 	std::wstring title;
 
@@ -63,8 +62,7 @@ void WindowFilter::Refresh()
 			continue;
 
 		// Get class name
-		GetClassName(hwnd, buffer, bufferSize);
-		className.assign(buffer);
+		WindowHelper::GetClassNameText(hwnd, className);
 
 		// Filter by window class
 		if (IsFilteredByClassName(className)) continue;
@@ -74,8 +72,7 @@ void WindowFilter::Refresh()
 			continue;
 
 		// Get title
-		GetWindowText(hwnd, buffer, bufferSize);
-		title.assign(buffer);
+		WindowHelper::GetEditText(hwnd, title);
 
 		// Check blacklist
 		if (IsFilteredByBlacklist(className, title))
@@ -85,11 +82,7 @@ void WindowFilter::Refresh()
 		if (className.compare(L"SideBar_HTMLHostWindow") == 0)
 		{
 			HWND parent = GetParent(hwnd);
-			if (parent != NULL)
-			{
-				GetWindowText(parent, buffer, bufferSize);
-				title.assign(buffer);
-			}
+			if (parent != NULL) WindowHelper::GetEditText(parent, title);
 		}
 
 		// Filter untitled windows
