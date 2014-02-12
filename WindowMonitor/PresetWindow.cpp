@@ -216,13 +216,11 @@ void PresetWindow::UpdateSelectedPreset()
 	std::wstring listText;
 	WindowHelper::GetListboxItemText(presetListbox, index, listText);
 
-	// Find preset
-	DoubleRect dimensions;
-	presetManager->GetPreset(listText, dimensions);
+	// Select preset
+	presetManager->GetPreset(listText, *currentViewSetting);
 
 	// Update app
 	SetWindowText(titleText, listText.c_str());
-	currentViewSetting->CopyFrom(dimensions);
 
 	// Move this window back to top
 	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
