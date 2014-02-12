@@ -282,22 +282,30 @@ void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 
 		switch (mii.wID)
 		{
-		case ID_MENU_EXIT:
-			SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
+		case ID_MENU_TOGGLEBORDER:
+			ToggleBorder();
 			break;
 		case ID_MENU_RESET:
 			Reset();
 			break;
-		case ID_MENU_TOGGLEBORDER:
-			ToggleBorder();
-			break;
-		case ID_MENU_MANAGEPRESETS:
-			presetWindow->Create();
+		case ID_MENU_EXIT:
+			SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
 			break;
 		default:
 			if (static_cast<int>(wParam) >= baseMenuItemCount)
 				SelectSource(static_cast<int>(wParam) - baseMenuItemCount);
 			break;
+		}
+	}
+	else if (sourceMenu == presetsMenu)
+	{
+		GetMenuItemInfo(presetsMenu, static_cast<unsigned int>(wParam), TRUE, &mii);
+		switch (mii.wID)
+		{
+		case ID_MENU_MANAGEPRESETS:
+			presetWindow->Create();
+			break;
+		default: return;
 		}
 	}
 	else if (sourceMenu == zoomMenu)

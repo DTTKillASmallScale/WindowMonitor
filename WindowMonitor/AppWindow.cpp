@@ -57,7 +57,8 @@ void AppWindow::OnCreate()
 	// Create menu
 	menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));
 	contextMenu = GetSubMenu(menu, 0);
-	zoomMenu = GetSubMenu(contextMenu, 0);
+	presetsMenu = GetSubMenu(contextMenu, 0);
+	zoomMenu = GetSubMenu(contextMenu, 1);
 	baseMenuItemCount = GetMenuItemCount(contextMenu);
 
 	// Set menu to send WM_MENUCOMMAND instead of WM_COMMAND

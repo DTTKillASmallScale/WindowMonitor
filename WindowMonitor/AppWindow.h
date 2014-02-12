@@ -54,7 +54,7 @@ private:
 
 	int chromeWidth, chromeHeight;
 
-	HMENU menu, contextMenu, zoomMenu;
+	HMENU menu, contextMenu, presetsMenu, zoomMenu;
 	int baseMenuItemCount;
 	bool suppressContextMenu;
 	int currentCursor;
