@@ -46,7 +46,7 @@ void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 {
 	accelerators = LoadAccelerators(cs.hInstance, MAKEINTRESOURCE(IDW_MAIN));
 	cs.lpszClass = _T("DwmWindowMonitorApp");
-	cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER;
+	cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER | WS_MINIMIZEBOX;
 	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorArrow));
 	wcex.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
 }
@@ -184,15 +184,13 @@ void AppWindow::Reset()
 
 void AppWindow::ToggleBorder()
 {
-	// Get current border status
-	DWORD oldStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
-	bool hasBorder = (oldStyle & WS_THICKFRAME) != 0;
-
-	// Calc new style
-	LONG_PTR newStyle = WS_VISIBLE | WS_POPUP | WS_SYSMENU | (hasBorder ? 0 : WS_THICKFRAME | WS_BORDER);
+	// Toggle window border
+	DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+	style ^= WS_THICKFRAME;
+	style ^= WS_BORDER;
 
 	// Set new style
-	SetWindowLongPtr(windowHandle, GWL_STYLE, newStyle);
+	SetWindowLongPtr(windowHandle, GWL_STYLE, style);
 	UpdateWindow();
 
 	// Update content menu
