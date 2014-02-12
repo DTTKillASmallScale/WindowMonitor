@@ -136,7 +136,7 @@ void PresetWindow::OnSetFocus()
 	}
 	catch (std::runtime_error e)
 	{
-		WindowHelper::DisplayExceptionMessage(L"Window Monitor Error", IDS_PRESETFILEERR, e);
+		WindowHelper::DisplayExceptionMessage(IDS_PRESET_ERROR_TITLE, IDS_PRESET_ERROR_FILE, e);
 		this->Destroy();
 	}
 }
