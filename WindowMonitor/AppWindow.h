@@ -77,4 +77,5 @@ private:
 	static const int CursorPan;
 	static const int CursorScale;
 	static const int CursorNoFunction;
+	static const COLORREF BackgroundColour;
 };

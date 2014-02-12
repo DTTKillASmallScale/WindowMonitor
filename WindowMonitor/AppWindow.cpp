@@ -13,6 +13,7 @@ const int AppWindow::CursorMove = 32646;
 const int AppWindow::CursorPan = 32649;
 const int AppWindow::CursorScale = 32642;
 const int AppWindow::CursorNoFunction = 32648;
+const COLORREF AppWindow::BackgroundColour = RGB(255, 255, 255);
 
 // Prevent window from being on top in debug mode
 #ifdef _DEBUG
@@ -48,7 +49,7 @@ void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 	cs.lpszClass = _T("DwmWindowMonitorApp");
 	cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER | WS_MINIMIZEBOX;
 	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorArrow));
-	wcex.hbrBackground = CreateSolidBrush(RGB(255, 255, 255));
+	wcex.hbrBackground = CreateSolidBrush(AppWindow::BackgroundColour);
 }
 
 void AppWindow::OnCreate()
@@ -57,7 +58,7 @@ void AppWindow::OnCreate()
 	WindowHelper::SetTitle(windowHandle, instance, IDS_TITLE);
 	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN);
 	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN, true);
-	SetLayeredWindowAttributes(windowHandle, RGB(255, 255, 255), 0, LWA_COLORKEY);
+	SetLayeredWindowAttributes(windowHandle, AppWindow::BackgroundColour, 0, LWA_COLORKEY);
 	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 	// Create menu
