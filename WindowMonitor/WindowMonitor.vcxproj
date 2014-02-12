@@ -93,6 +93,8 @@
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Culture>
+      </Culture>
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -198,10 +200,11 @@
     <ClCompile Include="WindowFilterItem.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="WindowMonitor.rc" />
+    <Image Include="Res\Bevel-And-Emboss-Media-Tv.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="Res\Bevel-And-Emboss-Media-Tv.ico" />
+    <ResourceCompile Include="WindowMonitor.rc" />
+    <ResourceCompile Include="WindowMonitorVersion.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

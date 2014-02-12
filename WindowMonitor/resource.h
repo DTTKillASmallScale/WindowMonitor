@@ -1,43 +1,24 @@
-//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by WindowMonitor.rc
-//
-#define APP_PRODUCT_VERSION "1.0.10"
-#define APP_PRODUCT_VERSION_NUM 1,0,10,0
-
-#define IDW_MAIN                        51
-#define ID_ACCEL_SWITCH                 101
-#define ID_ACCEL_RSWITCH                102
-#define ID_ACCEL_RESET                  103
-#define ID_ACCEL_CLICKTHROUGH           104
-
-#define IDS_TITLE                       120
-#define IDS_NOWINDOWSFOUND              123
-#define IDR_CTXMENU                     150
-
-#define IDD_NAMEPRESET 151
-
-#define ID_ZOOM_25                      32773
-#define ID_ZOOM_50                      32774
-#define ID_ZOOM_75                      32775
-#define ID_ZOOM_100                     32776
-#define ID_ZOOM_125                     32777
-#define ID_ZOOM_150                     32778
-#define ID_ZOOM_175                     32779
-#define ID_ZOOM_200                     32780
-#define ID_EXIT                         32781
-#define ID_REFRESH                      32782
-#define ID_MENU_TOGGLEBORDER            32783
-#define ID_MENU_MANAGEPRESETS           32784
-
-// Next default values for new objects
-// 
-#ifdef APSTUDIO_INVOKED
-#ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        151
-#define _APS_NEXT_COMMAND_VALUE         32789
-#define _APS_NEXT_CONTROL_VALUE         1000
-#define _APS_NEXT_SYMED_VALUE           150
+#ifndef IDC_STATIC
+#define IDC_STATIC (-1)
 #endif
-#endif
+
+#define IDW_MAIN                                101
+#define IDR_CTXMENU                             104
+#define IDS_TITLE                               40000
+#define ID_ACCEL_RESET                          40000
+#define ID_ZOOM_25                              40000
+#define IDS_NOWINDOWSFOUND                      40001
+#define ID_ACCEL_SWITCH                         40001
+#define ID_ZOOM_50                              40001
+#define ID_ACCEL_RSWITCH                        40002
+#define ID_ZOOM_75                              40002
+#define ID_ACCEL_CLICKTHROUGH                   40003
+#define ID_ZOOM_100                             40003
+#define ID_ZOOM_125                             40004
+#define ID_ZOOM_150                             40005
+#define ID_ZOOM_175                             40006
+#define ID_ZOOM_200                             40007
+#define ID_MENU_TOGGLEBORDER                    40008
+#define ID_MENU_MANAGEPRESETS                   40009
+#define ID_MENU_RESET                           40010
+#define ID_MENU_EXIT                            40011

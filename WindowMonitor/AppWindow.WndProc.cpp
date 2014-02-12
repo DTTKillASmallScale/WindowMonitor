@@ -282,10 +282,10 @@ void AppWindow::OnMenuCommand(WPARAM const & wParam, LPARAM const & lParam)
 
 		switch (mii.wID)
 		{
-		case ID_EXIT:
+		case ID_MENU_EXIT:
 			SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
 			break;
-		case ID_REFRESH:
+		case ID_MENU_RESET:
 			Reset();
 			break;
 		case ID_MENU_TOGGLEBORDER:
