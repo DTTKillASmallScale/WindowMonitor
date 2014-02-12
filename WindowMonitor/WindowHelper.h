@@ -3,30 +3,20 @@
 #include <string>
 #include <vector>
 
-// Acknowledgements:
-// This code adapted from Win32++ cstring.h
-// Adam Szulc for initial CString code
-
 namespace WindowHelper
 {
-	inline std::basic_string<TCHAR> LoadString(HINSTANCE hInstance, UINT nID)
+	inline void GetResourceString(HINSTANCE const & hInstance, UINT const & nID, std::wstring & str)
 	{
-		int nSize = 64;
-		int nTChars = nSize;
-		std::vector<TCHAR> vString;
-		TCHAR* pTCharArray = 0;
-
-		while (nSize - 1 <= nTChars)
-		{
-			nSize = nSize * 4;
-			vString.assign(nSize+1, _T('\0'));
-			pTCharArray = &vString[0];
-			nTChars = ::LoadString(hInstance, nID, pTCharArray, nSize);
-		}
-
-		std::basic_string<TCHAR> result;
-		if (nTChars > 0) result.assign(pTCharArray);
-		return result;
+		std::vector<wchar_t> buffer(256, '\0');
+		LoadStringW(hInstance, nID, &buffer[0], 256);
+		str.assign(&buffer[0]);
+	}
+	
+	inline void GetResourceString(HINSTANCE const & hInstance, UINT const & nID, std::string & str)
+	{
+		std::vector<char> buffer(256, '\0');
+		LoadStringA(hInstance, nID, &buffer[0], 256);
+		str.assign(&buffer[0]);
 	}
 
 	inline void SetIcon(HWND hWnd, HINSTANCE hInstance, int nIcon, bool big = false)
@@ -43,7 +33,9 @@ namespace WindowHelper
 
 	inline void SetTitle(HWND hWnd, HINSTANCE hInstance, UINT nID)
 	{
-		SetWindowText(hWnd, WindowHelper::LoadString(hInstance, nID).c_str());
+		std::wstring text;
+		WindowHelper::GetResourceString(hInstance, nID, text);
+		SetWindowTextW(hWnd, &text[0]);
 	}
 
 	inline HFONT CreateFont(HWND hWnd, LPCWSTR const & faceName, double const & points, int const & weight,

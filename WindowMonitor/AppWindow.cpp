@@ -262,8 +262,12 @@ void AppWindow::UpdateSourceMenu()
 	});
 
 	// Add blank item if no windows were added
-	if (identifier == baseMenuItemCount) AppendMenu(contextMenu, MF_STRING | MF_GRAYED, 0,
-		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
+	if (identifier == baseMenuItemCount) 
+	{
+		std::wstring text;
+		WindowHelper::GetResourceString(instance, IDS_NOWINDOWSFOUND, text);
+		AppendMenuW(contextMenu, MF_STRING | MF_GRAYED, 0, &text[0]);
+	}
 }
 
 void AppWindow::UpdatePresetMenu()
@@ -300,8 +304,12 @@ void AppWindow::UpdatePresetMenu()
 	});
 
 	// Add blank item if no windows were added
-	if (identifier == 2) AppendMenu(presetsMenu, MF_STRING | MF_GRAYED, 0,
-		WindowHelper::LoadString(instance, IDS_NOWINDOWSFOUND).c_str());
+	if (identifier == 2) 
+	{
+		std::wstring text;
+		WindowHelper::GetResourceString(instance, IDS_NOPRESETSFOUND, text);
+		AppendMenuW(presetsMenu, MF_STRING | MF_GRAYED, 0, &text[0]);
+	}
 }
 
 void AppWindow::ViewSettingUpdated(ViewSettingObserverState const & state)
