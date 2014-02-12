@@ -11,7 +11,9 @@ public:
 	bool RemovePreset(std::wstring const & name);
 	void IterateNames(std::function<void(std::wstring const &)> step);
 	void SaveToBinaryFile();
-	void LoadFromBinaryFile(bool const & skipIfCurrent = true);
+
+	// Returns true if items are loaded
+	bool LoadFromBinaryFile(bool const & skipIfCurrent = true);
 
 private:
 	std::map<std::wstring, DoubleRect> presets;

@@ -131,8 +131,8 @@ void PresetWindow::OnSetFocus()
 {
 	try
 	{
-		presetManager->LoadFromBinaryFile();
-		UpdatePresetList();
+		if (presetManager->LoadFromBinaryFile())
+			UpdatePresetList();
 	}
 	catch (std::runtime_error e)
 	{
