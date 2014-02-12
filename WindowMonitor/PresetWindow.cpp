@@ -136,11 +136,7 @@ void PresetWindow::OnSetFocus()
 	}
 	catch (std::runtime_error e)
 	{
-		std::stringstream ss;
-		ss << "There was a problem reading the preset file.\n\n'";
-		ss << e.what();
-		ss << "'\n\nYou should probably close the program before something terrible happens.";
-		MessageBoxA(windowHandle, ss.str().c_str(), "Window Monitor Error", MB_OK);
+		WindowHelper::DisplayExceptionMessage("Window Monitor Error", IDS_PRESETFILEERR, e);
 		this->Destroy();
 	}
 }

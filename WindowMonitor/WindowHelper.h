@@ -103,4 +103,18 @@ namespace WindowHelper
 		rect.right = monitorInfo.rcMonitor.right;
 		rect.top = monitorInfo.rcMonitor.top;
 	}
+
+	inline void DisplayExceptionMessage(std::string const & title, unsigned int const & nID, std::exception const & e)
+	{
+		// Get message template
+		std::string messageTemplate;
+		WindowHelper::GetResourceString(NULL, nID, messageTemplate);
+
+		// Fill placeholder with exception text
+		auto pos = messageTemplate.find("%1");
+		if (pos != std::string::npos) messageTemplate.replace(pos, 2, e.what());
+
+		// Display message box
+		MessageBoxA(NULL, &messageTemplate[0], &title[0], MB_OK | MB_ICONERROR);
+	}
 }
