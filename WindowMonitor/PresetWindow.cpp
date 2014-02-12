@@ -227,6 +227,9 @@ void PresetWindow::UpdateSelectedPreset()
 	// Update app
 	SetWindowText(titleText, listText.c_str());
 	currentViewSetting->CopyFrom(dimensions);
+
+	// Move this window back to top
+	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 }
 
 void PresetWindow::UpdateDimensions()
