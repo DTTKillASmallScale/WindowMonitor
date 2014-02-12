@@ -163,10 +163,10 @@ void WindowFilter::LoadBlacklist()
 	// Get last write time
 	WIN32_FIND_DATA fileData;
 	HANDLE fileHandle = FindFirstFile(&filename[0], &fileData);
+	if (fileHandle == INVALID_HANDLE_VALUE) return;
 	ULARGE_INTEGER currentTime;
 	currentTime.LowPart = fileData.ftLastWriteTime.dwLowDateTime;
 	currentTime.HighPart = fileData.ftLastWriteTime.dwHighDateTime;
-	if (fileHandle == INVALID_HANDLE_VALUE) return;
 
 	// If last recorded write time is less, read file
 	if (blacklistLastWrite < currentTime.QuadPart)
