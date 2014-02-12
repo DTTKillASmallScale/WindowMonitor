@@ -7,15 +7,15 @@ namespace WindowHelper
 {
 	inline void GetResourceString(HINSTANCE const & hInstance, UINT const & nID, std::wstring & str)
 	{
-		std::vector<wchar_t> buffer(256, '\0');
-		LoadStringW(hInstance, nID, &buffer[0], 256);
-		str.assign(&buffer[0]);
+		const wchar_t * buffer;
+		int len = LoadStringW(hInstance, nID, reinterpret_cast<LPWSTR>(&buffer), 0);
+		str.assign(&buffer[0], len);
 	}
 	
 	inline void GetResourceString(HINSTANCE const & hInstance, UINT const & nID, std::string & str)
 	{
-		std::vector<char> buffer(256, '\0');
-		LoadStringA(hInstance, nID, &buffer[0], 256);
+		std::vector<char> buffer(4096, '\0');
+		LoadStringA(hInstance, nID, &buffer[0], 4096);
 		str.assign(&buffer[0]);
 	}
 
