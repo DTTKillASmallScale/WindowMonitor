@@ -320,13 +320,13 @@ void AppWindow::OnPresetsMenuCmd(WPARAM const & wParam)
 			GetMenuItemInfo(presetsMenu, selection, TRUE, &mii);
 
 			// Get string
-			std::wstring buffer(mii.cch, '\0');
+			std::vector<wchar_t> buffer(mii.cch + 1, '\0');
 			mii.dwTypeData = &buffer[0];
 			mii.cch++;
 			GetMenuItemInfo(presetsMenu, selection, TRUE, &mii);
 
 			// Select preset
-			presetManager->GetPreset(buffer, *currentViewSetting);
+			presetManager->GetPreset(&buffer[0], *currentViewSetting);
 		}
 		break;
 	}

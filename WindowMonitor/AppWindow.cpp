@@ -269,7 +269,7 @@ void AppWindow::UpdateSourceMenu()
 	{
 		std::wstring text;
 		WindowHelper::GetResourceString(instance, IDS_NOWINDOWSFOUND, text);
-		AppendMenuW(contextMenu, MF_STRING | MF_GRAYED, 0, &text[0]);
+		AppendMenuW(contextMenu, MF_STRING | MF_GRAYED, 0, text.c_str());
 	}
 }
 
@@ -307,7 +307,7 @@ void AppWindow::UpdatePresetMenu()
 	{
 		std::wstring text;
 		WindowHelper::GetResourceString(instance, IDS_NOPRESETSFOUND, text);
-		AppendMenuW(presetsMenu, MF_STRING | MF_GRAYED, 0, &text[0]);
+		AppendMenuW(presetsMenu, MF_STRING | MF_GRAYED, 0, text.c_str());
 	}
 }
 

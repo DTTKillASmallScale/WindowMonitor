@@ -93,7 +93,7 @@ void PresetManager::SaveToBinaryFile()
 		out.write(reinterpret_cast<const char*>(&size), sizeof(size));
 
 		// Write string
-		byte const * data = reinterpret_cast<byte const *>(&it->first[0]);
+		byte const * data = reinterpret_cast<byte const *>(it->first.c_str());
 		out.write(reinterpret_cast<const char*>(data), size);
 
 		// Write dimensions

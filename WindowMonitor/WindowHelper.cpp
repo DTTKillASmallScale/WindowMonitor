@@ -33,7 +33,7 @@ namespace WindowHelper
 	{
 		std::wstring text;
 		WindowHelper::GetResourceString(hInstance, nID, text);
-		SetWindowTextW(hWnd, &text[0]);
+		SetWindowTextW(hWnd, text.c_str());
 	}
 
 	HFONT CreateFont(HWND hWnd, LPCWSTR const & faceName, double const & points, int const & weight,
@@ -137,6 +137,6 @@ namespace WindowHelper
 		}
 
 		// Display message box
-		MessageBoxW(NULL, &messageTemplate[0], &title[0], MB_OK | MB_ICONERROR);
+		MessageBoxW(NULL, messageTemplate.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
 	}
 }

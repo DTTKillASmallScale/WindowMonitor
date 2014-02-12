@@ -178,7 +178,7 @@ void PresetWindow::SavePreset()
 	UpdatePresetList();
 
 	// Reselect item
-	SendMessage(presetListbox, LB_SELECTSTRING, -1, reinterpret_cast<LPARAM>(reinterpret_cast<wchar_t*>(&editText[0])));
+	SendMessage(presetListbox, LB_SELECTSTRING, -1, reinterpret_cast<LPARAM>(reinterpret_cast<wchar_t const *>(editText.c_str())));
 	previousListboxSelection = static_cast<int>(SendMessage(presetListbox, LB_GETCURSEL, 0, 0));
 }
 
