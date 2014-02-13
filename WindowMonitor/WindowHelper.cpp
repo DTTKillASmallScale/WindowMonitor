@@ -89,6 +89,9 @@ namespace WindowHelper
 
 	void GetListboxItemText(HWND const & hWnd, int const & index, std::wstring & text)
 	{
+		// Check
+		if (index < 0) return;
+
 		// Get number of characters for selected listbox item
 		int textLength = static_cast<int>(SendMessage(hWnd, LB_GETTEXTLEN, static_cast<WPARAM>(index), 0));
 
