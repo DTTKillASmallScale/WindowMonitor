@@ -25,7 +25,6 @@ private:
 	void UpdateDimensions();
 	void DeletePreset();
 	void SavePreset();
-	std::wstring FormatDouble(double const & value);
 
 	PresetManager * presetManager;
 	ViewSetting * currentViewSetting;

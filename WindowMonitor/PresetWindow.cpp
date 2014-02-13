@@ -228,10 +228,21 @@ void PresetWindow::UpdateSelectedPreset()
 
 void PresetWindow::UpdateDimensions()
 {
-	SetWindowText(posyText, FormatDouble(currentViewSetting->top).c_str());
-	SetWindowText(posxText, FormatDouble(currentViewSetting->left).c_str());
-	SetWindowText(heightText, FormatDouble(currentViewSetting->bottom).c_str());
-	SetWindowText(widthText, FormatDouble(currentViewSetting->right).c_str());
+	std::wostringstream temp;
+	temp << std::setw(4) << currentViewSetting->top;
+	SetWindowText(posyText, temp.str().c_str());
+
+	temp.str(L"");
+	temp << std::setw(4) << currentViewSetting->left;
+	SetWindowText(posxText, temp.str().c_str());
+
+	temp.str(L"");
+	temp << std::setw(4) << currentViewSetting->bottom;
+	SetWindowText(heightText, temp.str().c_str());
+
+	temp.str(L"");
+	temp << std::setw(4) << currentViewSetting->right;
+	SetWindowText(widthText, temp.str().c_str());
 }
 
 void PresetWindow::ViewSettingUpdated(ViewSettingObserverState const & state)
@@ -245,9 +256,3 @@ void PresetWindow::ViewSettingUpdated(ViewSettingObserverState const & state)
 	UpdateDimensions();
 }
 
-std::wstring PresetWindow::FormatDouble(double const & value)
-{
-	std::wostringstream temp;
-	temp << std::setw(4) << value;
-	return temp.str();
-}
