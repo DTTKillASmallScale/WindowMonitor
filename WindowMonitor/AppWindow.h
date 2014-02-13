@@ -13,7 +13,7 @@ class AppWindow : public CWindow, public ViewSettingObserver
 public:
 	AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting, PresetWindow * const presetWindow);
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	void ViewSettingUpdated(ViewSettingObserverState const & state);
+	void ViewSettingUpdated(ViewSettingObserverSource const & eventSource, void * data);
 
 protected:
 	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);

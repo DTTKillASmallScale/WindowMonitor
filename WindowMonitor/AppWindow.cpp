@@ -73,15 +73,22 @@ void AppWindow::OnCreate()
 	SelectSource(0);
 
 	// Add view setting observer
-	currentViewSetting->RegisterObserver(this);
+	RegisterObserver(this);
 }
 
 void AppWindow::OnDestroy()
 {
+	// Remove view setting observer
+	UnregisterObserver(this);
+
+	// Close preset window
 	presetWindow->Destroy();
-	currentViewSetting->UnregisterObserver(this);
+
+	// Clean up resources
 	adjustableThumbnail.UnsetThumbnail();
 	DestroyMenu(menu);
+
+	// Close program
 	PostQuitMessage(0);
 }
 
@@ -157,6 +164,7 @@ void AppWindow::Reset()
 {
 	// Set selection
 	currentViewSetting->SetFromClientRect(sourceWindow);
+	ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::Reset);
 
 	// Set scale
 	RECT monitorRect;
@@ -305,19 +313,23 @@ void AppWindow::UpdatePresetMenu()
 	}
 }
 
-void AppWindow::ViewSettingUpdated(ViewSettingObserverState const & state)
+void AppWindow::ViewSettingUpdated(ViewSettingObserverSource const & eventSource, void * data)
 {
-	if (state == ViewSettingObserverState::CopyFrom)
+	switch (eventSource)
 	{
+	case ViewSettingObserverSource::SelectPresetFromManager:
+	case ViewSettingObserverSource::SelectPresetFromMenu:
 		UpdateWindow();
 		UpdateThumbnail();
-	}
-	else if (state == ViewSettingObserverState::Shift)
-	{
+		break;
+	case ViewSettingObserverSource::Shift:
+	case ViewSettingObserverSource::Scale:
 		UpdateThumbnail();
-	}
-	else if (state == ViewSettingObserverState::Crop)
-	{
+		break;
+	case ViewSettingObserverSource::Crop:
 		UpdateWindow();
+		break;
+	default:
+		break;
 	}
 }

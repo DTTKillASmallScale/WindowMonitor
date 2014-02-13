@@ -138,11 +138,13 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 		if (shiftLmb)
 		{
 			currentViewSetting->Shift(x, y);
+			ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::Shift);
 		}
 		// Crop view
 		else if (ctrlLmb)
 		{
 			currentViewSetting->Crop(x, y);
+			ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::Crop);
 		}
 	}
 
@@ -211,6 +213,7 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 	RECT clientRect;
 	GetClientRect(windowHandle, &clientRect);
 	currentViewSetting->SetScaleToWindow(clientRect);
+	ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::Scale);
 
 	return true;
 }
@@ -327,6 +330,7 @@ void AppWindow::OnPresetsMenuCmd(WPARAM const & wParam)
 
 			// Select preset
 			presetManager->GetPreset(&buffer[0], *currentViewSetting);
+			ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::SelectPresetFromMenu, &std::wstring(&buffer[0]));
 		}
 		break;
 	}

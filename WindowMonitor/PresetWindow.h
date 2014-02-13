@@ -10,7 +10,7 @@ class PresetWindow : public CWindow, public ViewSettingObserver
 public:
 	PresetWindow(PresetManager * const presetManager, ViewSetting * const currentViewSetting);
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	void ViewSettingUpdated(ViewSettingObserverState const & state);
+	void ViewSettingUpdated(ViewSettingObserverSource const & eventSource, void * data);
 
 protected:
 	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
@@ -20,11 +20,13 @@ private:
 	void OnDestroy();
 	bool OnCommand(WPARAM const & wParam, LPARAM const & lParam);
 	void OnSetFocus();
-	void UpdatePresetList();
-	void UpdateSelectedPreset();
-	void UpdateDimensions();
-	void DeletePreset();
+
 	void SavePreset();
+	void DeletePreset();
+	void SelectPreset();
+
+	void UpdatePresetList();
+	void UpdateDimensions();
 
 	PresetManager * presetManager;
 	ViewSetting * currentViewSetting;

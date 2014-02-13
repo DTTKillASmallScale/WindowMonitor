@@ -25,15 +25,8 @@ public:
 	void GetScaledDimensions(long & width, long & height);
 	void GetScaledRect(double const & width, double const & height, RECT & rect);
 
-	void RegisterObserver(ViewSettingObserver * obs);
-	void UnregisterObserver(ViewSettingObserver * obs);
-
 private:
 	double scale;
-
-	std::vector<ViewSettingObserver*> observers;
-	void NotifyObservers(ViewSettingObserverState const & state);
-
 	static const double MaxResetRatio;
 };
 

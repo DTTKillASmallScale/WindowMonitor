@@ -22,7 +22,7 @@ void ViewSetting::SetFromClientRect(HWND const & hWnd)
 		left = static_cast<double>(tmp.left);
 		right = static_cast<double>(tmp.right);
 		top = static_cast<double>(tmp.top);
-		NotifyObservers(ViewSettingObserverState::SetFromClientRect);
+		//NotifyObservers(ViewSettingObserverState::SetFromClientRect);
 	}
 }
 
@@ -32,20 +32,38 @@ void ViewSetting::Shift(long x, long y)
 	top -= y / scale;
 	right -= x / scale;
 	bottom -= y / scale;
-	NotifyObservers(ViewSettingObserverState::Shift);
+	//NotifyObservers(ViewSettingObserverState::Shift);
 }
 
 void ViewSetting::Crop(long x, long y)
 {
 	right += x / scale;
 	bottom += y / scale;
-	NotifyObservers(ViewSettingObserverState::Crop);
+	//NotifyObservers(ViewSettingObserverState::Crop);
 }
 
 void ViewSetting::CopyFrom(DoubleRect const & other)
 {
 	DoubleRect::CopyFrom(other);
-	NotifyObservers(ViewSettingObserverState::CopyFrom);
+	//NotifyObservers(ViewSettingObserverState::CopyFrom);
+}
+
+void ViewSetting::SetScale(double const & newScale)
+{
+	scale = newScale;
+}
+
+void ViewSetting::SetScaleToWindow(RECT const & clientRect)
+{
+	scale = static_cast<double>(clientRect.right - clientRect.left) / ceil(right - left);
+}
+
+void ViewSetting::SetScaleToMonitorSize(RECT const & monitorRect)
+{
+	double sourceMonitorRatio = (right - left) / static_cast<double>(monitorRect.right - monitorRect.left);
+	sourceMonitorRatio = max(sourceMonitorRatio, (bottom - top) / static_cast<double>(monitorRect.bottom - monitorRect.top));
+	if (sourceMonitorRatio > MaxResetRatio) scale = MaxResetRatio / sourceMonitorRatio;
+	else scale = 1.0;
 }
 
 double ViewSetting::GetAspect()
@@ -75,40 +93,4 @@ double ViewSetting::GetWidth()
 double ViewSetting::GetHeight()
 {
 	return (bottom - top);
-}
-
-void ViewSetting::SetScale(double const & newScale)
-{
-	scale = newScale;
-}
-
-void ViewSetting::SetScaleToWindow(RECT const & clientRect)
-{
-	scale = static_cast<double>(clientRect.right - clientRect.left) / ceil(right - left);
-}
-
-void ViewSetting::SetScaleToMonitorSize(RECT const & monitorRect)
-{
-	double sourceMonitorRatio = (right - left) / static_cast<double>(monitorRect.right - monitorRect.left);
-	sourceMonitorRatio = max(sourceMonitorRatio, (bottom - top) / static_cast<double>(monitorRect.bottom - monitorRect.top));
-	if (sourceMonitorRatio > MaxResetRatio) scale = MaxResetRatio / sourceMonitorRatio;
-	else scale = 1.0;
-}
-
-void ViewSetting::RegisterObserver(ViewSettingObserver * obs)
-{
-	observers.push_back(obs);
-}
-
-void ViewSetting::UnregisterObserver(ViewSettingObserver * obs)
-{
-	observers.erase(std::remove(observers.begin(), observers.end(), obs), observers.end());
-}
-
-void ViewSetting::NotifyObservers(ViewSettingObserverState const & state)
-{
-	for (auto it = observers.begin(); it != observers.end(); ++it)
-	{
-		(*it)->ViewSettingUpdated(state);
-	}
 }

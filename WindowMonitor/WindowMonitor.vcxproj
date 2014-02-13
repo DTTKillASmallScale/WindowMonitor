@@ -197,6 +197,7 @@
     </ClCompile>
     <ClCompile Include="AdjustableThumbnail.cpp" />
     <ClCompile Include="ViewSetting.cpp" />
+    <ClCompile Include="ViewSettingObserver.cpp" />
     <ClCompile Include="WindowFilter.cpp" />
     <ClCompile Include="WindowFilterBlacklistItem.cpp" />
     <ClCompile Include="WindowFilterItem.cpp" />

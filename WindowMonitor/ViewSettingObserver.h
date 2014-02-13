@@ -1,15 +1,27 @@
 #pragma once
 
-enum class ViewSettingObserverState
+class CWindow;
+
+enum class ViewSettingObserverSource
 {
-	SetFromClientRect = 1,
+	SelectPresetFromManager = 1,
+	SelectPresetFromMenu,
 	Shift,
 	Crop,
-	CopyFrom
+	Scale,
+	SavePreset,
+	Reset
 };
 
 class ViewSettingObserver
 {
 public:
-	virtual void ViewSettingUpdated(ViewSettingObserverState const & state) = 0;
+	virtual void ViewSettingUpdated(ViewSettingObserverSource const & eventSource, void * data) = 0;
+
+	static void NotifyObservers(ViewSettingObserverSource const & eventSource, void * data = NULL);
+	static void RegisterObserver(ViewSettingObserver * obs);
+	static void UnregisterObserver(ViewSettingObserver * obs);
+
+private:
+	static std::vector<ViewSettingObserver*> observers;
 };
