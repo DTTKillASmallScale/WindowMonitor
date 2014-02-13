@@ -15,12 +15,6 @@ const int AppWindow::CursorScale = 32642;
 const int AppWindow::CursorNoFunction = 32648;
 const COLORREF AppWindow::BackgroundColour = RGB(255, 255, 255);
 
-// Prevent window from being on top in debug mode
-#ifdef _DEBUG
-#pragma warning(suppress: 4005)
-#define HWND_TOPMOST NULL
-#endif
-
 AppWindow::AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting, PresetWindow * const presetWindow) :
 	CWindow(),
 	windowFilter(windowFilter),
