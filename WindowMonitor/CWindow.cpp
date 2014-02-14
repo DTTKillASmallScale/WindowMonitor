@@ -144,7 +144,7 @@ LRESULT CALLBACK CWindow::StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, 
 		LRESULT result = window->WndProc(hWnd, message, wParam, lParam);
 
 		// Remove handle if destroyed
-		if (message == WM_DESTROY && result == 0) window->windowHandle = NULL;
+		if (message == WM_DESTROY) window->windowHandle = NULL;
 
 		// Return
 		return result;
