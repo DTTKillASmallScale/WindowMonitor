@@ -37,7 +37,6 @@ void PresetWindow::OnCreate()
 	presetListbox = CreateWindowEx(WS_EX_CLIENTEDGE, L"Listbox", NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT, 12, 12, 165, 121, windowHandle, reinterpret_cast<HMENU>(PresetCommand::ListboxSelect), instance, NULL);
 	removeButton = CreateWindow(L"Button", L"Remove", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 12, 146, 75, 23, windowHandle, reinterpret_cast<HMENU>(PresetCommand::RemovePreset), instance, NULL);
 	titleLabel = CreateWindow(L"Static", L"Name:", WS_CHILD | WS_VISIBLE | SS_LEFT, 192, 12, 30, 13, windowHandle, NULL, instance, NULL);
-	titleText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT, 195, 28, 175, 20, windowHandle, NULL, instance, NULL);
 	sizeLabel = CreateWindow(L"Static", L"Size:", WS_CHILD | WS_VISIBLE | SS_LEFT, 192, 60, 30, 13, windowHandle, NULL, instance, NULL);
 	posxText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 202, 90, 50, 20, windowHandle, NULL, instance, NULL);
 	posyText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 258, 78, 50, 20, windowHandle, NULL, instance, NULL);
@@ -45,12 +44,14 @@ void PresetWindow::OnCreate()
 	widthText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 314, 90, 50, 20, windowHandle, NULL, instance, NULL);
 	saveButton = CreateWindow(L"Button", L"Save", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 297, 146, 75, 23, windowHandle, reinterpret_cast<HMENU>(PresetCommand::SavePreset), instance, NULL);
 
+	titleText.CreateControl(195, 28, 175, 20, windowHandle);
+
 	// Set fonts
 	defaultFont = WindowHelper::CreateFont(windowHandle, L"Microsoft Sans Serif", 8.25, FW_NORMAL, false, false, false);
 	SendMessage(presetListbox, WM_SETFONT, WPARAM(defaultFont), TRUE);
 	SendMessage(removeButton, WM_SETFONT, WPARAM(defaultFont), TRUE);
 	SendMessage(titleLabel, WM_SETFONT, WPARAM(defaultFont), TRUE);
-	SendMessage(titleText, WM_SETFONT, WPARAM(defaultFont), TRUE);
+	SendMessage(titleText.GetWindowHandle(), WM_SETFONT, WPARAM(defaultFont), TRUE);
 	SendMessage(sizeLabel, WM_SETFONT, WPARAM(defaultFont), TRUE);
 	SendMessage(posxText, WM_SETFONT, WPARAM(defaultFont), TRUE);
 	SendMessage(posyText, WM_SETFONT, WPARAM(defaultFont), TRUE);
@@ -106,8 +107,9 @@ bool PresetWindow::OnCommand(WPARAM const & wParam, LPARAM const & lParam)
 	case PresetCommand::SavePreset:
 	{
 		std::wstring editText;
-		WindowHelper::GetEditText(titleText, editText);
+		WindowHelper::GetEditText(titleText.GetWindowHandle(), editText);
 		windowMonitor->SavePreset(editText);
+		SendMessage(titleText.GetWindowHandle(), EM_SETSEL, 0, -1);
 		return true;
 	}
 	case PresetCommand::RemovePreset:
@@ -159,7 +161,7 @@ void PresetWindow::UpdateListSelection()
 {
 	std::wstring selectedName = windowMonitor->GetSelectedPresetName();
 	int index = static_cast<int>(SendMessage(presetListbox, LB_FINDSTRINGEXACT, 0, reinterpret_cast<LPARAM>(selectedName.c_str())));
-	SetWindowText(titleText, selectedName.c_str());
+	SetWindowText(titleText.GetWindowHandle(), selectedName.c_str());
 	SendMessage(presetListbox, LB_SETCURSEL, index, 0);
 	previousListboxSelection = index;
 }

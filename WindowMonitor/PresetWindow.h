@@ -1,6 +1,7 @@
 #pragma once
 #include "CWindow.h"
 #include "WindowMonitorObserver.h"
+#include "CustomEditControl.h"
 
 class WindowMonitor;
 
@@ -36,8 +37,9 @@ private:
 	int previousListboxSelection;
 	HFONT defaultFont;
 	HWND presetListbox, removeButton,
-		titleLabel, titleText, 
+		titleLabel, 
 		sizeLabel, posxText, posyText, widthText, heightText,
 		saveButton;
+	CustomEditControl titleText;
 };
 
