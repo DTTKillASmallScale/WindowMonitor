@@ -140,6 +140,6 @@ namespace WindowHelper
 		}
 
 		// Display message box
-		MessageBoxW(NULL, messageTemplate.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+		MessageBoxW(NULL, messageTemplate.c_str(), title.c_str(), MB_OK | MB_ICONERROR | MB_TOPMOST);
 	}
 }
