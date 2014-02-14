@@ -4,13 +4,6 @@
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
 
-enum class PresetCommand
-{
-	SavePreset = 100,
-	RemovePreset,
-	ListboxSelect
-};
-
 PresetWindow::PresetWindow(WindowMonitor * const windowMonitor) :
 	CWindow(),
 	windowMonitor(windowMonitor),

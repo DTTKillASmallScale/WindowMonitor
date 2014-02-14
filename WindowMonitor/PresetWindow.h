@@ -4,6 +4,13 @@
 
 class WindowMonitor;
 
+enum class PresetCommand
+{
+	SavePreset = 100,
+	RemovePreset,
+	ListboxSelect
+};
+
 class PresetWindow : public CWindow, public WindowMonitorObserver
 {
 public:
