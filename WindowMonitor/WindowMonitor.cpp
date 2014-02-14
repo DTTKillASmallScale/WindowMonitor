@@ -181,6 +181,8 @@ RECT WindowMonitor::GetScaledRect()
 void WindowMonitor::IterateSources(std::function<void(std::wstring const & title, bool const & selected)> action)
 {
 	HWND hwnd = sources->GetWindowHandle(selectedSource);
+	sources->Refresh();
+	if (sources->ItemCount() < 1) return;
 	sources->IterateItems([&](WindowFilterItem const & item)
 	{
 		action(item.title, (item.hwnd == hwnd));
