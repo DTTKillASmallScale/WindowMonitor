@@ -17,8 +17,8 @@ protected:
 
 	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
 	static bool PreTranslateMessage(MSG msg);
-	static LRESULT CALLBACK StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 };
