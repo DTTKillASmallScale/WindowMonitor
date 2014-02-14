@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "WindowFilter.h"
 #include "PresetManager.h"
-#include "ViewSetting.h"
-#include "AppWindow.h"
+#include "WindowMonitor.h"
 #include "PresetWindow.h"
+#include "AppWindow.h"
 
 // WindowMonitor displays a DWM thumbnail for a selected window
 // TV Icon from http://www.iconarchive.com/show/media-icons-by-bevel-and-emboss/tv-icon.html
@@ -12,13 +12,13 @@ int APIENTRY WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
 	WindowFilter windowFilter;
 	PresetManager presetManager;
-	ViewSetting currentViewSetting;
+	WindowMonitor windowMonitor(&windowFilter, &presetManager);
 
 	// Create preset window
-	PresetWindow presetWindow(&presetManager, &currentViewSetting);
+	PresetWindow presetWindow(&windowMonitor);
 
 	// Create main window
-	AppWindow appWindow(&windowFilter, &presetManager, &currentViewSetting, &presetWindow);
+	AppWindow appWindow(&windowMonitor, &presetWindow);
 	appWindow.Create();
 
 	// Run loop

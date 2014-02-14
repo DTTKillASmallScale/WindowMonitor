@@ -1,16 +1,15 @@
 #pragma once
 #include "CWindow.h"
-#include "ViewSettingObserver.h"
+#include "WindowMonitorObserver.h"
 
-class PresetManager;
-class ViewSetting;
+class WindowMonitor;
 
-class PresetWindow : public CWindow, public ViewSettingObserver
+class PresetWindow : public CWindow, public WindowMonitorObserver
 {
 public:
-	PresetWindow(PresetManager * const presetManager, ViewSetting * const currentViewSetting);
+	PresetWindow(WindowMonitor * const windowMonitor);
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	void ViewSettingUpdated(ViewSettingObserverSource const & eventSource, void * data);
+	void OnWindowMonitorEvent(WindowMonitorEvent const & event);
 
 protected:
 	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
@@ -19,17 +18,13 @@ private:
 	void OnCreate();
 	void OnDestroy();
 	bool OnCommand(WPARAM const & wParam, LPARAM const & lParam);
-	void OnSetFocus();
-
-	void SavePreset();
-	void DeletePreset();
-	void SelectPreset();
+	void OnListboxSelect();
 
 	void UpdatePresetList();
+	void UpdateListSelection();
 	void UpdateDimensions();
 
-	PresetManager * presetManager;
-	ViewSetting * currentViewSetting;
+	WindowMonitor * windowMonitor;
 
 	int previousListboxSelection;
 	HFONT defaultFont;

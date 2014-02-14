@@ -1,9 +1,7 @@
 #include "stdafx.h"
-#include "AppWindow.h"
 #include "Resource.h"
-#include "WindowFilter.h"
-#include "PresetManager.h"
-#include "ViewSetting.h"
+#include "AppWindow.h"
+#include "WindowMonitor.h"
 #include "WindowHelper.h"
 
 const int AppWindow::MaxMenuTextLength = 32;
@@ -15,24 +13,21 @@ const int AppWindow::CursorScale = 32642;
 const int AppWindow::CursorNoFunction = 32648;
 const COLORREF AppWindow::BackgroundColour = RGB(255, 255, 255);
 
-AppWindow::AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting, PresetWindow * const presetWindow) :
+AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const presetWindow) :
 	CWindow(),
-	windowFilter(windowFilter),
-	presetManager(presetManager),
-	currentViewSetting(currentViewSetting),
+	windowMonitor(windowMonitor),
 	presetWindow(presetWindow),
 	adjustableThumbnail(),
-	sourceWindow(NULL),
-	sourceIndex(0),
-	chromeWidth(0),
-	chromeHeight(0),
 	menu(NULL),
 	contextMenu(NULL),
+	presetsMenu(NULL),
 	zoomMenu(NULL),
 	baseMenuItemCount(0),
 	suppressContextMenu(false),
 	currentCursor(0),
-	cursorSet(false)
+	cursorSet(false),
+	chromeWidth(0),
+	chromeHeight(0)
 {
 	lastPos.x = lastPos.y = 0;
 }
@@ -69,17 +64,17 @@ void AppWindow::OnCreate()
 	menuInfo.dwStyle = MNS_NOTIFYBYPOS;
 	SetMenuInfo(contextMenu, &menuInfo);
 
-	// Select source window
-	SelectSource(0);
+	// Add observer
+	windowMonitor->RegisterObserver(this);
 
-	// Add view setting observer
-	RegisterObserver(this);
+	// Select first source
+	windowMonitor->SelectSource(0);
 }
 
 void AppWindow::OnDestroy()
 {
 	// Remove view setting observer
-	UnregisterObserver(this);
+	windowMonitor->UnregisterObserver(this);
 
 	// Close preset window
 	presetWindow->Destroy();
@@ -92,99 +87,6 @@ void AppWindow::OnDestroy()
 	PostQuitMessage(0);
 }
 
-void AppWindow::UpdateWindow()
-{
-	long width, height;
-	currentViewSetting->GetScaledDimensions(width, height);
-
-	// Calc window dimensions
-	RECT windowRect{ 0, 0, width, height };
-	DWORD dwStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
-	AdjustWindowRect(&windowRect, dwStyle, FALSE);
-
-	// Set window size
-	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE | SWP_NOACTIVATE);
-
-	// Get size of window chrome
-	chromeWidth = (windowRect.right - windowRect.left) - static_cast<long>(currentViewSetting->GetWidth());
-	chromeHeight = (windowRect.bottom - windowRect.top) - static_cast<long>(currentViewSetting->GetHeight());
-}
-
-void AppWindow::UpdateThumbnail()
-{
-	RECT sourceRect;
-	GetClientRect(sourceWindow, &sourceRect);
-	currentViewSetting->GetScaledRect(static_cast<double>(sourceRect.right), static_cast<double>(sourceRect.bottom), sourceRect);
-	adjustableThumbnail.SetSize(sourceRect);
-}
-
-void AppWindow::SelectSource(int const & index)
-{
-	// Get filtered windows
-	windowFilter->Refresh();
-
-	// Get size
-	std::size_t size = windowFilter->ItemCount();
-	if (size < 1) return;
-
-	// Set source index
-	if (index < 0) sourceIndex = size - 1;
-	else if (static_cast<size_t>(index) >= size) sourceIndex = 0;
-	else sourceIndex = index;
-
-	// Get source window handle
-	sourceWindow = windowFilter->GetWindowHandle(sourceIndex);
-
-	// Set thumbnail to source
-	adjustableThumbnail.SetThumbnail(windowHandle, sourceWindow);
-
-	// Reset
-	Reset();
-}
-
-void AppWindow::CycleForward()
-{
-	// Refresh list
-	windowFilter->Refresh();
-
-	// Select next source
-	SelectSource(static_cast<int>(sourceIndex)+1);
-}
-
-void AppWindow::CycleBack()
-{
-	// Refresh list
-	windowFilter->Refresh();
-
-	// Select next source
-	SelectSource(static_cast<int>(sourceIndex)-1);
-}
-
-void AppWindow::Reset()
-{
-	// Set selection
-	currentViewSetting->SetFromClientRect(sourceWindow);
-	ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::Reset);
-
-	// Set scale
-	RECT monitorRect;
-	WindowHelper::GetMonitorRect(windowHandle, monitorRect);
-	currentViewSetting->SetScaleToMonitorSize(monitorRect);
-
-	// Update window
-	UpdateWindow();
-
-	// Center window
-	RECT windowRect;
-	GetWindowRect(windowHandle, &windowRect);
-	int x = (monitorRect.right + monitorRect.left - windowRect.right + windowRect.left) / 2;
-	int y = (monitorRect.bottom + monitorRect.top - windowRect.bottom + windowRect.top) / 2;
-	SetWindowPos(windowHandle, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE);
-
-	// Update thumbnail
-	UpdateThumbnail();
-}
-
 void AppWindow::ToggleBorder()
 {
 	// Toggle window border
@@ -194,7 +96,7 @@ void AppWindow::ToggleBorder()
 
 	// Set new style
 	SetWindowLongPtr(windowHandle, GWL_STYLE, style);
-	UpdateWindow();
+	UpdateWindow(); // Recalc chrome size
 
 	// Update content menu
 	MENUITEMINFO mii;
@@ -214,7 +116,6 @@ void AppWindow::ToggleClickThrough()
 
 	// Set new style
 	SetWindowLongPtr(windowHandle, GWL_EXSTYLE, style);
-	UpdateWindow();
 }
 
 void AppWindow::SetContextualCursor()
@@ -243,24 +144,20 @@ void AppWindow::UpdateSourceMenu()
 	while (GetMenuItemCount(contextMenu) > baseMenuItemCount)
 		DeleteMenu(contextMenu, baseMenuItemCount, MF_BYPOSITION);
 
-	// Get filtered windows
-	windowFilter->Refresh();
-
 	// Add items
 	std::wstring text;
 	int identifier = baseMenuItemCount;
-	windowFilter->IterateItems([&](WindowFilterItem const & item)
+	windowMonitor->IterateSources([&](std::wstring const & title, bool const & selected)
 	{
 		// Get title text
-		text.assign(item.title.substr(0, AppWindow::MaxMenuTextLength));
+		text.assign(title.substr(0, AppWindow::MaxMenuTextLength));
 
 		// Add ellipsis if truncated
-		if (item.title.length() > AppWindow::MaxMenuTextLength) text.append(L"...");
+		if (title.length() > AppWindow::MaxMenuTextLength) text.append(L"...");
 
 		// Create menu item
 		bool breakMenu = identifier % AppWindow::MenuItemBreakPoint == 0;
-		bool checked = (item.hwnd == sourceWindow);
-		AppendMenu(contextMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0) | (checked ? MF_CHECKED : 0), identifier, text.c_str());
+		AppendMenu(contextMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0) | (selected ? MF_CHECKED : 0), identifier, text.c_str());
 
 		// Next item
 		++identifier;
@@ -281,24 +178,14 @@ void AppWindow::UpdatePresetMenu()
 	while (GetMenuItemCount(presetsMenu) > 2)
 		DeleteMenu(presetsMenu, 2, MF_BYPOSITION);
 
-	// Load data
-	try
-	{
-		presetManager->LoadFromBinaryFile();
-	}
-	catch (std::runtime_error e)
-	{
-		WindowHelper::DisplayExceptionMessage(IDS_PRESET_ERROR_TITLE, IDS_PRESET_ERROR_FILE, e);
-	}
-
 	// Add items
 	std::wstring text;
 	int identifier = 2;
-	presetManager->IterateNames([&](std::wstring const & name)
+	windowMonitor->IteratePresets([&](std::wstring const & name, bool const & selected)
 	{
 		// Create menu item
 		bool breakMenu = identifier % AppWindow::MenuItemBreakPoint == 0;
-		AppendMenu(presetsMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0), identifier, name.c_str());
+		AppendMenu(presetsMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0) | (selected ? MF_CHECKED : 0), identifier, name.c_str());
 
 		// Next item
 		++identifier;
@@ -313,22 +200,67 @@ void AppWindow::UpdatePresetMenu()
 	}
 }
 
-void AppWindow::ViewSettingUpdated(ViewSettingObserverSource const & eventSource, void * data)
+void AppWindow::UpdateWindow()
 {
-	switch (eventSource)
+	long width = static_cast<long>(windowMonitor->GetScaledWidth());
+	long height = static_cast<long>(windowMonitor->GetScaledHeight());
+
+	// Calc window dimensions
+	RECT windowRect{ 0, 0, width, height };
+	DWORD dwStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+	AdjustWindowRect(&windowRect, dwStyle, FALSE);
+
+	// Set window size
+	SetWindowPos(windowHandle, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+
+	// Get size of window chrome
+	chromeWidth = (windowRect.right - windowRect.left) - width;
+	chromeHeight = (windowRect.bottom - windowRect.top) - height;
+}
+
+void AppWindow::CenterWindow()
+{
+	RECT windowRect, monitorRect;
+	GetWindowRect(windowHandle, &windowRect);
+	WindowHelper::GetMonitorRect(windowHandle, monitorRect);
+	int x = (monitorRect.right + monitorRect.left - windowRect.right + windowRect.left) / 2;
+	int y = (monitorRect.bottom + monitorRect.top - windowRect.bottom + windowRect.top) / 2;
+	SetWindowPos(windowHandle, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+}
+
+void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
+{
+	switch (event)
 	{
-	case ViewSettingObserverSource::SelectPresetFromManager:
-	case ViewSettingObserverSource::SelectPresetFromMenu:
+	case WindowMonitorEvent::SourceSelected:
+	{
+		adjustableThumbnail.SetThumbnail(windowHandle, windowMonitor->GetSourceWindow());
+		windowMonitor->ScaleToFitMonitor(windowHandle);
+		CenterWindow();
+		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		break;
+	}
+	case WindowMonitorEvent::PresetSelected:
+	case WindowMonitorEvent::Scaled:
+	case WindowMonitorEvent::ScaledToWindow:
+	case WindowMonitorEvent::ScaledToMonitor:
+	{
+		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 		UpdateWindow();
-		UpdateThumbnail();
+		if (event == WindowMonitorEvent::ScaledToMonitor) CenterWindow();
+		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		break;
-	case ViewSettingObserverSource::Shift:
-	case ViewSettingObserverSource::Scale:
-		UpdateThumbnail();
+	}
+	case WindowMonitorEvent::Moved:
+	{
+		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 		break;
-	case ViewSettingObserverSource::Crop:
+	}
+	case WindowMonitorEvent::Cropped:
+	{
 		UpdateWindow();
 		break;
+	}
 	default:
 		break;
 	}

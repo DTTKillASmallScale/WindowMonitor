@@ -174,12 +174,12 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="AdjustableThumbnail.h" />
-    <ClInclude Include="ViewSetting.h" />
-    <ClInclude Include="ViewSettingObserver.h" />
     <ClInclude Include="WindowFilter.h" />
     <ClInclude Include="WindowFilterBlacklistItem.h" />
     <ClInclude Include="WindowFilterItem.h" />
     <ClInclude Include="WindowHelper.h" />
+    <ClInclude Include="WindowMonitor.h" />
+    <ClInclude Include="WindowMonitorObserver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppWindow.cpp" />
@@ -196,12 +196,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="AdjustableThumbnail.cpp" />
-    <ClCompile Include="ViewSetting.cpp" />
-    <ClCompile Include="ViewSettingObserver.cpp" />
     <ClCompile Include="WindowFilter.cpp" />
     <ClCompile Include="WindowFilterBlacklistItem.cpp" />
     <ClCompile Include="WindowFilterItem.cpp" />
     <ClCompile Include="WindowHelper.cpp" />
+    <ClCompile Include="WindowMonitor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Res\Bevel-And-Emboss-Media-Tv.ico" />

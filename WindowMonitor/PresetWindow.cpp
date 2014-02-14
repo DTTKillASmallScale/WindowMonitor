@@ -1,9 +1,8 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "PresetWindow.h"
+#include "WindowMonitor.h"
 #include "WindowHelper.h"
-#include "PresetManager.h"
-#include "ViewSetting.h"
 
 enum class PresetCommand
 {
@@ -12,10 +11,9 @@ enum class PresetCommand
 	ListboxSelect
 };
 
-PresetWindow::PresetWindow(PresetManager * const presetManager, ViewSetting * const currentViewSetting) :
+PresetWindow::PresetWindow(WindowMonitor * const windowMonitor) :
 	CWindow(),
-	presetManager(presetManager),
-	currentViewSetting(currentViewSetting),
+	windowMonitor(windowMonitor),
 	previousListboxSelection(-1)
 {
 }
@@ -32,28 +30,6 @@ void PresetWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 	cs.x = (monitorRect.right + monitorRect.left - cs.cx) / 2;
 	cs.y = (monitorRect.bottom + monitorRect.top - cs.cy) / 2;
 	wcex.hbrBackground = CreateSolidBrush(RGB(240, 240, 240));
-}
-
-LRESULT PresetWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-	case WM_CREATE:
-		OnCreate();
-		return 0;
-	case WM_DESTROY:
-		OnDestroy();
-		return 0;
-	case WM_COMMAND:
-		if (OnCommand(wParam, lParam)) return 0;
-		break;
-	case WM_SETFOCUS:
-		OnSetFocus();
-		break;
-	}
-
-	// Use the default message handling for remaining messages
-	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 void PresetWindow::OnCreate()
@@ -89,21 +65,42 @@ void PresetWindow::OnCreate()
 	SendMessage(heightText, WM_SETFONT, WPARAM(defaultFont), TRUE);
 	SendMessage(saveButton, WM_SETFONT, WPARAM(defaultFont), TRUE);
 
-	// Load data
+	windowMonitor->RegisterObserver(this);
 	UpdatePresetList();
-
-	// Add view setting observer
-	RegisterObserver(this);
+	UpdateListSelection();
+	UpdateDimensions();
 }
 
 void PresetWindow::OnDestroy()
 {
 	// Remove view setting observer
-	UnregisterObserver(this);
+	windowMonitor->UnregisterObserver(this);
 
 	// Clean up resources
 	DeleteObject(defaultFont);
 	previousListboxSelection = -1;
+}
+
+LRESULT PresetWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	switch (message)
+	{
+	case WM_CREATE:
+		OnCreate();
+		return 0;
+	case WM_DESTROY:
+		OnDestroy();
+		return 0;
+	case WM_COMMAND:
+		if (OnCommand(wParam, lParam)) return 0;
+		break;
+	case WM_SETFOCUS:
+		windowMonitor->UpdatePresets();
+		break;
+	}
+
+	// Use the default message handling for remaining messages
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 bool PresetWindow::OnCommand(WPARAM const & wParam, LPARAM const & lParam)
@@ -114,92 +111,44 @@ bool PresetWindow::OnCommand(WPARAM const & wParam, LPARAM const & lParam)
 	switch (static_cast<PresetCommand>(low))
 	{
 	case PresetCommand::SavePreset:
-		SavePreset();
+	{
+		std::wstring editText;
+		WindowHelper::GetEditText(titleText, editText);
+		windowMonitor->SavePreset(editText);
 		return true;
+	}
 	case PresetCommand::RemovePreset:
-		DeletePreset();
+	{
+		int index = static_cast<int>(SendMessage(presetListbox, LB_GETCURSEL, 0, 0));
+		if (index != LB_ERR) windowMonitor->DeleteSelectedPreset();
 		return true;
+	}
 	case PresetCommand::ListboxSelect:
-		if (high == LBN_SELCHANGE) SelectPreset();
+		if (high == LBN_SELCHANGE) OnListboxSelect();
 		return true;
 	default:
 		return false;
 	}
 }
 
-void PresetWindow::OnSetFocus()
-{
-	try
-	{
-		if (presetManager->LoadFromBinaryFile())
-			UpdatePresetList();
-	}
-	catch (std::runtime_error e)
-	{
-		WindowHelper::DisplayExceptionMessage(IDS_PRESET_ERROR_TITLE, IDS_PRESET_ERROR_FILE, e);
-		this->Destroy();
-	}
-}
-
-void PresetWindow::SavePreset()
-{
-	// Get name from textbox
-	std::wstring editText;
-	WindowHelper::GetEditText(titleText, editText);
-
-	// Check
-	if (editText.length() < 1) return;
-
-	// If listbox has a selection, rename it
-	int index = static_cast<int>(SendMessage(presetListbox, LB_GETCURSEL, 0, 0));
-	if (index != LB_ERR)
-	{
-		std::wstring listText;
-		WindowHelper::GetListboxItemText(presetListbox, index, listText);
-		presetManager->RenamePreset(listText, editText);
-	}
-
-	// Save preset
-	presetManager->SavePreset(editText, *currentViewSetting);
-	ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::SavePreset);
-}
-
-void PresetWindow::DeletePreset()
-{
-	int index = static_cast<int>(SendMessage(presetListbox, LB_GETCURSEL, 0, 0));
-	if (index != LB_ERR)
-	{
-		std::wstring listText;
-		WindowHelper::GetListboxItemText(presetListbox, index, listText);
-		presetManager->RemovePreset(listText);
-		UpdatePresetList();
-	}
-}
-
-void PresetWindow::SelectPreset()
+void PresetWindow::OnListboxSelect()
 {
 	// Get selected index
 	int index = static_cast<int>(SendMessage(presetListbox, LB_GETCURSEL, 0, 0));
 	if (index == LB_ERR) return;
 	
-	// Deselect if selection hasn't changed
 	if (previousListboxSelection == index)
 	{
-		SendMessage(presetListbox, LB_SETCURSEL, -1, 0);
-		previousListboxSelection = -1;
-		return;
+		// Deselect if selection hasn't changed
+		windowMonitor->UnselectPreset();
 	}
-	
-	// Store selection
-	previousListboxSelection = index;
-
-	// Get title of selected preset
-	std::wstring listText;
-	WindowHelper::GetListboxItemText(presetListbox, index, listText);
-
-	// Select preset
-	presetManager->GetPreset(listText, *currentViewSetting);
-	ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::SelectPresetFromManager);
+	else
+	{
+		// Select preset
+		std::wstring listText;
+		WindowHelper::GetListboxItemText(presetListbox, index, listText);
+		windowMonitor->SelectPreset(listText);
+	}
 }
 
 void PresetWindow::UpdatePresetList()
@@ -207,101 +156,69 @@ void PresetWindow::UpdatePresetList()
 	SendMessage(presetListbox, LB_RESETCONTENT, 0, 0);
 	previousListboxSelection = -1;
 
-	presetManager->IterateNames([&](std::wstring const & name)
+	windowMonitor->IteratePresets([&](std::wstring const & name, bool const & selected)
 	{
 		SendMessage(presetListbox, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(name.c_str()));
 	});
 }
 
+void PresetWindow::UpdateListSelection()
+{
+	std::wstring selectedName = windowMonitor->GetSelectedPresetName();
+	int index = static_cast<int>(SendMessage(presetListbox, LB_FINDSTRINGEXACT, 0, reinterpret_cast<LPARAM>(selectedName.c_str())));
+	SetWindowText(titleText, selectedName.c_str());
+	SendMessage(presetListbox, LB_SETCURSEL, index, 0);
+	previousListboxSelection = index;
+}
+
 void PresetWindow::UpdateDimensions()
 {
+	DoubleRect dimensions = windowMonitor->GetDimensions();
+
 	std::wostringstream temp;
-	temp << std::setw(4) << currentViewSetting->top;
+	temp << std::setw(4) << dimensions.top;
 	SetWindowText(posyText, temp.str().c_str());
 
 	temp.str(L"");
-	temp << std::setw(4) << currentViewSetting->left;
+	temp << std::setw(4) << dimensions.left;
 	SetWindowText(posxText, temp.str().c_str());
 
 	temp.str(L"");
-	temp << std::setw(4) << currentViewSetting->bottom;
+	temp << std::setw(4) << dimensions.bottom;
 	SetWindowText(heightText, temp.str().c_str());
 
 	temp.str(L"");
-	temp << std::setw(4) << currentViewSetting->right;
+	temp << std::setw(4) << dimensions.right;
 	SetWindowText(widthText, temp.str().c_str());
 }
 
-void PresetWindow::ViewSettingUpdated(ViewSettingObserverSource const & eventSource, void * data)
+void PresetWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 {
-	switch (eventSource)
+	switch (event)
 	{
-	case ViewSettingObserverSource::SelectPresetFromMenu:
+	case WindowMonitorEvent::DimensionsReset:
+	case WindowMonitorEvent::PresetSelected:
 	{
-		// Get title of selected item from data
-		std::wstring * text = reinterpret_cast<std::wstring *>(data);
-
-		// Select listbox item
-		int index = static_cast<int>(SendMessage(presetListbox, LB_FINDSTRINGEXACT, 0, reinterpret_cast<LPARAM>(text->c_str())));
-		if (index != LB_ERR)
-		{
-			SendMessage(presetListbox, LB_SETCURSEL, index, 0);
-			previousListboxSelection = index;
-		}
-
-		// Set text box
-		SetWindowText(titleText, text->c_str());
-
-		// Set dimension display
+		UpdateListSelection();
 		UpdateDimensions();
 		break;
 	}
-	case ViewSettingObserverSource::SelectPresetFromManager:
-	{
-		// Move this window back to top
-		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-
-		// Get title of selected item from listbox
-		std::wstring listText;
-		WindowHelper::GetListboxItemText(presetListbox, previousListboxSelection, listText);
-
-		// Set text box
-		SetWindowText(titleText, listText.c_str());
-
-		// Set dimension display
-		UpdateDimensions();
-		break;
-	}
-	case ViewSettingObserverSource::SavePreset:
-	{
-		// Get title
-		std::wstring editText;
-		WindowHelper::GetEditText(titleText, editText);
-
-		// Refresh listbox
+	case WindowMonitorEvent::PresetsUpdated:
 		UpdatePresetList();
-
-		// Reselect item
-		SendMessage(presetListbox, LB_SELECTSTRING, -1, reinterpret_cast<LPARAM>(reinterpret_cast<wchar_t const *>(editText.c_str())));
-		previousListboxSelection = static_cast<int>(SendMessage(presetListbox, LB_GETCURSEL, 0, 0));
-
-		// Set dimension display
 		UpdateDimensions();
 		break;
-	}
-	case ViewSettingObserverSource::Shift:
-	case ViewSettingObserverSource::Crop:
-		// Set dimension display
+	case WindowMonitorEvent::PresetDeselected:
+		UpdateListSelection();
+		break;
+	case WindowMonitorEvent::Moved:
+	case WindowMonitorEvent::Cropped:
 		UpdateDimensions();
 		break;
-	case ViewSettingObserverSource::Reset:
-	{
-		SetWindowText(titleText, L"");
-		SendMessage(presetListbox, LB_SETCURSEL, -1, 0);
-		previousListboxSelection = -1;
-		UpdateDimensions();
+	case WindowMonitorEvent::PresetSaved:
+	case WindowMonitorEvent::PresetDeleted:
+		UpdatePresetList();
+		UpdateListSelection();
 		break;
-	}
 	default:
 		break;
 	}

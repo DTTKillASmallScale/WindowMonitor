@@ -1,19 +1,17 @@
 #pragma once
 #include "CWindow.h"
+#include "WindowMonitorObserver.h"
 #include "AdjustableThumbnail.h"
-#include "ViewSettingObserver.h"
 #include "PresetWindow.h"
 
-class WindowFilter;
-class PresetManager;
-class ViewSetting;
+class WindowMonitor;
 
-class AppWindow : public CWindow, public ViewSettingObserver
+class AppWindow : public CWindow, public WindowMonitorObserver
 {
 public:
-	AppWindow(WindowFilter * const windowFilter, PresetManager * const presetManager, ViewSetting * const currentViewSetting, PresetWindow * const presetWindow);
+	AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const presetWindow);
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	void ViewSettingUpdated(ViewSettingObserverSource const & eventSource, void * data);
+	void OnWindowMonitorEvent(WindowMonitorEvent const & event);
 
 protected:
 	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
@@ -38,35 +36,25 @@ private:
 	void OnDestroy();
 
 	// Methods
-	void UpdateWindow();
-	void UpdateThumbnail();
-	void SelectSource(int const & index);
-	void CycleForward();
-	void CycleBack();
-	void Reset();
 	void ToggleBorder();
 	void ToggleClickThrough();
 	void SetContextualCursor();
 	void UpdateSourceMenu();
 	void UpdatePresetMenu();
+	void UpdateWindow();
+	void CenterWindow();
 
 	// Vars
 	AdjustableThumbnail adjustableThumbnail;
-	HWND sourceWindow;
-	std::size_t sourceIndex;
-
-	int chromeWidth, chromeHeight;
-
 	HMENU menu, contextMenu, presetsMenu, zoomMenu;
 	int baseMenuItemCount;
 	bool suppressContextMenu;
 	int currentCursor;
 	bool cursorSet;
 	POINTS lastPos;
+	int chromeWidth, chromeHeight;
 
-	WindowFilter * windowFilter;
-	PresetManager * presetManager;
-	ViewSetting * currentViewSetting;
+	WindowMonitor * windowMonitor;
 	PresetWindow * presetWindow;
 
 	// Constants

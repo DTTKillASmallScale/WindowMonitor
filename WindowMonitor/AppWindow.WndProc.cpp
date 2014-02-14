@@ -1,8 +1,7 @@
 #include "stdafx.h"
+#include "resource.h"
 #include "AppWindow.h"
-#include "Resource.h"
-#include "PresetManager.h"
-#include "ViewSetting.h"
+#include "WindowMonitor.h"
 #include "WindowHelper.h"
 
 LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -137,14 +136,12 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 		// Shift view
 		if (shiftLmb)
 		{
-			currentViewSetting->Shift(x, y);
-			ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::Shift);
+			windowMonitor->Shift(x, y);
 		}
 		// Crop view
 		else if (ctrlLmb)
 		{
-			currentViewSetting->Crop(x, y);
-			ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::Crop);
+			windowMonitor->Crop(x, y);
 		}
 	}
 
@@ -167,7 +164,7 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 	LPRECT newRect = (LPRECT)lParam;
 	double width = static_cast<double>(newRect->right - newRect->left - chromeWidth);
 	double height = static_cast<double>(newRect->bottom - newRect->top - chromeHeight);
-	double aspect = currentViewSetting->GetAspect();
+	double aspect = windowMonitor->GetAspect();
 	long newWidth = static_cast<long>(height * aspect);
 	long newHeight = static_cast<long>(width * (1.0 / aspect));
 	long newValue;
@@ -209,18 +206,15 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 		break;
 	}
 
-	// Calculate scale
-	RECT clientRect;
-	GetClientRect(windowHandle, &clientRect);
-	currentViewSetting->SetScaleToWindow(clientRect);
-	ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::Scale);
+	// Set scale
+	windowMonitor->ScaleToFitWindow(windowHandle);
 
 	return true;
 }
 
 bool AppWindow::OnSize(WPARAM const & wParam, LPARAM const & lParam)
 {
-	UpdateThumbnail();
+	adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 	return true;
 }
 
@@ -234,18 +228,24 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 {
 	if (HIWORD(wParam) == 1)
 	{
-		// Tab and reset
 		switch (LOWORD(wParam))
 		{
 		case ID_ACCEL_SWITCH:
-			CycleForward();
+		{
+			windowMonitor->SelectNextSource();
 			return true;
+		}
 		case ID_ACCEL_RSWITCH:
-			CycleBack();
+		{
+			windowMonitor->SelectPreviousSource();
 			return true;
+		}
 		case ID_ACCEL_RESET:
-			Reset();
+		{
+			windowMonitor->ResetDimensions();
+			windowMonitor->ScaleToFitMonitor(windowHandle);
 			return true;
+		}
 		case ID_ACCEL_CLICKTHROUGH:
 			ToggleClickThrough();
 			return true;
@@ -289,15 +289,17 @@ void AppWindow::OnOptionsMenuCmd(WPARAM const & wParam)
 		ToggleBorder();
 		break;
 	case ID_MENU_RESET:
-		Reset();
+		windowMonitor->ResetDimensions();
+		windowMonitor->ScaleToFitMonitor(windowHandle);
 		break;
 	case ID_MENU_EXIT:
 		SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
 		break;
 	default:
 		if (selection >= baseMenuItemCount)
-			SelectSource(selection - baseMenuItemCount);
+			windowMonitor->SelectSource(static_cast<size_t>(selection - baseMenuItemCount));
 		break;
+
 	}
 }
 
@@ -329,8 +331,7 @@ void AppWindow::OnPresetsMenuCmd(WPARAM const & wParam)
 			GetMenuItemInfo(presetsMenu, selection, TRUE, &mii);
 
 			// Select preset
-			presetManager->GetPreset(&buffer[0], *currentViewSetting);
-			ViewSettingObserver::NotifyObservers(ViewSettingObserverSource::SelectPresetFromMenu, &std::wstring(&buffer[0]));
+			windowMonitor->SelectPreset(&buffer[0]);
 		}
 		break;
 	}
@@ -346,16 +347,14 @@ void AppWindow::OnZoomMenuCmd(WPARAM const & wParam)
 
 	switch (mii.wID)
 	{
-	case ID_ZOOM_25: currentViewSetting->SetScale(0.25); break;
-	case ID_ZOOM_50: currentViewSetting->SetScale(0.5); break;
-	case ID_ZOOM_75: currentViewSetting->SetScale(0.75); break;
-	case ID_ZOOM_100: currentViewSetting->SetScale(1.0); break;
-	case ID_ZOOM_125: currentViewSetting->SetScale(1.25); break;
-	case ID_ZOOM_150: currentViewSetting->SetScale(1.5); break;
-	case ID_ZOOM_175: currentViewSetting->SetScale(1.75); break;
-	case ID_ZOOM_200: currentViewSetting->SetScale(2.0); break;
+	case ID_ZOOM_25: windowMonitor->Scale(0.25); break;
+	case ID_ZOOM_50: windowMonitor->Scale(0.5); break;
+	case ID_ZOOM_75: windowMonitor->Scale(0.75); break;
+	case ID_ZOOM_100: windowMonitor->Scale(1.0); break;
+	case ID_ZOOM_125: windowMonitor->Scale(1.25); break;
+	case ID_ZOOM_150: windowMonitor->Scale(1.5); break;
+	case ID_ZOOM_175: windowMonitor->Scale(1.75); break;
+	case ID_ZOOM_200: windowMonitor->Scale(2.0); break;
 	default: return;
 	}
-
-	UpdateWindow();
 }
