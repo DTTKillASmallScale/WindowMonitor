@@ -59,8 +59,6 @@ void CWindow::Create()
 		cs.hMenu,
 		cs.hInstance,
 		cs.lpCreateParams);
-
-	OnInitialUpdate();
 }
 
 void CWindow::Destroy()
@@ -69,10 +67,6 @@ void CWindow::Destroy()
 }
 
 void CWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
-{
-}
-
-void CWindow::OnInitialUpdate()
 {
 }
 

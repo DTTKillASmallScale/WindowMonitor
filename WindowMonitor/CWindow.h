@@ -16,7 +16,6 @@ protected:
 	HACCEL accelerators;
 
 	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
-	virtual void OnInitialUpdate();
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 private:
