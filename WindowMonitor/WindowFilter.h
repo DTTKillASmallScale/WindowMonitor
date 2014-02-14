@@ -8,7 +8,7 @@ public:
 	WindowFilter();
 	std::size_t ItemCount();
 	HWND GetWindowHandle(std::size_t const & index);
-	void IterateItems(std::function<void(WindowFilterItem const &)> step);
+	void IterateItems(std::function<void(WindowFilterItem const &)> action);
 	void Refresh();
 
 private:

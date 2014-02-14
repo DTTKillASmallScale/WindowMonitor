@@ -15,7 +15,9 @@ std::size_t WindowFilter::ItemCount()
 
 HWND WindowFilter::GetWindowHandle(std::size_t const & index)
 {
-	return items.at(index).hwnd;
+	std::size_t const & count = items.size();
+	if (index > -1 && index < count) return items.at(index).hwnd;
+	else return NULL;
 }
 
 void WindowFilter::IterateItems(std::function<void(WindowFilterItem const &)> step)
