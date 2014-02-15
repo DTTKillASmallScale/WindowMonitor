@@ -28,10 +28,14 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		if (OnMouseMove(wParam, lParam)) return 0;
 		break;
 	case WM_SIZING:
+		wasSizing = true;
 		if (OnSizing(wParam, lParam)) return TRUE;
 		break;
+	case WM_SIZE:
+		if (wasSizing) { wasSizing = false; windowMonitor->ScaleToFitWindow(windowHandle); }
+		break;
 	case WM_EXITSIZEMOVE:
-		windowMonitor->ScaleToFitWindow(windowHandle);
+		wasSizing = false;
 		break;
 	case WM_LBUTTONDBLCLK:
 		if (OnLeftDoubleClick(wParam, lParam)) return 0;

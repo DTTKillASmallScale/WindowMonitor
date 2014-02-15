@@ -235,7 +235,6 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 	case WindowMonitorEvent::SourceSelected:
 		adjustableThumbnail.SetThumbnail(windowHandle, windowMonitor->GetSourceWindow());
 		windowMonitor->ScaleToFitMonitor(windowHandle);
-		CenterWindow();
 		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		break;
 	case WindowMonitorEvent::Moved:

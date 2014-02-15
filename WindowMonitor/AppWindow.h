@@ -52,6 +52,7 @@ private:
 	bool cursorSet;
 	POINTS lastPos;
 	int chromeWidth, chromeHeight;
+	bool wasSizing;
 
 	WindowMonitor * windowMonitor;
 	PresetWindow * presetWindow;
