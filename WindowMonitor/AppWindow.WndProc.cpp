@@ -293,7 +293,7 @@ void AppWindow::OnOptionsMenuCmd(WPARAM const & wParam)
 		windowMonitor->ScaleToFitMonitor(windowHandle);
 		break;
 	case ID_MENU_EXIT:
-		SendMessage(windowHandle, WM_DESTROY, NULL, NULL);
+		Destroy();
 		break;
 	default:
 		if (selection >= baseMenuItemCount)
