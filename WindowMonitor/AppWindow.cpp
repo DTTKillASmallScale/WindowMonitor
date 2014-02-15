@@ -238,24 +238,24 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		CenterWindow();
 		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 		break;
+	case WindowMonitorEvent::Moved:
+		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
+		break;
+	case WindowMonitorEvent::Cropped:
+		UpdateWindow();
+		break;
 	case WindowMonitorEvent::PresetSelected:
 	case WindowMonitorEvent::Scaled:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 		UpdateWindow();
-		break;
-	case WindowMonitorEvent::ScaledToWindow:
-		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 		break;
 	case WindowMonitorEvent::ScaledToMonitor:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 		UpdateWindow();
 		CenterWindow();
 		break;
-	case WindowMonitorEvent::Moved:
+	case WindowMonitorEvent::ScaledToWindow:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
-		break;
-	case WindowMonitorEvent::Cropped:
-		UpdateWindow();
 		break;
 	default:
 		break;
