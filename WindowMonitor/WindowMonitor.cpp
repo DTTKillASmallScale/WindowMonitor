@@ -223,6 +223,12 @@ void WindowMonitor::UnregisterObserver(WindowMonitorObserver * observer)
 
 void WindowMonitor::NotifyObservers(WindowMonitorEvent const & event)
 {
+#ifdef _DEBUG
+	std::wstringstream ss;
+	ss << time(NULL) << "\t" << WindowMonitorEventNames[static_cast<int>(event)] << "\n";
+	OutputDebugStringW(ss.str().c_str());
+#endif
+
 	for (auto it = observers.begin(); it != observers.end(); ++it)
 	{
 		(*it)->OnWindowMonitorEvent(event);
