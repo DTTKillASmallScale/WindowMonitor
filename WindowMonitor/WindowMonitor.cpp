@@ -144,7 +144,7 @@ void WindowMonitor::ScaleToFitWindow(HWND const & hWnd)
 {
 	RECT rect;
 	GetClientRect(hWnd, &rect);
-	scale = static_cast<double>(rect.right - rect.left) / ceil(dimensions.right - dimensions.left);
+	scale = static_cast<double>(rect.right - rect.left) / (dimensions.right - dimensions.left);
 	NotifyObservers(WindowMonitorEvent::ScaledToWindow);
 }
 
@@ -171,10 +171,10 @@ RECT WindowMonitor::GetScaledRect()
 	HWND hwnd = sources->GetWindowHandle(selectedSource);
 	RECT rect;
 	GetClientRect(hwnd, &rect);
-	rect.left = static_cast<long>(-dimensions.left * scale);
-	rect.top = static_cast<long>(-dimensions.top * scale);
-	rect.right = static_cast<long>((static_cast<double>(rect.right) - dimensions.left) * scale);
-	rect.bottom = static_cast<long>((static_cast<double>(rect.bottom) - dimensions.top) * scale);
+	rect.left = static_cast<long>(ceil(-dimensions.left * scale));
+	rect.top = static_cast<long>(ceil(-dimensions.top * scale));
+	rect.right = static_cast<long>(ceil((static_cast<double>(rect.right) - dimensions.left) * scale));
+	rect.bottom = static_cast<long>(ceil((static_cast<double>(rect.bottom) - dimensions.top) * scale));
 	return rect;
 }
 
