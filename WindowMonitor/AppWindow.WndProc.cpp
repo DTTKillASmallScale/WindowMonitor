@@ -314,8 +314,12 @@ void AppWindow::OnPresetsMenuCmd(WPARAM const & wParam)
 	switch (mii.wID)
 	{
 	case ID_MENU_MANAGEPRESETS:
-		presetWindow->Create();
+	{
+		HWND hwnd = presetWindow->GetWindowHandle();
+		if (hwnd != NULL) SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		else presetWindow->Create();
 		break;
+	}
 	default: {
 		if (selection >= 2)
 		{
