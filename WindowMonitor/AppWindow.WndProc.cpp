@@ -30,8 +30,8 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	case WM_SIZING:
 		if (OnSizing(wParam, lParam)) return TRUE;
 		break;
-	case WM_SIZE:
-		if (OnSize(wParam, lParam)) return TRUE;
+	case WM_EXITSIZEMOVE:
+		windowMonitor->ScaleToFitWindow(windowHandle);
 		break;
 	case WM_LBUTTONDBLCLK:
 		if (OnLeftDoubleClick(wParam, lParam)) return 0;
@@ -208,13 +208,6 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 
 	// Set scale
 	windowMonitor->ScaleToFitWindow(windowHandle);
-
-	return true;
-}
-
-bool AppWindow::OnSize(WPARAM const & wParam, LPARAM const & lParam)
-{
-	adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 	return true;
 }
 
