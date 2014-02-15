@@ -23,7 +23,7 @@ public:
 	void Crop(long const & x, long const & y);
 	void Scale(double const & newScale);
 	void ScaleToFitWindow(HWND const & hWnd);
-	void ScaleToFitMonitor(HWND const & hWnd);
+	void ScaleToFitMonitor(HWND const & hWnd, bool const & maximize = false);
 	void ResetDimensions();
 
 	inline HWND GetSourceWindow() { return sources->GetWindowHandle(selectedSource); }
@@ -55,7 +55,6 @@ private:
 
 	void NotifyObservers(WindowMonitorEvent const & event);
 
-	static const double MaxMonitorFitRatio;
 	static const std::wregex WhitespacePattern;
 };
 

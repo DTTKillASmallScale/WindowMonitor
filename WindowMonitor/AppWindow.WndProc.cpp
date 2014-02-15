@@ -202,8 +202,17 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 		}
 		case ID_ACCEL_RESET:
 		{
+			DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+			if ((style & WS_THICKFRAME) == 0) ToggleBorder();
 			windowMonitor->ResetDimensions();
 			windowMonitor->ScaleToFitMonitor(windowHandle);
+			return true;
+		}
+		case ID_ACCEL_FULLSCREEN:
+		{
+			DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+			if ((style & WS_THICKFRAME) != 0) ToggleBorder();
+			windowMonitor->ScaleToFitMonitor(windowHandle, true);
 			return true;
 		}
 		case ID_ACCEL_CLICKTHROUGH:

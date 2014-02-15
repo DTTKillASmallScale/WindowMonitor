@@ -17,6 +17,7 @@
 #define ID_ACCEL_CLICKTHROUGH                   40003
 #define ID_ZOOM_100                             40003
 #define IDS_PRESET_ERROR_FILE                   40004
+#define ID_ACCEL_FULLSCREEN                     40004
 #define ID_ZOOM_125                             40004
 #define IDS_PRESET_ERROR_TITLE                  40005
 #define ID_ZOOM_150                             40005

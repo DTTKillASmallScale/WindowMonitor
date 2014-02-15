@@ -3,7 +3,6 @@
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
 
-const double WindowMonitor::MaxMonitorFitRatio = 0.9;
 const std::wregex WindowMonitor::WhitespacePattern(L"^\\s+|\\s+$");
 
 WindowMonitor::WindowMonitor(WindowFilter * sources, PresetManager * presets) :
@@ -148,7 +147,7 @@ void WindowMonitor::ScaleToFitWindow(HWND const & hWnd)
 	NotifyObservers(WindowMonitorEvent::ScaledToWindow);
 }
 
-void WindowMonitor::ScaleToFitMonitor(HWND const & hWnd)
+void WindowMonitor::ScaleToFitMonitor(HWND const & hWnd, bool const & maximize)
 {
 	// Get monitor rect for window
 	RECT monitorRect;
@@ -161,8 +160,17 @@ void WindowMonitor::ScaleToFitMonitor(HWND const & hWnd)
 	sourceMonitorRatio = max(sourceMonitorRatio, (dimensions.bottom - dimensions.top) / static_cast<double>(monitorRect.bottom - monitorRect.top));
 
 	// Set scale
-	if (sourceMonitorRatio > MaxMonitorFitRatio) scale = MaxMonitorFitRatio / sourceMonitorRatio;
-	else scale = 1.0;
+	if (maximize)
+	{
+		scale = 1.0 / sourceMonitorRatio;
+	}
+	else
+	{
+		double const maxMonitorFitRatio = 0.9;
+		if (sourceMonitorRatio > maxMonitorFitRatio) scale = maxMonitorFitRatio / sourceMonitorRatio;
+		else scale = 1.0;
+	}
+
 	NotifyObservers(WindowMonitorEvent::ScaledToMonitor);
 }
 
