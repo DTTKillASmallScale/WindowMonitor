@@ -18,14 +18,9 @@ protected:
 
 private:
 	// Events
-	bool OnKeyDown(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnKeyUp(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnLeftButtonUp(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnRightButtonUp(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnSetCursor(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnMouseMove(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnSizing(WPARAM const & wParam, LPARAM const & lParam);
-	bool OnLeftDoubleClick(WPARAM const & wParam, LPARAM const & lParam);
 	bool OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam);
 	void OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
 	void OnOptionsMenuCmd(WPARAM const & wParam);

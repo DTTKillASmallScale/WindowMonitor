@@ -10,16 +10,18 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	{
 	case WM_LBUTTONDOWN:
 	case WM_KEYDOWN:
-		if (OnKeyDown(wParam, lParam)) return 0;
+		// Bit 30: The value is 1 if the key is down before the message is sent, or it is zero if the key is up.
+		if ((lParam & 0x40000000) == 0) { SetContextualCursor(); return 0; }
 		break;
 	case WM_KEYUP:
-		if (OnKeyUp(wParam, lParam)) return 0;
-		break;
+		SetContextualCursor();
+		return 0;
 	case WM_LBUTTONUP:
-		if (OnLeftButtonUp(wParam, lParam)) return 0;
+		SetContextualCursor();
+		if (wParam == MK_RBUTTON) { suppressContextMenu = true; return 0; }
 		break;
 	case WM_RBUTTONUP:
-		if (OnRightButtonUp(wParam, lParam)) return 0;
+		if (wParam == MK_LBUTTON) return 0;
 		break;
 	case WM_SETCURSOR:
 		if (OnSetCursor(wParam, lParam)) return TRUE;
@@ -38,8 +40,8 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		wasSizing = false;
 		break;
 	case WM_LBUTTONDBLCLK:
-		if (OnLeftDoubleClick(wParam, lParam)) return 0;
-		break;
+		ToggleBorder();
+		return 0;
 	case WM_COMMAND:
 		if (OnAccelCommand(wParam, lParam)) return 0;
 		break;
@@ -63,39 +65,6 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 	// Use the default message handling for remaining messages
 	return DefWindowProc(hWnd, message, wParam, lParam);
-}
-
-bool AppWindow::OnKeyDown(WPARAM const & wParam, LPARAM const & lParam)
-{
-	// Bit 30: The value is 1 if the key is down before the message is sent, or it is zero if the key is up.
-	bool notRepeated = (lParam & 0x40000000) == 0;
-
-	if (notRepeated)
-	{
-		SetContextualCursor();
-		return true;
-	}
-
-	return false;
-}
-
-bool AppWindow::OnKeyUp(WPARAM const & wParam, LPARAM const & lParam)
-{
-	SetContextualCursor();
-	return true;
-}
-
-bool AppWindow::OnLeftButtonUp(WPARAM const & wParam, LPARAM const & lParam)
-{
-	SetContextualCursor();
-	if (wParam == MK_RBUTTON) { suppressContextMenu = true; return true; }
-	return false;
-}
-
-bool AppWindow::OnRightButtonUp(WPARAM const & wParam, LPARAM const & lParam)
-{
-	if (wParam == MK_LBUTTON) return true;
-	return false;
 }
 
 bool AppWindow::OnSetCursor(WPARAM const & wParam, LPARAM const & lParam)
@@ -212,12 +181,6 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 
 	// Set scale
 	windowMonitor->ScaleToFitWindow(windowHandle);
-	return true;
-}
-
-bool AppWindow::OnLeftDoubleClick(WPARAM const & wParam, LPARAM const & lParam)
-{
-	ToggleBorder();
 	return true;
 }
 
