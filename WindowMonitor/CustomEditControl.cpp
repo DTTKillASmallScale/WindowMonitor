@@ -15,7 +15,6 @@ CustomEditControl::CustomEditControl(int const & x, int const & y, int const & c
 	cs.cy = cy;
 	cs.style = WS_CHILD | WS_VISIBLE | SS_LEFT;
 	cs.dwExStyle = WS_EX_CLIENTEDGE;
-	cs.lpCreateParams = this;
 }
 
 void CustomEditControl::SetParent(HWND const & parent)
@@ -34,7 +33,7 @@ void CustomEditControl::Create()
 	windowHandle = CreateWindowEx(cs.dwExStyle, cs.lpszClass, cs.lpszName, cs.style, cs.x, cs.y, cs.cx, cs.cy, cs.hwndParent, cs.hMenu, instance, cs.lpCreateParams);
 
 	// Set user data for StaticWndProc
-	SetWindowLongPtr(windowHandle, GWLP_USERDATA, (LONG_PTR)this);
+	SetWindowLongPtr(windowHandle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 	// Re-wire to use StaticWndProc
 	originalProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(windowHandle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&CWindow::StaticWndProc)));

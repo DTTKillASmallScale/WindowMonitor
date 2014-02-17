@@ -2,10 +2,10 @@
 #include "CWindow.h"
 
 CWindow::CWindow() :
-	instance(NULL),
 	windowHandle(NULL),
 	accelerators(NULL)
 {
+	instance = GetModuleHandle(NULL);
 }
 
 void CWindow::Create()
@@ -13,8 +13,6 @@ void CWindow::Create()
 	// Check current window handle
 	if (windowHandle != NULL) return;
 
-	instance = GetModuleHandle(NULL);
-	
 	CREATESTRUCT cs;
 	SecureZeroMemory(&cs, sizeof(CREATESTRUCT));
 	cs.hwndParent = NULL;
@@ -120,18 +118,17 @@ bool CWindow::PreTranslateMessage(MSG msg)
 
 LRESULT CALLBACK CWindow::StaticWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	CWindow * window = reinterpret_cast<CWindow*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-
-	if (window == NULL && message == WM_NCCREATE) 
+	// Get pointer to object from lpCreateParams and set userdata
+	// This is so we don't lose any messages that are sent before CreateWindowEx exits
+	if (message == WM_NCCREATE)
 	{
-		// Get pointer to object from lpCreateParams and set userdata
-		// This is so we don't lose any messages that are sent before CreateWindowEx exits
 		CREATESTRUCT * cs = reinterpret_cast<CREATESTRUCT*>(lParam);
-		window = reinterpret_cast<CWindow*>(cs->lpCreateParams);
-		SetWindowLongPtr(hWnd, GWLP_USERDATA, (LONG_PTR)window);
+		SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(cs->lpCreateParams));
 	}
 
-	if (window == NULL) 
+	CWindow * window = reinterpret_cast<CWindow*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+
+	if (window == NULL)
 	{
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
