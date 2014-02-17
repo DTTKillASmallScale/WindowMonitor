@@ -7,7 +7,8 @@
 PresetWindow::PresetWindow(WindowMonitor * const windowMonitor) :
 	CWindow(),
 	windowMonitor(windowMonitor),
-	previousListboxSelection(-1)
+	previousListboxSelection(-1),
+	titleText(195, 28, 175, 20)
 {
 }
 
@@ -44,7 +45,8 @@ void PresetWindow::OnCreate()
 	widthText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 314, 90, 50, 20, windowHandle, NULL, instance, NULL);
 	saveButton = CreateWindow(L"Button", L"Save", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 297, 146, 75, 23, windowHandle, reinterpret_cast<HMENU>(PresetCommand::SavePreset), instance, NULL);
 
-	titleText.CreateControl(195, 28, 175, 20, windowHandle);
+	titleText.SetParent(windowHandle);
+	titleText.Create();
 
 	// Set fonts
 	defaultFont = WindowHelper::CreateFont(windowHandle, L"Microsoft Sans Serif", 8.25, FW_NORMAL, false, false, false);

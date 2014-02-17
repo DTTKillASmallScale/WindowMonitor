@@ -4,7 +4,7 @@ class CWindow
 {
 public:
 	CWindow();
-	void Create();
+	virtual void Create();
 	void Destroy();
 	inline HWND GetWindowHandle() { return windowHandle; }
 	inline HINSTANCE GetInstance() { return instance; }
