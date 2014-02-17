@@ -248,6 +248,10 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		UpdateWindow();
 		break;
 	case WindowMonitorEvent::DimensionsReset:
+	{
+		DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+		if ((style & WS_THICKFRAME) == 0) ToggleBorder();
+	}
 	case WindowMonitorEvent::ScaledToMonitor:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 		UpdateWindow();
