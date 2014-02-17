@@ -119,7 +119,7 @@ void WindowMonitor::Crop(long const & x, long const & y)
 	NotifyObservers(WindowMonitorEvent::Cropped);
 }
 
-void WindowMonitor::ResetDimensions()
+void WindowMonitor::ResetAndScaleToFitMonitor(HWND const & hWnd)
 {
 	RECT tmp;
 	if (GetClientRect(sources->GetWindowHandle(selectedSource), &tmp))
@@ -130,6 +130,7 @@ void WindowMonitor::ResetDimensions()
 		dimensions.top = static_cast<double>(tmp.top);
 	}
 	selectedPreset.clear();
+	ScaleToFitMonitorWithoutNotification(hWnd);
 	NotifyObservers(WindowMonitorEvent::DimensionsReset);
 }
 
@@ -148,6 +149,12 @@ void WindowMonitor::ScaleToFitWindow(HWND const & hWnd)
 }
 
 void WindowMonitor::ScaleToFitMonitor(HWND const & hWnd, bool const & maximize)
+{
+	ScaleToFitMonitorWithoutNotification(hWnd, maximize);
+	NotifyObservers(WindowMonitorEvent::ScaledToMonitor);
+}
+
+void WindowMonitor::ScaleToFitMonitorWithoutNotification(HWND const & hWnd, bool const & maximize)
 {
 	// Get monitor rect for window
 	RECT monitorRect;
@@ -170,8 +177,6 @@ void WindowMonitor::ScaleToFitMonitor(HWND const & hWnd, bool const & maximize)
 		if (sourceMonitorRatio > maxMonitorFitRatio) scale = maxMonitorFitRatio / sourceMonitorRatio;
 		else scale = 1.0;
 	}
-
-	NotifyObservers(WindowMonitorEvent::ScaledToMonitor);
 }
 
 RECT WindowMonitor::GetScaledRect()

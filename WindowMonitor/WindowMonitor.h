@@ -24,7 +24,7 @@ public:
 	void Scale(double const & newScale);
 	void ScaleToFitWindow(HWND const & hWnd);
 	void ScaleToFitMonitor(HWND const & hWnd, bool const & maximize = false);
-	void ResetDimensions();
+	void ResetAndScaleToFitMonitor(HWND const & hWnd);
 
 	inline HWND GetSourceWindow() { return sources->GetWindowHandle(selectedSource); }
 	inline std::wstring GetSelectedPresetName() { return selectedPreset; }
@@ -53,6 +53,7 @@ private:
 
 	std::vector<WindowMonitorObserver *> observers;
 
+	void ScaleToFitMonitorWithoutNotification(HWND const & hWnd, bool const & maximize = false); 
 	void NotifyObservers(WindowMonitorEvent const & event);
 
 	static const std::wregex WhitespacePattern;

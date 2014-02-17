@@ -204,8 +204,7 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 		{
 			DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
 			if ((style & WS_THICKFRAME) == 0) ToggleBorder();
-			windowMonitor->ResetDimensions();
-			windowMonitor->ScaleToFitMonitor(windowHandle);
+			windowMonitor->ResetAndScaleToFitMonitor(windowHandle);
 			return true;
 		}
 		case ID_ACCEL_FULLSCREEN:
@@ -258,8 +257,7 @@ void AppWindow::OnOptionsMenuCmd(WPARAM const & wParam)
 		ToggleBorder();
 		break;
 	case ID_MENU_RESET:
-		windowMonitor->ResetDimensions();
-		windowMonitor->ScaleToFitMonitor(windowHandle);
+		windowMonitor->ResetAndScaleToFitMonitor(windowHandle);
 		break;
 	case ID_MENU_EXIT:
 		Destroy();

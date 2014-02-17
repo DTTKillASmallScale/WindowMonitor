@@ -225,7 +225,7 @@ void AppWindow::CenterWindow()
 	WindowHelper::GetMonitorRect(windowHandle, monitorRect);
 	int x = (monitorRect.right + monitorRect.left - windowRect.right + windowRect.left) / 2;
 	int y = (monitorRect.bottom + monitorRect.top - windowRect.bottom + windowRect.top) / 2;
-	SetWindowPos(windowHandle, NULL, x, y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOZORDER);
+	SetWindowPos(windowHandle, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE);
 }
 
 void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
@@ -234,9 +234,7 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 	{
 	case WindowMonitorEvent::SourceSelected:
 		adjustableThumbnail.SetThumbnail(windowHandle, windowMonitor->GetSourceWindow());
-		windowMonitor->ResetDimensions();
-		windowMonitor->ScaleToFitMonitor(windowHandle);
-		SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+		windowMonitor->ResetAndScaleToFitMonitor(windowHandle);
 		break;
 	case WindowMonitorEvent::Moved:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
@@ -249,6 +247,7 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 		UpdateWindow();
 		break;
+	case WindowMonitorEvent::DimensionsReset:
 	case WindowMonitorEvent::ScaledToMonitor:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 		UpdateWindow();
