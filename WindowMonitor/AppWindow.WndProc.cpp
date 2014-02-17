@@ -233,7 +233,14 @@ void AppWindow::OnContextMenu(WPARAM const & wParam, LPARAM const & lParam)
 	int x = GET_X_LPARAM(lParam);
 	int y = GET_Y_LPARAM(lParam);
 
-	// TODO Check x and y for -1
+	// Check if menu opened by keyboard shortcut
+	if (x == -1 && y == -1)
+	{
+		RECT rect;
+		GetWindowRect(windowHandle, &rect);
+		x = rect.left + (rect.right - rect.left) / 2;
+		y = rect.top + (rect.bottom - rect.top) / 2;
+	}
 
 	// Show menu
 	UpdateSourceMenu();
