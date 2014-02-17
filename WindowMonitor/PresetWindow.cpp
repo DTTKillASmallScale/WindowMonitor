@@ -179,11 +179,11 @@ void PresetWindow::UpdateDimensions()
 	SetWindowText(posxText, temp.str().c_str());
 
 	temp.str(L"");
-	temp << std::setw(4) << dimensions.bottom;
+	temp << std::setw(4) << (dimensions.bottom - dimensions.top);
 	SetWindowText(heightText, temp.str().c_str());
 
 	temp.str(L"");
-	temp << std::setw(4) << dimensions.right;
+	temp << std::setw(4) << (dimensions.right - dimensions.left);
 	SetWindowText(widthText, temp.str().c_str());
 }
 
