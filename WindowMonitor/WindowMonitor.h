@@ -4,6 +4,8 @@
 #include "PresetManager.h"
 #include "WindowMonitorObserver.h"
 
+typedef std::function<void(std::wstring const & text, bool const & selected)> WindowMonitorIterateAction;
+
 class WindowMonitor
 {
 public:
@@ -35,8 +37,8 @@ public:
 	inline double GetAspect(){ return (dimensions.right - dimensions.left) / (dimensions.bottom - dimensions.top); }
 	inline DoubleRect GetDimensions() { return dimensions; }
 	RECT GetScaledRect();
-	void IterateSources(std::function<void(std::wstring const & title, bool const & selected)> action);
-	void IteratePresets(std::function<void(std::wstring const & name, bool const & selected)> action);
+	void IterateSources(WindowMonitorIterateAction action);
+	void IteratePresets(WindowMonitorIterateAction action);
 
 	void RegisterObserver(WindowMonitorObserver * observer);
 	void UnregisterObserver(WindowMonitorObserver * observer);

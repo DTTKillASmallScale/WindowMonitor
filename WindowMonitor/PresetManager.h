@@ -1,6 +1,8 @@
 #pragma once
 #include "DoubleRect.h"
 
+typedef std::function<void(std::wstring const & name)> PresetManagerIterateAction;
+
 class PresetManager
 {
 public:
@@ -9,7 +11,7 @@ public:
 	bool GetPreset(std::wstring const & name, DoubleRect & dimensions);
 	bool RenamePreset(std::wstring const & currentName, std::wstring const & newName);
 	bool RemovePreset(std::wstring const & name);
-	void IterateNames(std::function<void(std::wstring const &)> step);
+	void IterateNames(PresetManagerIterateAction action);
 	void SaveToBinaryFile();
 
 	// Returns true if items are loaded

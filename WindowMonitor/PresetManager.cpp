@@ -62,11 +62,11 @@ bool PresetManager::RemovePreset(std::wstring const & name)
 	return found;
 }
 
-void PresetManager::IterateNames(std::function<void(std::wstring const &)> step)
+void PresetManager::IterateNames(PresetManagerIterateAction action)
 {
 	for (auto it = presets.begin(); it != presets.end(); ++it)
 	{
-		step(it->first);
+		action(it->first);
 	}
 }
 void PresetManager::SaveToBinaryFile()

@@ -20,11 +20,11 @@ HWND WindowFilter::GetWindowHandle(std::size_t const & index)
 	else return NULL;
 }
 
-void WindowFilter::IterateItems(std::function<void(WindowFilterItem const &)> step)
+void WindowFilter::IterateItems(WindowFilterIterateAction action)
 {
 	for (auto it = items.begin(); it != items.end(); ++it)
 	{
-		step(*it);
+		action(*it);
 	}
 }
 

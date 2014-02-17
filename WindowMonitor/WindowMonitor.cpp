@@ -191,7 +191,7 @@ RECT WindowMonitor::GetScaledRect()
 	return rect;
 }
 
-void WindowMonitor::IterateSources(std::function<void(std::wstring const & title, bool const & selected)> action)
+void WindowMonitor::IterateSources(WindowMonitorIterateAction action)
 {
 	HWND hwnd = sources->GetWindowHandle(selectedSource);
 	sources->Refresh();
@@ -202,7 +202,7 @@ void WindowMonitor::IterateSources(std::function<void(std::wstring const & title
 	});
 }
 
-void WindowMonitor::IteratePresets(std::function<void(std::wstring const & name, bool const & selected)> action)
+void WindowMonitor::IteratePresets(WindowMonitorIterateAction action)
 {
 	UpdatePresets();
 	presets->IterateNames([&](std::wstring const & name)
