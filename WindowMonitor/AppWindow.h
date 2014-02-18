@@ -30,6 +30,7 @@ private:
 
 	// Methods
 	void ToggleBorder();
+	void ToggleFullscreen();
 	void ToggleClickThrough();
 	void SetContextualCursor();
 	void UpdateSourceMenu();

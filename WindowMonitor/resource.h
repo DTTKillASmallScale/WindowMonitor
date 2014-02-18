@@ -29,3 +29,4 @@
 #define ID_MENU_MANAGEPRESETS                   40009
 #define ID_MENU_RESET                           40010
 #define ID_MENU_EXIT                            40011
+#define ID_MENU_FULLSCREEN                      40012

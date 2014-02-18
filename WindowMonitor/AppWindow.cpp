@@ -125,13 +125,41 @@ void AppWindow::ToggleBorder()
 	SetWindowLongPtr(GetWindowHandle(), GWL_STYLE, style);
 	UpdateWindow(); // Recalc chrome size
 
-	// Update content menu
+	// Update context menu
 	MENUITEMINFO mii;
 	mii.cbSize = sizeof(MENUITEMINFO);
 	mii.fMask = MIIM_STATE;
 	GetMenuItemInfo(contextMenu, ID_MENU_TOGGLEBORDER, FALSE, &mii);
 	mii.fState ^= MFS_CHECKED;
 	SetMenuItemInfo(contextMenu, ID_MENU_TOGGLEBORDER, FALSE, &mii);
+}
+
+void AppWindow::ToggleFullscreen()
+{
+	DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
+
+	// Get context menu
+	MENUITEMINFO mii;
+	mii.cbSize = sizeof(MENUITEMINFO);
+	mii.fMask = MIIM_STATE;
+	GetMenuItemInfo(contextMenu, ID_MENU_FULLSCREEN, FALSE, &mii);
+
+	if ((mii.fState & MFS_CHECKED) == 0)
+	{
+		// Set fullscreen
+		if ((style & WS_THICKFRAME) != 0) ToggleBorder();
+		windowMonitor->ScaleToFitMonitor(GetWindowHandle(), true);
+	}
+	else
+	{
+		// Clear fullscreen
+		if ((style & WS_THICKFRAME) == 0) ToggleBorder();
+		windowMonitor->ScaleToFitMonitor(GetWindowHandle());
+	}
+
+	// Update context menu
+	mii.fState ^= MFS_CHECKED;
+	SetMenuItemInfo(contextMenu, ID_MENU_FULLSCREEN, FALSE, &mii);
 }
 
 void AppWindow::ToggleClickThrough()
@@ -276,8 +304,16 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		break;
 	case WindowMonitorEvent::DimensionsReset:
 	{
+		// Toggle border if set
 		DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
 		if ((style & WS_THICKFRAME) == 0) ToggleBorder();
+
+		// Clear fullscreen menu
+		MENUITEMINFO mii;
+		mii.cbSize = sizeof(MENUITEMINFO);
+		mii.fMask = MIIM_STATE;
+		mii.fState = MFS_ENABLED;
+		SetMenuItemInfo(contextMenu, ID_MENU_FULLSCREEN, FALSE, &mii);
 	}
 	case WindowMonitorEvent::ScaledToMonitor:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());

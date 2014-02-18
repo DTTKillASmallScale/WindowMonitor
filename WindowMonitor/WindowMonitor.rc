@@ -35,6 +35,7 @@ IDR_CTXMENU MENU
             MENUITEM "200%", ID_ZOOM_200
         }
         MENUITEM "Sizing Border", ID_MENU_TOGGLEBORDER, CHECKED
+        MENUITEM "Fullscreen", ID_MENU_FULLSCREEN
         MENUITEM "Reset", ID_MENU_RESET
         MENUITEM "Exit", ID_MENU_EXIT
         MENUITEM SEPARATOR

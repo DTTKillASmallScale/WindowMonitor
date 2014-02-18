@@ -191,27 +191,17 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 		switch (LOWORD(wParam))
 		{
 		case ID_ACCEL_SWITCH:
-		{
 			windowMonitor->SelectNextSource();
 			return true;
-		}
 		case ID_ACCEL_RSWITCH:
-		{
 			windowMonitor->SelectPreviousSource();
 			return true;
-		}
 		case ID_ACCEL_RESET:
-		{
 			windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
 			return true;
-		}
 		case ID_ACCEL_FULLSCREEN:
-		{
-			DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
-			if ((style & WS_THICKFRAME) != 0) ToggleBorder();
-			windowMonitor->ScaleToFitMonitor(GetWindowHandle(), true);
+			ToggleFullscreen();
 			return true;
-		}
 		case ID_ACCEL_CLICKTHROUGH:
 			ToggleClickThrough();
 			return true;
@@ -263,6 +253,9 @@ void AppWindow::OnOptionsMenuCmd(WPARAM const & wParam)
 		break;
 	case ID_MENU_RESET:
 		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
+		break;
+	case ID_MENU_FULLSCREEN:
+		ToggleFullscreen();
 		break;
 	case ID_MENU_EXIT:
 		Destroy();
