@@ -10,11 +10,10 @@ class AppWindow : public CWindow, public WindowMonitorObserver
 {
 public:
 	AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const presetWindow);
-	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void OnWindowMonitorEvent(WindowMonitorEvent const & event);
 
 protected:
-	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
+	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override;
 
 private:
 	// Events
@@ -52,6 +51,7 @@ private:
 	WindowMonitor * windowMonitor;
 	PresetWindow * presetWindow;
 
+public:
 	// Constants
 	static const int MaxMenuTextLength;
 	static const int MenuItemBreakPoint;

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Resource.h"
 #include "AppWindow.h"
+#include "CWindowClass.h"
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
 
@@ -12,6 +13,37 @@ const int AppWindow::CursorPan = 32649;
 const int AppWindow::CursorScale = 32642;
 const int AppWindow::CursorNoFunction = 32648;
 const COLORREF AppWindow::BackgroundColour = RGB(255, 255, 255);
+
+class AppWindowClass : public CWindowClass
+{
+public:
+	AppWindowClass() : CWindowClass(L"DwmWindowMonitorApp") { }
+
+	virtual void Configure(WNDCLASSEX & wcex) override
+	{
+		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+		wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(AppWindow::CursorArrow));
+		wcex.hbrBackground = CreateSolidBrush(AppWindow::BackgroundColour);
+	}
+};
+
+class AppWindowStruct : public CWindowStruct
+{
+public:
+	virtual void Configure(CREATESTRUCT & cs) override
+	{
+		cs.lpszClass = _T("DwmWindowMonitorApp");
+		cs.lpszName = _T("New Window");
+		cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER | WS_MINIMIZEBOX;
+		cs.dwExStyle = NULL;
+		cs.hwndParent = NULL;
+		cs.x = 0;
+		cs.y = 0;
+		cs.cx = 640;
+		cs.cy = 480;
+		cs.hMenu = NULL;
+	}
+};
 
 AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const presetWindow) :
 	CWindow(),
@@ -30,15 +62,8 @@ AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const p
 	chromeHeight(0)
 {
 	lastPos.x = lastPos.y = 0;
-}
-
-void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
-{
-	SetAccelerators(IDW_MAIN);
-	cs.lpszClass = _T("DwmWindowMonitorApp");
-	cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER | WS_MINIMIZEBOX;
-	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorArrow));
-	wcex.hbrBackground = CreateSolidBrush(AppWindow::BackgroundColour);
+	SetWindowClass<AppWindowClass>();
+	SetWindowStruct<AppWindowStruct>();
 }
 
 void AppWindow::OnCreate()
@@ -49,6 +74,8 @@ void AppWindow::OnCreate()
 	WindowHelper::SetIcon(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, true);
 	SetLayeredWindowAttributes(GetWindowHandle(), AppWindow::BackgroundColour, 0, LWA_COLORKEY);
 	SetWindowPos(GetWindowHandle(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
+	SetAccelerators(IDW_MAIN);
 
 	// Create menu
 	menu = LoadMenu(WindowHelper::GetCurrentModuleHandle(), MAKEINTRESOURCE(IDR_CTXMENU));

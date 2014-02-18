@@ -16,11 +16,10 @@ class PresetWindow : public CWindow, public WindowMonitorObserver
 {
 public:
 	PresetWindow(WindowMonitor * const windowMonitor);
-	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	void OnWindowMonitorEvent(WindowMonitorEvent const & event);
 
 protected:
-	virtual void PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex);
+	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override;
 
 private:
 	void OnCreate();

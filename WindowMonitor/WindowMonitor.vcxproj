@@ -167,6 +167,7 @@
     <ClInclude Include="AppWindow.h" />
     <ClInclude Include="CustomEditControl.h" />
     <ClInclude Include="CWindow.h" />
+    <ClInclude Include="CWindowClass.h" />
     <ClInclude Include="DoubleRect.h" />
     <ClInclude Include="PresetManager.h" />
     <ClInclude Include="PresetWindow.h" />
@@ -187,6 +188,7 @@
     <ClCompile Include="AppWindow.WndProc.cpp" />
     <ClCompile Include="CustomEditControl.cpp" />
     <ClCompile Include="CWindow.cpp" />
+    <ClCompile Include="CWindowClass.cpp" />
     <ClCompile Include="PresetManager.cpp" />
     <ClCompile Include="PresetWindow.cpp" />
     <ClCompile Include="Program.cpp" />

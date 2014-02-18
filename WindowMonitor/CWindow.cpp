@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "CWindow.h"
+#include "CWindowClass.h"
 #include "WindowHelper.h"
 
 CWindow::CWindow() :
@@ -8,55 +9,16 @@ CWindow::CWindow() :
 {
 }
 
+CWindow::~CWindow()
+{
+	if (windowClass.get() != nullptr) windowClass->Unregister();
+}
+
 void CWindow::Create()
 {
-	// Check current window handle
 	if (windowHandle != NULL) return;
-
-	CREATESTRUCT cs;
-	SecureZeroMemory(&cs, sizeof(CREATESTRUCT));
-	cs.hwndParent = NULL;
-	cs.hMenu = NULL;
-	cs.lpszName = _T("New Window");
-	cs.lpszClass = _T("CustomWindowClass");
-	cs.x = 0;
-	cs.y = 0;
-	cs.cx = 640;
-	cs.cy = 480;
-	cs.style = WS_OVERLAPPEDWINDOW | WS_VISIBLE;
-	cs.dwExStyle = NULL;
-
-	WNDCLASSEX wcex;
-	SecureZeroMemory(&wcex, sizeof(WNDCLASSEX));
-	wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-
-	// Let child classes override settings
-	PreCreate(cs, wcex);
-
-	// Make sure critical values are set
-	cs.hInstance = WindowHelper::GetCurrentModuleHandle();
-	cs.lpCreateParams = this;
-	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.hInstance = WindowHelper::GetCurrentModuleHandle();
-	wcex.lpfnWndProc = CWindow::StaticWndProc;
-	wcex.lpszClassName = cs.lpszClass;
-
-	// Create window
-	RegisterClassEx(&wcex);
-
-	CreateWindowEx(
-		cs.dwExStyle,
-		cs.lpszClass,
-		cs.lpszName,
-		cs.style,
-		cs.x, cs.y,
-		cs.cx, cs.cy,
-		cs.hwndParent,
-		cs.hMenu,
-		cs.hInstance,
-		cs.lpCreateParams);
+	if (windowClass.get() != nullptr) windowClass->Register(StaticWndProc);
+	if (windowStruct.get() != nullptr) windowStruct->Create(*this);
 }
 
 void CWindow::Destroy()
@@ -67,24 +29,6 @@ void CWindow::Destroy()
 void CWindow::SetAccelerators(int const & resourceId)
 {
 	accelerators = LoadAccelerators(WindowHelper::GetCurrentModuleHandle(), MAKEINTRESOURCE(resourceId));
-}
-
-void CWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
-{
-}
-
-LRESULT CWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	switch (message)
-	{
-	case WM_DESTROY:
-		PostQuitMessage(0);
-		break;
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-	
-	return 0;
 }
 
 void CWindow::Run()

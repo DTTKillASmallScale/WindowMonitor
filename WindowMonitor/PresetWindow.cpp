@@ -1,8 +1,39 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "PresetWindow.h"
+#include "CWindowClass.h"
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
+
+class PresetWindowClass : public CWindowClass
+{
+public:
+	PresetWindowClass() : CWindowClass(L"DwmWindowMonitorPresets") { }
+
+	virtual void Configure(WNDCLASSEX & wcex) override
+	{
+		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+		wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+		wcex.hbrBackground = CreateSolidBrush(RGB(240, 240, 240));
+	}
+};
+
+class PresetWindowStruct : public CWindowStruct
+{
+public:
+	virtual void Configure(CREATESTRUCT & cs) override
+	{
+		RECT monitorRect;
+		WindowHelper::GetMonitorRect(NULL, monitorRect);
+		cs.lpszClass = _T("DwmWindowMonitorPresets");
+		cs.style = WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
+		cs.cx = 400;
+		cs.cy = 220;
+		cs.x = (monitorRect.right + monitorRect.left - cs.cx) / 2;
+		cs.y = (monitorRect.bottom + monitorRect.top - cs.cy) / 2;
+	}
+};
+
 
 PresetWindow::PresetWindow(WindowMonitor * const windowMonitor) :
 	CWindow(),
@@ -10,20 +41,8 @@ PresetWindow::PresetWindow(WindowMonitor * const windowMonitor) :
 	previousListboxSelection(-1),
 	titleText(195, 28, 175, 20)
 {
-}
-
-void PresetWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
-{
-	RECT monitorRect;
-	WindowHelper::GetMonitorRect(GetWindowHandle(), monitorRect);
-
-	cs.lpszClass = _T("DwmWindowMonitorPresets");
-	cs.style = WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
-	cs.cx = 400;
-	cs.cy = 220;
-	cs.x = (monitorRect.right + monitorRect.left - cs.cx) / 2;
-	cs.y = (monitorRect.bottom + monitorRect.top - cs.cy) / 2;
-	wcex.hbrBackground = CreateSolidBrush(RGB(240, 240, 240));
+	SetWindowClass<PresetWindowClass>();
+	SetWindowStruct<PresetWindowStruct>();
 }
 
 void PresetWindow::OnCreate()
