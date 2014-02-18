@@ -1,11 +1,11 @@
 #include "stdafx.h"
 #include "CWindow.h"
+#include "WindowHelper.h"
 
 CWindow::CWindow() :
 	windowHandle(NULL),
 	accelerators(NULL)
 {
-	instance = GetModuleHandle(NULL);
 }
 
 void CWindow::Create()
@@ -36,10 +36,10 @@ void CWindow::Create()
 	PreCreate(cs, wcex);
 
 	// Make sure critical values are set
-	cs.hInstance = instance;
+	cs.hInstance = WindowHelper::GetCurrentModuleHandle();
 	cs.lpCreateParams = this;
 	wcex.cbSize = sizeof(WNDCLASSEX);
-	wcex.hInstance = instance;
+	wcex.hInstance = WindowHelper::GetCurrentModuleHandle();
 	wcex.lpfnWndProc = CWindow::StaticWndProc;
 	wcex.lpszClassName = cs.lpszClass;
 

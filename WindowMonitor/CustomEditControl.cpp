@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CustomEditControl.h"
 #include "PresetWindow.h"
+#include "WindowHelper.h"
 
 CustomEditControl::CustomEditControl(int const & x, int const & y, int const & cx, int const & cy) :
 	originalProc(NULL)
@@ -27,10 +28,8 @@ void CustomEditControl::Create()
 	// Check current window handle
 	if (windowHandle != NULL) return;
 
-	instance = GetModuleHandle(NULL);
-
 	// Create window
-	windowHandle = CreateWindowEx(cs.dwExStyle, cs.lpszClass, cs.lpszName, cs.style, cs.x, cs.y, cs.cx, cs.cy, cs.hwndParent, cs.hMenu, instance, cs.lpCreateParams);
+	windowHandle = CreateWindowEx(cs.dwExStyle, cs.lpszClass, cs.lpszName, cs.style, cs.x, cs.y, cs.cx, cs.cy, cs.hwndParent, cs.hMenu, WindowHelper::GetCurrentModuleHandle(), cs.lpCreateParams);
 
 	// Set user data for StaticWndProc
 	SetWindowLongPtr(windowHandle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));

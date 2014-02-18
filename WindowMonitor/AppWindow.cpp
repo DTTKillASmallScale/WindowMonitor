@@ -44,14 +44,14 @@ void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 void AppWindow::OnCreate()
 {
 	// Set window options
-	WindowHelper::SetTitle(windowHandle, instance, IDS_TITLE);
-	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN);
-	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN, true);
+	WindowHelper::SetTitle(windowHandle, WindowHelper::GetCurrentModuleHandle(), IDS_TITLE);
+	WindowHelper::SetIcon(windowHandle, WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
+	WindowHelper::SetIcon(windowHandle, WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, true);
 	SetLayeredWindowAttributes(windowHandle, AppWindow::BackgroundColour, 0, LWA_COLORKEY);
 	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 	// Create menu
-	menu = LoadMenu(instance, MAKEINTRESOURCE(IDR_CTXMENU));
+	menu = LoadMenu(WindowHelper::GetCurrentModuleHandle(), MAKEINTRESOURCE(IDR_CTXMENU));
 	contextMenu = GetSubMenu(menu, 0);
 	presetsMenu = GetSubMenu(contextMenu, 0);
 	zoomMenu = GetSubMenu(contextMenu, 1);
@@ -167,7 +167,7 @@ void AppWindow::UpdateSourceMenu()
 	if (identifier == baseMenuItemCount) 
 	{
 		std::wstring text;
-		WindowHelper::GetResourceString(instance, IDS_NOWINDOWSFOUND, text);
+		WindowHelper::GetResourceString(WindowHelper::GetCurrentModuleHandle(), IDS_NOWINDOWSFOUND, text);
 		AppendMenuW(contextMenu, MF_STRING | MF_GRAYED, 0, text.c_str());
 	}
 }
@@ -195,7 +195,7 @@ void AppWindow::UpdatePresetMenu()
 	if (identifier == 2) 
 	{
 		std::wstring text;
-		WindowHelper::GetResourceString(instance, IDS_NOPRESETSFOUND, text);
+		WindowHelper::GetResourceString(WindowHelper::GetCurrentModuleHandle(), IDS_NOPRESETSFOUND, text);
 		AppendMenuW(presetsMenu, MF_STRING | MF_GRAYED, 0, text.c_str());
 	}
 }

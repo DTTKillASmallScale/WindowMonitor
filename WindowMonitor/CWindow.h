@@ -7,11 +7,9 @@ public:
 	virtual void Create();
 	void Destroy();
 	inline HWND GetWindowHandle() { return windowHandle; }
-	inline HINSTANCE GetInstance() { return instance; }
 	static void Run();
 
 protected:
-	HINSTANCE instance;
 	HWND windowHandle;
 	HACCEL accelerators;
 

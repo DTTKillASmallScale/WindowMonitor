@@ -29,21 +29,21 @@ void PresetWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 void PresetWindow::OnCreate()
 {
 	// Set window options
-	WindowHelper::SetTitle(windowHandle, instance, IDS_PRESETS);
-	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN);
-	WindowHelper::SetIcon(windowHandle, instance, IDW_MAIN, true);
+	WindowHelper::SetTitle(windowHandle, WindowHelper::GetCurrentModuleHandle(), IDS_PRESETS);
+	WindowHelper::SetIcon(windowHandle, WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
+	WindowHelper::SetIcon(windowHandle, WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, true);
 	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 	// Create controls
-	presetListbox = CreateWindowEx(WS_EX_CLIENTEDGE, L"Listbox", NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT, 12, 12, 165, 121, windowHandle, reinterpret_cast<HMENU>(PresetCommand::ListboxSelect), instance, NULL);
-	removeButton = CreateWindow(L"Button", L"Remove", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 12, 146, 75, 23, windowHandle, reinterpret_cast<HMENU>(PresetCommand::RemovePreset), instance, NULL);
-	titleLabel = CreateWindow(L"Static", L"Name:", WS_CHILD | WS_VISIBLE | SS_LEFT, 192, 12, 30, 13, windowHandle, NULL, instance, NULL);
-	sizeLabel = CreateWindow(L"Static", L"Size:", WS_CHILD | WS_VISIBLE | SS_LEFT, 192, 60, 30, 13, windowHandle, NULL, instance, NULL);
-	posxText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 202, 90, 50, 20, windowHandle, NULL, instance, NULL);
-	posyText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 258, 78, 50, 20, windowHandle, NULL, instance, NULL);
-	heightText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 258, 104, 50, 20, windowHandle, NULL, instance, NULL);
-	widthText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 314, 90, 50, 20, windowHandle, NULL, instance, NULL);
-	saveButton = CreateWindow(L"Button", L"Save", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 297, 146, 75, 23, windowHandle, reinterpret_cast<HMENU>(PresetCommand::SavePreset), instance, NULL);
+	presetListbox = CreateWindowEx(WS_EX_CLIENTEDGE, L"Listbox", NULL, WS_CHILD | WS_VISIBLE | WS_VSCROLL | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT, 12, 12, 165, 121, windowHandle, reinterpret_cast<HMENU>(PresetCommand::ListboxSelect), WindowHelper::GetCurrentModuleHandle(), NULL);
+	removeButton = CreateWindow(L"Button", L"Remove", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 12, 146, 75, 23, windowHandle, reinterpret_cast<HMENU>(PresetCommand::RemovePreset), WindowHelper::GetCurrentModuleHandle(), NULL);
+	titleLabel = CreateWindow(L"Static", L"Name:", WS_CHILD | WS_VISIBLE | SS_LEFT, 192, 12, 30, 13, windowHandle, NULL, WindowHelper::GetCurrentModuleHandle(), NULL);
+	sizeLabel = CreateWindow(L"Static", L"Size:", WS_CHILD | WS_VISIBLE | SS_LEFT, 192, 60, 30, 13, windowHandle, NULL, WindowHelper::GetCurrentModuleHandle(), NULL);
+	posxText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 202, 90, 50, 20, windowHandle, NULL, WindowHelper::GetCurrentModuleHandle(), NULL);
+	posyText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 258, 78, 50, 20, windowHandle, NULL, WindowHelper::GetCurrentModuleHandle(), NULL);
+	heightText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 258, 104, 50, 20, windowHandle, NULL, WindowHelper::GetCurrentModuleHandle(), NULL);
+	widthText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 314, 90, 50, 20, windowHandle, NULL, WindowHelper::GetCurrentModuleHandle(), NULL);
+	saveButton = CreateWindow(L"Button", L"Save", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 297, 146, 75, 23, windowHandle, reinterpret_cast<HMENU>(PresetCommand::SavePreset), WindowHelper::GetCurrentModuleHandle(), NULL);
 
 	titleText.SetParent(windowHandle);
 	titleText.Create();
