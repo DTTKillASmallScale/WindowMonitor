@@ -34,7 +34,7 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		if (OnSizing(wParam, lParam)) return TRUE;
 		break;
 	case WM_SIZE:
-		if (wasSizing) { wasSizing = false; windowMonitor->ScaleToFitWindow(windowHandle); }
+		if (wasSizing) { wasSizing = false; windowMonitor->ScaleToFitWindow(GetWindowHandle()); }
 		break;
 	case WM_EXITSIZEMOVE:
 		wasSizing = false;
@@ -96,7 +96,7 @@ bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
 	// Drag window
 	if (lmb)
 	{
-		SendMessage(windowHandle, WM_SYSCOMMAND, SC_MOVE | 0x0002, NULL);
+		SendMessage(GetWindowHandle(), WM_SYSCOMMAND, SC_MOVE | 0x0002, NULL);
 		SetContextualCursor();
 		return true;
 	}
@@ -180,7 +180,7 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 	}
 
 	// Set scale
-	windowMonitor->ScaleToFitWindow(windowHandle);
+	windowMonitor->ScaleToFitWindow(GetWindowHandle());
 	return true;
 }
 
@@ -202,14 +202,14 @@ bool AppWindow::OnAccelCommand(WPARAM const & wParam, LPARAM const & lParam)
 		}
 		case ID_ACCEL_RESET:
 		{
-			windowMonitor->ResetAndScaleToFitMonitor(windowHandle);
+			windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
 			return true;
 		}
 		case ID_ACCEL_FULLSCREEN:
 		{
-			DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+			DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
 			if ((style & WS_THICKFRAME) != 0) ToggleBorder();
-			windowMonitor->ScaleToFitMonitor(windowHandle, true);
+			windowMonitor->ScaleToFitMonitor(GetWindowHandle(), true);
 			return true;
 		}
 		case ID_ACCEL_CLICKTHROUGH:
@@ -237,7 +237,7 @@ void AppWindow::OnContextMenu(WPARAM const & wParam, LPARAM const & lParam)
 	if (x == -1 && y == -1)
 	{
 		RECT rect;
-		GetWindowRect(windowHandle, &rect);
+		GetWindowRect(GetWindowHandle(), &rect);
 		x = rect.left + (rect.right - rect.left) / 2;
 		y = rect.top + (rect.bottom - rect.top) / 2;
 	}
@@ -245,7 +245,7 @@ void AppWindow::OnContextMenu(WPARAM const & wParam, LPARAM const & lParam)
 	// Show menu
 	UpdateSourceMenu();
 	UpdatePresetMenu();
-	TrackPopupMenu(contextMenu, TPM_LEFTALIGN | TPM_TOPALIGN, x, y, 0, windowHandle, NULL);
+	TrackPopupMenu(contextMenu, TPM_LEFTALIGN | TPM_TOPALIGN, x, y, 0, GetWindowHandle(), NULL);
 }
 
 void AppWindow::OnOptionsMenuCmd(WPARAM const & wParam)
@@ -262,7 +262,7 @@ void AppWindow::OnOptionsMenuCmd(WPARAM const & wParam)
 		ToggleBorder();
 		break;
 	case ID_MENU_RESET:
-		windowMonitor->ResetAndScaleToFitMonitor(windowHandle);
+		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
 		break;
 	case ID_MENU_EXIT:
 		Destroy();

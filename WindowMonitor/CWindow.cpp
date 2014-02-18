@@ -64,6 +64,11 @@ void CWindow::Destroy()
 	if (windowHandle != NULL) DestroyWindow(windowHandle);
 }
 
+void CWindow::SetAccelerators(int const & resourceId)
+{
+	accelerators = LoadAccelerators(WindowHelper::GetCurrentModuleHandle(), MAKEINTRESOURCE(resourceId));
+}
+
 void CWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 {
 }

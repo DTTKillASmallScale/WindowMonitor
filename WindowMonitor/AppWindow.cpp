@@ -34,7 +34,7 @@ AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const p
 
 void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 {
-	accelerators = LoadAccelerators(cs.hInstance, MAKEINTRESOURCE(IDW_MAIN));
+	SetAccelerators(IDW_MAIN);
 	cs.lpszClass = _T("DwmWindowMonitorApp");
 	cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER | WS_MINIMIZEBOX;
 	wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(CursorArrow));
@@ -44,11 +44,11 @@ void AppWindow::PreCreate(CREATESTRUCT & cs, WNDCLASSEX & wcex)
 void AppWindow::OnCreate()
 {
 	// Set window options
-	WindowHelper::SetTitle(windowHandle, WindowHelper::GetCurrentModuleHandle(), IDS_TITLE);
-	WindowHelper::SetIcon(windowHandle, WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
-	WindowHelper::SetIcon(windowHandle, WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, true);
-	SetLayeredWindowAttributes(windowHandle, AppWindow::BackgroundColour, 0, LWA_COLORKEY);
-	SetWindowPos(windowHandle, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	WindowHelper::SetTitle(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDS_TITLE);
+	WindowHelper::SetIcon(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
+	WindowHelper::SetIcon(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, true);
+	SetLayeredWindowAttributes(GetWindowHandle(), AppWindow::BackgroundColour, 0, LWA_COLORKEY);
+	SetWindowPos(GetWindowHandle(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 	// Create menu
 	menu = LoadMenu(WindowHelper::GetCurrentModuleHandle(), MAKEINTRESOURCE(IDR_CTXMENU));
@@ -90,12 +90,12 @@ void AppWindow::OnDestroy()
 void AppWindow::ToggleBorder()
 {
 	// Toggle window border
-	DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+	DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
 	style ^= WS_THICKFRAME;
 	style ^= WS_BORDER;
 
 	// Set new style
-	SetWindowLongPtr(windowHandle, GWL_STYLE, style);
+	SetWindowLongPtr(GetWindowHandle(), GWL_STYLE, style);
 	UpdateWindow(); // Recalc chrome size
 
 	// Update content menu
@@ -110,12 +110,12 @@ void AppWindow::ToggleBorder()
 void AppWindow::ToggleClickThrough()
 {
 	// Toggle window transparency
-	DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_EXSTYLE));
+	DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_EXSTYLE));
 	style ^= WS_EX_TRANSPARENT;
 	style ^= WS_EX_LAYERED;
 
 	// Set new style
-	SetWindowLongPtr(windowHandle, GWL_EXSTYLE, style);
+	SetWindowLongPtr(GetWindowHandle(), GWL_EXSTYLE, style);
 }
 
 void AppWindow::SetContextualCursor()
@@ -134,7 +134,7 @@ void AppWindow::SetContextualCursor()
 	if (prevCursor != currentCursor) 
 	{
 		cursorSet = false;
-		SendMessage(windowHandle, WM_SETCURSOR, WPARAM(windowHandle), (LPARAM)MAKELONG(HTCLIENT, WM_MOUSEMOVE));
+		SendMessage(GetWindowHandle(), WM_SETCURSOR, WPARAM(GetWindowHandle()), (LPARAM)MAKELONG(HTCLIENT, WM_MOUSEMOVE));
 	}
 }
 
@@ -207,11 +207,11 @@ void AppWindow::UpdateWindow()
 
 	// Calc window dimensions
 	RECT windowRect{ 0, 0, width, height };
-	DWORD dwStyle = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+	DWORD dwStyle = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
 	AdjustWindowRect(&windowRect, dwStyle, FALSE);
 
 	// Set window size
-	SetWindowPos(windowHandle, NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
+	SetWindowPos(GetWindowHandle(), NULL, 0, 0, windowRect.right - windowRect.left, windowRect.bottom - windowRect.top, SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
 
 	// Get size of window chrome
 	chromeWidth = (windowRect.right - windowRect.left) - width;
@@ -221,11 +221,11 @@ void AppWindow::UpdateWindow()
 void AppWindow::CenterWindow()
 {
 	RECT windowRect, monitorRect;
-	GetWindowRect(windowHandle, &windowRect);
-	WindowHelper::GetMonitorRect(windowHandle, monitorRect);
+	GetWindowRect(GetWindowHandle(), &windowRect);
+	WindowHelper::GetMonitorRect(GetWindowHandle(), monitorRect);
 	int x = (monitorRect.right + monitorRect.left - windowRect.right + windowRect.left) / 2;
 	int y = (monitorRect.bottom + monitorRect.top - windowRect.bottom + windowRect.top) / 2;
-	SetWindowPos(windowHandle, HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE);
+	SetWindowPos(GetWindowHandle(), HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE);
 }
 
 void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
@@ -233,8 +233,8 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 	switch (event)
 	{
 	case WindowMonitorEvent::SourceSelected:
-		adjustableThumbnail.SetThumbnail(windowHandle, windowMonitor->GetSourceWindow());
-		windowMonitor->ResetAndScaleToFitMonitor(windowHandle);
+		adjustableThumbnail.SetThumbnail(GetWindowHandle(), windowMonitor->GetSourceWindow());
+		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
 		break;
 	case WindowMonitorEvent::Moved:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
@@ -249,7 +249,7 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		break;
 	case WindowMonitorEvent::DimensionsReset:
 	{
-		DWORD style = static_cast<DWORD>(GetWindowLong(windowHandle, GWL_STYLE));
+		DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
 		if ((style & WS_THICKFRAME) == 0) ToggleBorder();
 	}
 	case WindowMonitorEvent::ScaledToMonitor:

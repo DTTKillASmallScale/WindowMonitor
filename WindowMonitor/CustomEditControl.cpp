@@ -26,16 +26,16 @@ void CustomEditControl::SetParent(HWND const & parent)
 void CustomEditControl::Create()
 {
 	// Check current window handle
-	if (windowHandle != NULL) return;
+	if (GetWindowHandle() != NULL) return;
 
 	// Create window
-	windowHandle = CreateWindowEx(cs.dwExStyle, cs.lpszClass, cs.lpszName, cs.style, cs.x, cs.y, cs.cx, cs.cy, cs.hwndParent, cs.hMenu, WindowHelper::GetCurrentModuleHandle(), cs.lpCreateParams);
+	SetWindowHandle(CreateWindowEx(cs.dwExStyle, cs.lpszClass, cs.lpszName, cs.style, cs.x, cs.y, cs.cx, cs.cy, cs.hwndParent, cs.hMenu, WindowHelper::GetCurrentModuleHandle(), cs.lpCreateParams));
 
 	// Set user data for StaticWndProc
-	SetWindowLongPtr(windowHandle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
+	SetWindowLongPtr(GetWindowHandle(), GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
 	// Re-wire to use StaticWndProc
-	originalProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(windowHandle, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&CWindow::StaticWndProc)));
+	originalProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(GetWindowHandle(), GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&CWindow::StaticWndProc)));
 }
 
 LRESULT CustomEditControl::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -47,8 +47,8 @@ LRESULT CustomEditControl::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 	case WM_KEYUP:
 		if (wParam == VK_RETURN)
 		{
-			HWND parent = GetParent(windowHandle);
-			SendMessage(parent, WM_COMMAND, MAKEWPARAM(PresetCommand::SavePreset, 0), reinterpret_cast<LPARAM>(windowHandle));
+			HWND parent = GetParent(GetWindowHandle());
+			SendMessage(parent, WM_COMMAND, MAKEWPARAM(PresetCommand::SavePreset, 0), reinterpret_cast<LPARAM>(GetWindowHandle()));
 			return 0;
 		}
 	}
