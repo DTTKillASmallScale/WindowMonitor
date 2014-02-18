@@ -13,4 +13,5 @@ namespace WindowHelper
 	void GetListboxItemText(HWND const & hWnd, int const & index, std::wstring & text);
 	void GetMonitorRect(HWND const & hWnd, RECT & rect);
 	void DisplayExceptionMessage(unsigned int const & titleId, unsigned int const & textId, std::exception const & e);
+	HINSTANCE GetCurrentModuleHandle();
 }

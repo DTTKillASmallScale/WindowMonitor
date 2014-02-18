@@ -142,4 +142,12 @@ namespace WindowHelper
 		// Display message box
 		MessageBoxW(NULL, messageTemplate.c_str(), title.c_str(), MB_OK | MB_ICONERROR | MB_TOPMOST);
 	}
+
+	HINSTANCE GetCurrentModuleHandle()
+	{
+		HMODULE module = NULL;
+		if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCTSTR>(&GetCurrentModuleHandle), &module))
+			return module;
+		return NULL;
+	}
 }
