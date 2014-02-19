@@ -58,7 +58,7 @@ void WindowFilter::IterateItems(WindowFilterIterateAction action)
 	}
 }
 
-void WindowFilter::Refresh()
+size_t WindowFilter::Refresh()
 {
 	// Load blacklist
 	LoadBlacklist();
@@ -68,9 +68,11 @@ void WindowFilter::Refresh()
 	EnumWindows(WindowFilter::AddWindowToList, LPARAM(&windows));
 
 	// Filter windows
-	HWND hwnd = NULL;
+	HWND hwnd, parent;
 	std::wstring className;
 	std::wstring title;
+	RECT clientRect;
+	size_t checksum(0);
 
 	// Clear set
 	items.clear();
@@ -88,7 +90,6 @@ void WindowFilter::Refresh()
 		if (IsIconic(hwnd)) continue;
 
 		// Check client area size
-		RECT clientRect;
 		GetClientRect(hwnd, &clientRect);
 		if (clientRect.bottom - clientRect.top < 1 || clientRect.right - clientRect.left < 1)
 			continue;
@@ -113,7 +114,7 @@ void WindowFilter::Refresh()
 		// Re-title windows sidebar inner windows
 		if (className.compare(L"SideBar_HTMLHostWindow") == 0)
 		{
-			HWND parent = GetParent(hwnd);
+			parent = GetParent(hwnd);
 			if (parent != NULL) WindowHelper::GetEditText(parent, title);
 		}
 
@@ -126,7 +127,12 @@ void WindowFilter::Refresh()
 
 		// Insert item at start
 		items.insert(items.begin(), WindowFilterItem(hwnd, title, className));
+
+		// Update checksum
+		checksum += hwndHash(hwnd);
 	}
+
+	return checksum;
 }
 
 bool WindowFilter::IsFilteredByClassName(std::wstring const & className)

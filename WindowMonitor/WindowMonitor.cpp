@@ -206,11 +206,13 @@ RECT WindowMonitor::GetScaledRect()
 	return rect;
 }
 
+size_t WindowMonitor::UpdateSources()
+{
+	return sources->Refresh();
+}
+
 void WindowMonitor::IterateSources(WindowMonitorIterateAction action)
 {
-	sources->Refresh();
-	if (sources->ItemCount() < 1) return;
-	
 	sources->IterateItems([&](WindowFilterItem const & item)
 	{
 		action(item.title, (item == selectedSource));

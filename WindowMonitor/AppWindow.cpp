@@ -195,6 +195,11 @@ void AppWindow::SetContextualCursor()
 
 void AppWindow::UpdateSourceMenu()
 {
+	// Update sources
+	size_t checksum = windowMonitor->UpdateSources();
+	if (lastChecksum == checksum) return;
+	lastChecksum = checksum;
+
 	// Clear
 	while (GetMenuItemCount(contextMenu) > baseMenuItemCount)
 		DeleteMenu(contextMenu, baseMenuItemCount, MF_BYPOSITION);
@@ -290,6 +295,7 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 	case WindowMonitorEvent::SourceSelected:
 		adjustableThumbnail.SetThumbnail(GetWindowHandle(), windowMonitor->GetSourceWindow());
 		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
+		lastChecksum = 0;
 		break;
 	case WindowMonitorEvent::Moved:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
@@ -314,6 +320,8 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		mii.fMask = MIIM_STATE;
 		mii.fState = MFS_ENABLED;
 		SetMenuItemInfo(contextMenu, ID_MENU_FULLSCREEN, FALSE, &mii);
+
+		// Continue onto next case
 	}
 	case WindowMonitorEvent::ScaledToMonitor:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());

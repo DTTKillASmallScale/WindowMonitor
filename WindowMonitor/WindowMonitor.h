@@ -37,6 +37,8 @@ public:
 	inline double GetAspect(){ return (dimensions.right - dimensions.left) / (dimensions.bottom - dimensions.top); }
 	inline DoubleRect GetDimensions() { return dimensions; }
 	RECT GetScaledRect();
+
+	size_t UpdateSources();
 	void IterateSources(WindowMonitorIterateAction action);
 	void IteratePresets(WindowMonitorIterateAction action);
 

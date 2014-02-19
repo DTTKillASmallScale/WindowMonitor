@@ -48,6 +48,7 @@ private:
 	POINTS lastPos;
 	int chromeWidth, chromeHeight;
 	bool wasSizing;
+	size_t lastChecksum;
 
 	WindowMonitor * windowMonitor;
 	PresetWindow * presetWindow;
