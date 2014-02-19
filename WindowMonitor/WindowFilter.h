@@ -2,14 +2,16 @@
 #include "WindowFilterItem.h"
 #include "WindowFilterBlacklistItem.h"
 
-typedef std::function<void(WindowFilterItem const & name)> WindowFilterIterateAction;
+typedef std::function<bool(WindowFilterItem const & item)> WindowFilterIterateAction;
 
 class WindowFilter
 {
 public:
 	WindowFilter();
 	std::size_t ItemCount();
-	HWND GetWindowHandle(std::size_t const & index);
+	WindowFilterItem GetItem(std::size_t const & index);
+	WindowFilterItem GetNextItem(WindowFilterItem const & currentItem);
+	WindowFilterItem GetPreviousItem(WindowFilterItem const & currentItem);
 	void IterateItems(WindowFilterIterateAction action);
 	void Refresh();
 

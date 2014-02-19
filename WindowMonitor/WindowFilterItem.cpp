@@ -12,3 +12,8 @@ bool WindowFilterItem::operator<(WindowFilterItem const & rhs) const
 {
 	return hwnd < rhs.hwnd;
 }
+
+bool WindowFilterItem::operator == (WindowFilterItem const & rhs) const
+{
+	return (hwnd == rhs.hwnd) && (className == rhs.className);
+}

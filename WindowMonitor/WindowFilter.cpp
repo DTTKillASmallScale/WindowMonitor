@@ -13,18 +13,48 @@ std::size_t WindowFilter::ItemCount()
 	return items.size();
 }
 
-HWND WindowFilter::GetWindowHandle(std::size_t const & index)
+WindowFilterItem WindowFilter::GetItem(std::size_t const & index)
 {
-	std::size_t const & count = items.size();
-	if (index < count) return items.at(index).hwnd;
-	else return NULL;
+	if (index < items.size()) return items[index];
+	else return WindowFilterItem();
+}
+
+WindowFilterItem WindowFilter::GetNextItem(WindowFilterItem const & currentItem)
+{
+	std::size_t index = 0;
+
+	IterateItems([&](WindowFilterItem const & item)
+	{
+		index++;
+		if (item == currentItem) return true;
+		return false;
+	});
+
+	if (index >= ItemCount()) index = 0;
+	return GetItem(index);
+}
+
+WindowFilterItem WindowFilter::GetPreviousItem(WindowFilterItem const & currentItem)
+{
+	std::size_t index = 0;
+
+	IterateItems([&](WindowFilterItem const & item)
+	{
+		if (item == currentItem) return true;
+		index++;
+		return false;
+	});
+
+	if (index == 0) index = ItemCount() - 1;
+	else index--;
+	return GetItem(index);
 }
 
 void WindowFilter::IterateItems(WindowFilterIterateAction action)
 {
 	for (auto it = items.begin(); it != items.end(); ++it)
 	{
-		action(*it);
+		if (action(*it) == true) break;
 	}
 }
 

@@ -28,7 +28,7 @@ public:
 	void ScaleToFitMonitor(HWND const & hWnd, bool const & maximize = false);
 	void ResetAndScaleToFitMonitor(HWND const & hWnd);
 
-	inline HWND GetSourceWindow() { return sources->GetWindowHandle(selectedSource); }
+	inline HWND GetSourceWindow() { return selectedSource.hwnd; }
 	inline std::wstring GetSelectedPresetName() { return selectedPreset; }
 	inline double GetWidth() { return dimensions.right - dimensions.left; }
 	inline double GetHeight() { return dimensions.bottom - dimensions.top; }
@@ -47,7 +47,7 @@ private:
 	DoubleRect dimensions;
 	double scale;
 
-	std::size_t selectedSource;
+	WindowFilterItem selectedSource;
 	std::wstring selectedPreset;
 
 	WindowFilter * sources;
@@ -55,6 +55,7 @@ private:
 
 	std::vector<WindowMonitorObserver *> observers;
 
+	void SetDimensionsToSelectedSource();
 	void ScaleToFitMonitorWithoutNotification(HWND const & hWnd, bool const & maximize = false); 
 	void NotifyObservers(WindowMonitorEvent const & event);
 

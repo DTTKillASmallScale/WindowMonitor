@@ -10,7 +10,6 @@ WindowMonitor::WindowMonitor(WindowFilter * sources, PresetManager * presets) :
 	presets(presets),
 	dimensions(),
 	scale(1.0),
-	selectedSource(0),
 	selectedPreset()
 {
 }
@@ -26,17 +25,10 @@ void WindowMonitor::SelectSource(std::size_t const & index)
 	if (sources->ItemCount() < 1) return;
 
 	// Set selected index
-	selectedSource = index;
+	selectedSource = sources->GetItem(index);
 
 	// Set dimensions
-	RECT tmp;
-	if (GetClientRect(sources->GetWindowHandle(selectedSource), &tmp))
-	{
-		dimensions.bottom = static_cast<double>(tmp.bottom);
-		dimensions.left = static_cast<double>(tmp.left);
-		dimensions.right = static_cast<double>(tmp.right);
-		dimensions.top = static_cast<double>(tmp.top);
-	}
+	SetDimensionsToSelectedSource();
 
 	// Send update event
 	NotifyObservers(WindowMonitorEvent::SourceSelected);
@@ -44,15 +36,34 @@ void WindowMonitor::SelectSource(std::size_t const & index)
 
 void WindowMonitor::SelectNextSource()
 {
-	auto index = selectedSource + 1;
-	if (index >= sources->ItemCount()) index = 0;
-	SelectSource(index);
+	// Get filtered windows
+	sources->Refresh();
+	if (sources->ItemCount() < 1) return;
+
+	// Get next item
+	selectedSource = sources->GetNextItem(selectedSource);
+
+	// Set dimensions
+	SetDimensionsToSelectedSource();
+
+	// Send update event
+	NotifyObservers(WindowMonitorEvent::SourceSelected);
 }
 
 void WindowMonitor::SelectPreviousSource()
 {
-	if (selectedSource == 0) SelectSource(sources->ItemCount() - 1);
-	else SelectSource(selectedSource - 1);
+	// Get filtered windows
+	sources->Refresh();
+	if (sources->ItemCount() < 1) return;
+
+	// Get previous item
+	selectedSource = sources->GetPreviousItem(selectedSource);
+
+	// Set dimensions
+	SetDimensionsToSelectedSource();
+
+	// Send update event
+	NotifyObservers(WindowMonitorEvent::SourceSelected);
 }
 
 void WindowMonitor::SelectPreset(std::wstring const & name)
@@ -119,16 +130,21 @@ void WindowMonitor::Crop(long const & x, long const & y)
 	NotifyObservers(WindowMonitorEvent::Cropped);
 }
 
-void WindowMonitor::ResetAndScaleToFitMonitor(HWND const & hWnd)
+void WindowMonitor::SetDimensionsToSelectedSource()
 {
 	RECT tmp;
-	if (GetClientRect(sources->GetWindowHandle(selectedSource), &tmp))
+	if (GetClientRect(selectedSource.hwnd, &tmp))
 	{
 		dimensions.bottom = static_cast<double>(tmp.bottom);
 		dimensions.left = static_cast<double>(tmp.left);
 		dimensions.right = static_cast<double>(tmp.right);
 		dimensions.top = static_cast<double>(tmp.top);
 	}
+}
+
+void WindowMonitor::ResetAndScaleToFitMonitor(HWND const & hWnd)
+{
+	SetDimensionsToSelectedSource();
 	selectedPreset.clear();
 	ScaleToFitMonitorWithoutNotification(hWnd);
 	NotifyObservers(WindowMonitorEvent::DimensionsReset);
@@ -181,9 +197,8 @@ void WindowMonitor::ScaleToFitMonitorWithoutNotification(HWND const & hWnd, bool
 
 RECT WindowMonitor::GetScaledRect()
 {
-	HWND hwnd = sources->GetWindowHandle(selectedSource);
 	RECT rect;
-	GetClientRect(hwnd, &rect);
+	GetClientRect(selectedSource.hwnd, &rect);
 	rect.left = static_cast<long>(ceil(-dimensions.left * scale));
 	rect.top = static_cast<long>(ceil(-dimensions.top * scale));
 	rect.right = static_cast<long>(ceil((static_cast<double>(rect.right) - dimensions.left) * scale));
@@ -193,12 +208,13 @@ RECT WindowMonitor::GetScaledRect()
 
 void WindowMonitor::IterateSources(WindowMonitorIterateAction action)
 {
-	HWND hwnd = sources->GetWindowHandle(selectedSource);
 	sources->Refresh();
 	if (sources->ItemCount() < 1) return;
+	
 	sources->IterateItems([&](WindowFilterItem const & item)
 	{
-		action(item.title, (item.hwnd == hwnd));
+		action(item.title, (item == selectedSource));
+		return false;
 	});
 }
 
