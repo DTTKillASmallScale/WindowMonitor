@@ -165,6 +165,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AppWindow.h" />
+    <ClInclude Include="AppWindowAcceleratorHandler.h" />
+    <ClInclude Include="AppWindowCursorHandler.h" />
+    <ClInclude Include="AppWindowMenuHandler.h" />
     <ClInclude Include="CustomEditControl.h" />
     <ClInclude Include="CWindow.h" />
     <ClInclude Include="CWindowClass.h" />
@@ -185,7 +188,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AppWindow.cpp" />
-    <ClCompile Include="AppWindow.WndProc.cpp" />
+    <ClCompile Include="AppWindowAcceleratorHandler.cpp" />
+    <ClCompile Include="AppWindowCursorHandler.cpp" />
+    <ClCompile Include="AppWindowMenuHandler.cpp" />
     <ClCompile Include="CustomEditControl.cpp" />
     <ClCompile Include="CWindow.cpp" />
     <ClCompile Include="CWindowClass.cpp" />

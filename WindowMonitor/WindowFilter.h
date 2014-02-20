@@ -20,7 +20,6 @@ private:
 	std::vector<WindowFilterItem> items;
 	std::vector<WindowFilterBlacklistItem> blacklist;
 	unsigned long long blacklistLastWrite;
-	std::hash<HWND> hwndHash;
 
 	bool IsFilteredByClassName(std::wstring const & className);
 	bool EmptyTitleAllowedByClassName(std::wstring const & className);

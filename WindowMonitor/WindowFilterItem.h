@@ -6,9 +6,14 @@ public:
 	HWND hwnd;
 	std::wstring title;
 	std::wstring className;
+	size_t hash;
 
-	WindowFilterItem() : hwnd(NULL) { }
+	WindowFilterItem() : hwnd(NULL), hash(0) { }
 	WindowFilterItem(HWND const & hwnd, std::wstring const & title, std::wstring const & className);
 	bool operator<(WindowFilterItem const & rhs) const;
 	bool operator==(WindowFilterItem const & rhs) const;
+
+private:
+	static const std::hash<HWND> HwndHash;
+	static const std::hash<std::wstring> StringHash;
 };

@@ -5,13 +5,6 @@
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
 
-const int AppWindow::MaxMenuTextLength = 32;
-const int AppWindow::MenuItemBreakPoint = 24;
-const int AppWindow::CursorArrow = 32512;
-const int AppWindow::CursorMove = 32646;
-const int AppWindow::CursorPan = 32649;
-const int AppWindow::CursorScale = 32642;
-const int AppWindow::CursorNoFunction = 32648;
 const COLORREF AppWindow::BackgroundColour = RGB(255, 255, 255);
 
 class AppWindowClass : public CWindowClass
@@ -22,7 +15,7 @@ public:
 	virtual void Configure(WNDCLASSEX & wcex) override
 	{
 		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-		wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(AppWindow::CursorArrow));
+		wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(32512));
 		wcex.hbrBackground = CreateSolidBrush(AppWindow::BackgroundColour);
 	}
 };
@@ -47,23 +40,22 @@ public:
 
 AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const presetWindow) :
 	CWindow(),
+	cursorHandler(this, windowMonitor),
+	acceleratorhandler(this, windowMonitor),
+	menuHandler(this, windowMonitor),
 	windowMonitor(windowMonitor),
 	presetWindow(presetWindow),
 	adjustableThumbnail(),
-	menu(NULL),
-	contextMenu(NULL),
-	presetsMenu(NULL),
-	zoomMenu(NULL),
-	baseMenuItemCount(0),
-	suppressContextMenu(false),
-	currentCursor(0),
-	cursorSet(false),
 	chromeWidth(0),
-	chromeHeight(0)
+	chromeHeight(0),
+	wasSizing(false),
+	borderVisible(true),
+	fullScreen(false)
 {
 	lastPos.x = lastPos.y = 0;
 	SetWindowClass<AppWindowClass>();
 	SetWindowStruct<AppWindowStruct>();
+	SetAccelerators(IDW_MAIN);
 }
 
 void AppWindow::OnCreate()
@@ -74,22 +66,6 @@ void AppWindow::OnCreate()
 	WindowHelper::SetIcon(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, true);
 	SetLayeredWindowAttributes(GetWindowHandle(), AppWindow::BackgroundColour, 0, LWA_COLORKEY);
 	CenterWindow();
-
-	SetAccelerators(IDW_MAIN);
-
-	// Create menu
-	menu = LoadMenu(WindowHelper::GetCurrentModuleHandle(), MAKEINTRESOURCE(IDR_CTXMENU));
-	contextMenu = GetSubMenu(menu, 0);
-	presetsMenu = GetSubMenu(contextMenu, 0);
-	zoomMenu = GetSubMenu(contextMenu, 1);
-	baseMenuItemCount = GetMenuItemCount(contextMenu);
-
-	// Set menu to send WM_MENUCOMMAND instead of WM_COMMAND
-	MENUINFO menuInfo;
-	menuInfo.cbSize = sizeof MENUINFO;
-	menuInfo.fMask = MIM_STYLE;
-	menuInfo.dwStyle = MNS_NOTIFYBYPOS;
-	SetMenuInfo(contextMenu, &menuInfo);
 
 	// Add observer
 	windowMonitor->RegisterObserver(this);
@@ -108,58 +84,224 @@ void AppWindow::OnDestroy()
 
 	// Clean up resources
 	adjustableThumbnail.UnsetThumbnail();
-	DestroyMenu(menu);
 
 	// Close program
 	PostQuitMessage(0);
 }
 
+LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	LRESULT result = 0;
+
+	// Handle accelerators
+	if (acceleratorhandler.WndProc(hWnd, message, wParam, lParam, result))
+		return result;
+
+	// Handle cursor
+	if (cursorHandler.WndProc(hWnd, message, wParam, lParam, result))
+		return result;
+
+	// Handle menu
+	if (menuHandler.WndProc(hWnd, message, wParam, lParam, result))
+		return result;
+
+	switch (message)
+	{
+	case WM_RBUTTONUP:
+		if (wParam == MK_LBUTTON) return 0;
+		break;
+	case WM_MOUSEMOVE:
+		if (OnMouseMove(wParam, lParam)) return 0;
+		break;
+	case WM_SIZING:
+		wasSizing = true;
+		if (OnSizing(wParam, lParam)) return TRUE;
+		break;
+	case WM_SIZE:
+		if (wasSizing) { wasSizing = false; windowMonitor->ScaleToFitWindow(GetWindowHandle()); }
+		break;
+	case WM_EXITSIZEMOVE:
+		wasSizing = false;
+		break;
+	case WM_LBUTTONDBLCLK:
+		ToggleBorder();
+		return 0;
+	case WM_SYSCOMMAND:
+		// Suppress alt-key menu activation
+		if (wParam == SC_KEYMENU && (lParam >> 16) <= 0) return 0;
+		break;
+	case WM_CREATE:
+		OnCreate();
+		return 0;
+	case WM_DESTROY:
+		OnDestroy();
+		return 0;
+	}
+
+	// Use the default message handling for remaining messages
+	return DefWindowProc(hWnd, message, wParam, lParam);
+}
+
+bool AppWindow::OnMouseMove(WPARAM const & wParam, LPARAM const & lParam)
+{
+	POINTS pos = MAKEPOINTS(lParam);
+	bool lmb = (wParam == MK_LBUTTON);
+	bool shiftLmb = (wParam == (MK_LBUTTON | MK_SHIFT));
+	bool ctrlLmb = (wParam == (MK_LBUTTON | MK_CONTROL));
+
+	// Drag window
+	if (lmb)
+	{
+		SendMessage(GetWindowHandle(), WM_SYSCOMMAND, SC_MOVE | 0x0002, NULL);
+		return true;
+	}
+
+	if (!(lastPos.x == 0 && lastPos.y == 0))
+	{
+		long x = pos.x - lastPos.x;
+		long y = pos.y - lastPos.y;
+
+		// Shift view
+		if (shiftLmb)
+		{
+			windowMonitor->Shift(x, y);
+		}
+		// Crop view
+		else if (ctrlLmb)
+		{
+			windowMonitor->Crop(x, y);
+		}
+	}
+
+	// Store last mouse position
+	if (shiftLmb || ctrlLmb)
+	{
+		lastPos.x = pos.x;
+		lastPos.y = pos.y;
+	}
+	else
+	{
+		lastPos.x = lastPos.y = 0;
+	}
+
+	return true;
+}
+
+bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
+{
+	LPRECT newRect = (LPRECT)lParam;
+	double width = static_cast<double>(newRect->right - newRect->left - chromeWidth);
+	double height = static_cast<double>(newRect->bottom - newRect->top - chromeHeight);
+	double aspect = windowMonitor->GetAspect();
+	long newWidth = static_cast<long>(height * aspect);
+	long newHeight = static_cast<long>(width * (1.0 / aspect));
+	long newValue;
+
+	switch (wParam)
+	{
+	case WMSZ_TOP:
+	case WMSZ_BOTTOM:
+		newRect->right = newRect->left + newWidth + chromeWidth;
+		break;
+
+	case WMSZ_LEFT:
+	case WMSZ_RIGHT:
+		newRect->bottom = newRect->top + newHeight + chromeHeight;
+		break;
+
+	case WMSZ_TOPRIGHT:
+		newValue = newRect->left + newWidth + chromeWidth;
+		if (newValue < newRect->right) newRect->top = newRect->bottom - newHeight - chromeHeight;
+		else newRect->right = newValue;
+		break;
+
+	case WMSZ_BOTTOMRIGHT:
+		newValue = newRect->left + newWidth + chromeWidth;
+		if (newValue < newRect->right) newRect->bottom = newRect->top + newHeight + chromeHeight;
+		else newRect->right = newValue;
+		break;
+
+	case WMSZ_TOPLEFT:
+		newValue = newRect->right - newWidth - chromeWidth;
+		if (newValue > newRect->left) newRect->top = newRect->bottom - newHeight - chromeHeight;
+		else newRect->left = newValue;
+		break;
+
+	case WMSZ_BOTTOMLEFT:
+		newValue = newRect->right - newWidth - chromeWidth;
+		if (newValue > newRect->left) newRect->bottom = newRect->top + newHeight + chromeHeight;
+		else newRect->left = newValue;
+		break;
+	}
+
+	// Set scale
+	windowMonitor->ScaleToFitWindow(GetWindowHandle());
+	return true;
+}
+
+void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
+{
+	switch (event)
+	{
+	case WindowMonitorEvent::SourceSelected:
+		adjustableThumbnail.SetThumbnail(GetWindowHandle(), windowMonitor->GetSourceWindow());
+		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
+		break;
+	case WindowMonitorEvent::Moved:
+		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
+		break;
+	case WindowMonitorEvent::Cropped:
+		UpdateWindow();
+		break;
+	case WindowMonitorEvent::PresetSelected:
+	case WindowMonitorEvent::Scaled:
+		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
+		UpdateWindow();
+		break;
+	case WindowMonitorEvent::DimensionsReset:
+	{
+		// Toggle border if set
+		DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
+		if ((style & WS_THICKFRAME) == 0) ToggleBorder();
+
+		// Clear fullscreen flag
+		fullScreen = false;
+
+		// Continue onto next case
+	}
+	case WindowMonitorEvent::ScaledToMonitor:
+		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
+		UpdateWindow();
+		CenterWindow();
+		break;
+	case WindowMonitorEvent::ScaledToWindow:
+		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
+		break;
+	default:
+		break;
+	}
+}
+
 void AppWindow::ToggleBorder()
 {
 	// Toggle window border
+	borderVisible = !borderVisible;
+
+	// Set new style
 	DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
 	style ^= WS_THICKFRAME;
 	style ^= WS_BORDER;
-
-	// Set new style
 	SetWindowLongPtr(GetWindowHandle(), GWL_STYLE, style);
-	UpdateWindow(); // Recalc chrome size
 
-	// Update context menu
-	MENUITEMINFO mii;
-	mii.cbSize = sizeof(MENUITEMINFO);
-	mii.fMask = MIIM_STATE;
-	GetMenuItemInfo(contextMenu, ID_MENU_TOGGLEBORDER, FALSE, &mii);
-	mii.fState ^= MFS_CHECKED;
-	SetMenuItemInfo(contextMenu, ID_MENU_TOGGLEBORDER, FALSE, &mii);
+	// Update window
+	UpdateWindow();
 }
 
 void AppWindow::ToggleFullscreen()
 {
-	DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
-
-	// Get context menu
-	MENUITEMINFO mii;
-	mii.cbSize = sizeof(MENUITEMINFO);
-	mii.fMask = MIIM_STATE;
-	GetMenuItemInfo(contextMenu, ID_MENU_FULLSCREEN, FALSE, &mii);
-
-	if ((mii.fState & MFS_CHECKED) == 0)
-	{
-		// Set fullscreen
-		if ((style & WS_THICKFRAME) != 0) ToggleBorder();
-		windowMonitor->ScaleToFitMonitor(GetWindowHandle(), true);
-	}
-	else
-	{
-		// Clear fullscreen
-		if ((style & WS_THICKFRAME) == 0) ToggleBorder();
-		windowMonitor->ScaleToFitMonitor(GetWindowHandle());
-	}
-
-	// Update context menu
-	mii.fState ^= MFS_CHECKED;
-	SetMenuItemInfo(contextMenu, ID_MENU_FULLSCREEN, FALSE, &mii);
+	fullScreen = !fullScreen;
+	if ((fullScreen && borderVisible) || (!fullScreen && !borderVisible)) ToggleBorder();
+	windowMonitor->ScaleToFitMonitor(GetWindowHandle(), fullScreen);
 }
 
 void AppWindow::ToggleClickThrough()
@@ -173,91 +315,11 @@ void AppWindow::ToggleClickThrough()
 	SetWindowLongPtr(GetWindowHandle(), GWL_EXSTYLE, style);
 }
 
-void AppWindow::SetContextualCursor()
+void AppWindow::ShowPresetWindow()
 {
-	int prevCursor = currentCursor;
-	bool lmb = static_cast<unsigned short>(GetKeyState(VK_LBUTTON)) >> 15 == 1;
-	bool shift = static_cast<unsigned short>(GetKeyState(VK_SHIFT)) >> 15 == 1;
-	bool control = static_cast<unsigned short>(GetKeyState(VK_CONTROL)) >> 15 == 1;
-
-	if (lmb && !shift && !control) currentCursor = CursorMove;
-	else if (shift && !control) currentCursor = CursorPan;
-	else if (!shift && control) currentCursor = CursorScale;
-	else if (shift && control) currentCursor = CursorNoFunction;
-	else currentCursor = 0;
-
-	if (prevCursor != currentCursor) 
-	{
-		cursorSet = false;
-		SendMessage(GetWindowHandle(), WM_SETCURSOR, WPARAM(GetWindowHandle()), (LPARAM)MAKELONG(HTCLIENT, WM_MOUSEMOVE));
-	}
-}
-
-void AppWindow::UpdateSourceMenu()
-{
-	// Update sources
-	size_t checksum = windowMonitor->UpdateSources();
-	if (lastChecksum == checksum) return;
-	lastChecksum = checksum;
-
-	// Clear
-	while (GetMenuItemCount(contextMenu) > baseMenuItemCount)
-		DeleteMenu(contextMenu, baseMenuItemCount, MF_BYPOSITION);
-
-	// Add items
-	std::wstring text;
-	int identifier = baseMenuItemCount;
-	windowMonitor->IterateSources([&](std::wstring const & title, bool const & selected)
-	{
-		// Get title text
-		text.assign(title.substr(0, AppWindow::MaxMenuTextLength));
-
-		// Add ellipsis if truncated
-		if (title.length() > AppWindow::MaxMenuTextLength) text.append(L"...");
-
-		// Create menu item
-		bool breakMenu = identifier % AppWindow::MenuItemBreakPoint == 0;
-		AppendMenu(contextMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0) | (selected ? MF_CHECKED : 0), identifier, text.c_str());
-
-		// Next item
-		++identifier;
-	});
-
-	// Add blank item if no windows were added
-	if (identifier == baseMenuItemCount) 
-	{
-		std::wstring text;
-		WindowHelper::GetResourceString(WindowHelper::GetCurrentModuleHandle(), IDS_NOWINDOWSFOUND, text);
-		AppendMenuW(contextMenu, MF_STRING | MF_GRAYED, 0, text.c_str());
-	}
-}
-
-void AppWindow::UpdatePresetMenu()
-{
-	// Clear
-	while (GetMenuItemCount(presetsMenu) > 2)
-		DeleteMenu(presetsMenu, 2, MF_BYPOSITION);
-
-	// Add items
-	std::wstring text;
-	int identifier = 2;
-	windowMonitor->IteratePresets([&](std::wstring const & name, bool const & selected)
-	{
-		// Create menu item
-		bool breakMenu = identifier % AppWindow::MenuItemBreakPoint == 0;
-		AppendMenu(presetsMenu, MF_STRING | (breakMenu ? MF_MENUBARBREAK : 0) | (selected ? MF_CHECKED : 0), identifier, name.c_str());
-
-		// Next item
-		++identifier;
-	});
-
-	// Add blank item if no windows were added
-	if (identifier == 2) 
-	{
-		std::wstring text;
-		WindowHelper::GetResourceString(WindowHelper::GetCurrentModuleHandle(), IDS_NOPRESETSFOUND, text);
-		AppendMenuW(presetsMenu, MF_STRING | MF_GRAYED, 0, text.c_str());
-	}
+	HWND hwnd = presetWindow->GetWindowHandle();
+	if (hwnd != NULL) SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+	else presetWindow->Create();
 }
 
 void AppWindow::UpdateWindow()
@@ -286,52 +348,4 @@ void AppWindow::CenterWindow()
 	int x = (monitorRect.right + monitorRect.left - windowRect.right + windowRect.left) / 2;
 	int y = (monitorRect.bottom + monitorRect.top - windowRect.bottom + windowRect.top) / 2;
 	SetWindowPos(GetWindowHandle(), HWND_TOPMOST, x, y, 0, 0, SWP_NOSIZE);
-}
-
-void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
-{
-	switch (event)
-	{
-	case WindowMonitorEvent::SourceSelected:
-		adjustableThumbnail.SetThumbnail(GetWindowHandle(), windowMonitor->GetSourceWindow());
-		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
-		lastChecksum = 0;
-		break;
-	case WindowMonitorEvent::Moved:
-		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
-		break;
-	case WindowMonitorEvent::Cropped:
-		UpdateWindow();
-		break;
-	case WindowMonitorEvent::PresetSelected:
-	case WindowMonitorEvent::Scaled:
-		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
-		UpdateWindow();
-		break;
-	case WindowMonitorEvent::DimensionsReset:
-	{
-		// Toggle border if set
-		DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
-		if ((style & WS_THICKFRAME) == 0) ToggleBorder();
-
-		// Clear fullscreen menu
-		MENUITEMINFO mii;
-		mii.cbSize = sizeof(MENUITEMINFO);
-		mii.fMask = MIIM_STATE;
-		mii.fState = MFS_ENABLED;
-		SetMenuItemInfo(contextMenu, ID_MENU_FULLSCREEN, FALSE, &mii);
-
-		// Continue onto next case
-	}
-	case WindowMonitorEvent::ScaledToMonitor:
-		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
-		UpdateWindow();
-		CenterWindow();
-		break;
-	case WindowMonitorEvent::ScaledToWindow:
-		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
-		break;
-	default:
-		break;
-	}
 }

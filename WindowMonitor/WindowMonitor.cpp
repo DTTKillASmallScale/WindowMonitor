@@ -211,16 +211,16 @@ size_t WindowMonitor::UpdateSources()
 	return sources->Refresh();
 }
 
-void WindowMonitor::IterateSources(WindowMonitorIterateAction action)
+void WindowMonitor::IterateSources(std::function<void(WindowFilterItem const & item, bool const & selected)> action)
 {
 	sources->IterateItems([&](WindowFilterItem const & item)
 	{
-		action(item.title, (item == selectedSource));
+		action(item, (item == selectedSource));
 		return false;
 	});
 }
 
-void WindowMonitor::IteratePresets(WindowMonitorIterateAction action)
+void WindowMonitor::IteratePresets(std::function<void(std::wstring const & text, bool const & selected)> action)
 {
 	UpdatePresets();
 	presets->IterateNames([&](std::wstring const & name)

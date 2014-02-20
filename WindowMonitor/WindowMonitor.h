@@ -4,22 +4,21 @@
 #include "PresetManager.h"
 #include "WindowMonitorObserver.h"
 
-typedef std::function<void(std::wstring const & text, bool const & selected)> WindowMonitorIterateAction;
-
 class WindowMonitor
 {
 public:
 	WindowMonitor(WindowFilter * sources, PresetManager * presets);
 	~WindowMonitor();
 
+	size_t UpdateSources();
 	void SelectSource(std::size_t const & index);
 	void SelectNextSource();
 	void SelectPreviousSource();
+	void UpdatePresets();
 	void SelectPreset(std::wstring const & name);
 	void UnselectPreset();
 	void SavePreset(std::wstring const & name);
 	void DeleteSelectedPreset();
-	void UpdatePresets();
 
 	void Shift(long const & x, long const & y);
 	void Crop(long const & x, long const & y);
@@ -28,6 +27,7 @@ public:
 	void ScaleToFitMonitor(HWND const & hWnd, bool const & maximize = false);
 	void ResetAndScaleToFitMonitor(HWND const & hWnd);
 
+	inline size_t GetSourceHash() { return selectedSource.hash; }
 	inline HWND GetSourceWindow() { return selectedSource.hwnd; }
 	inline std::wstring GetSelectedPresetName() { return selectedPreset; }
 	inline double GetWidth() { return dimensions.right - dimensions.left; }
@@ -38,9 +38,8 @@ public:
 	inline DoubleRect GetDimensions() { return dimensions; }
 	RECT GetScaledRect();
 
-	size_t UpdateSources();
-	void IterateSources(WindowMonitorIterateAction action);
-	void IteratePresets(WindowMonitorIterateAction action);
+	void IterateSources(std::function<void(WindowFilterItem const & item, bool const & selected)> action);
+	void IteratePresets(std::function<void(std::wstring const & text, bool const & selected)> action);
 
 	void RegisterObserver(WindowMonitorObserver * observer);
 	void UnregisterObserver(WindowMonitorObserver * observer);

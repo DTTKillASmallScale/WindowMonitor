@@ -126,10 +126,11 @@ size_t WindowFilter::Refresh()
 		}
 
 		// Insert item at start
-		items.insert(items.begin(), WindowFilterItem(hwnd, title, className));
+		auto item = WindowFilterItem(hwnd, title, className);
+		items.insert(items.begin(), item);
 
 		// Update checksum
-		checksum += hwndHash(hwnd);
+		checksum += item.hash;
 	}
 
 	return checksum;
