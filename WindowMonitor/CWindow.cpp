@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "CWindow.h"
-#include "CWindowClass.h"
+#include "CWindowWndClass.h"
+#include "CWindowCreateStruct.h"
 #include "WindowHelper.h"
 
 CWindow::CWindow() :

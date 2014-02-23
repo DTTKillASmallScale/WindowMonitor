@@ -1,16 +1,17 @@
 #include "stdafx.h"
 #include "Resource.h"
 #include "AppWindow.h"
-#include "CWindowClass.h"
+#include "CWindowWndClass.h"
+#include "CWindowCreateStruct.h"
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
 
 const COLORREF AppWindow::BackgroundColour = RGB(255, 255, 255);
 
-class AppWindowClass : public CWindowClass
+class AppWindowClass : public CWindowWndClass
 {
 public:
-	AppWindowClass() : CWindowClass(L"DwmWindowMonitorApp") { }
+	AppWindowClass() : CWindowWndClass(L"DwmWindowMonitorApp") { }
 
 	virtual void Configure(WNDCLASSEX & wcex) override
 	{
@@ -20,7 +21,7 @@ public:
 	}
 };
 
-class AppWindowStruct : public CWindowStruct
+class AppWindowStruct : public CWindowCreateStruct
 {
 public:
 	virtual void Configure(CREATESTRUCT & cs) override

@@ -1,7 +1,7 @@
 #pragma once
 
-class CWindowClass;
-class CWindowStruct;
+class CWindowWndClass;
+class CWindowCreateStruct;
 
 class CWindow
 {
@@ -26,7 +26,7 @@ protected:
 private:
 	HWND windowHandle;
 	HACCEL accelerators;
-	std::shared_ptr<CWindowClass> windowClass;
-	std::shared_ptr<CWindowStruct> windowStruct;
+	std::shared_ptr<CWindowWndClass> windowClass;
+	std::shared_ptr<CWindowCreateStruct> windowStruct;
 	static bool PreTranslateMessage(MSG msg);
 };

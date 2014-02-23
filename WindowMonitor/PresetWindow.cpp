@@ -1,14 +1,15 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "PresetWindow.h"
-#include "CWindowClass.h"
+#include "CWindowWndClass.h"
+#include "CWindowCreateStruct.h"
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
 
-class PresetWindowClass : public CWindowClass
+class PresetWindowClass : public CWindowWndClass
 {
 public:
-	PresetWindowClass() : CWindowClass(L"DwmWindowMonitorPresets") { }
+	PresetWindowClass() : CWindowWndClass(L"DwmWindowMonitorPresets") { }
 
 	virtual void Configure(WNDCLASSEX & wcex) override
 	{
@@ -18,14 +19,14 @@ public:
 	}
 };
 
-class PresetWindowStruct : public CWindowStruct
+class PresetWindowStruct : public CWindowCreateStruct
 {
 public:
 	virtual void Configure(CREATESTRUCT & cs) override
 	{
 		RECT monitorRect;
-		WindowHelper::GetMonitorRect(NULL, monitorRect);
-		cs.lpszClass = _T("DwmWindowMonitorPresets");
+		WindowHelper::GetMonitorRect(FindWindow(L"DwmWindowMonitorApp", NULL), monitorRect);
+		cs.lpszClass = L"DwmWindowMonitorPresets";
 		cs.style = WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU;
 		cs.cx = 400;
 		cs.cy = 220;
