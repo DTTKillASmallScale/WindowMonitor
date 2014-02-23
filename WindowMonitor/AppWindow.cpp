@@ -18,6 +18,8 @@ public:
 		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 		wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(32512));
 		wcex.hbrBackground = CreateSolidBrush(AppWindow::BackgroundColour);
+		wcex.hIcon = WindowHelper::GetLargeIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
+		wcex.hIconSm = WindowHelper::GetSmallIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
 	}
 };
 
@@ -26,8 +28,7 @@ class AppWindowStruct : public CWindowCreateStruct
 public:
 	virtual void Configure(CREATESTRUCT & cs) override
 	{
-		cs.lpszClass = _T("DwmWindowMonitorApp");
-		cs.lpszName = _T("New Window");
+		cs.lpszClass = L"DwmWindowMonitorApp";
 		cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER | WS_MINIMIZEBOX;
 		cs.dwExStyle = NULL;
 		cs.hwndParent = NULL;
@@ -63,8 +64,6 @@ void AppWindow::OnCreate()
 {
 	// Set window options
 	WindowHelper::SetTitle(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDS_TITLE);
-	WindowHelper::SetIcon(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
-	WindowHelper::SetIcon(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, true);
 	SetLayeredWindowAttributes(GetWindowHandle(), AppWindow::BackgroundColour, 0, LWA_COLORKEY);
 	CenterWindow();
 

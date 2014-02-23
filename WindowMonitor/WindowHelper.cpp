@@ -17,26 +17,32 @@ namespace WindowHelper
 		str.assign(&buffer[0]);
 	}
 
-	void SetIcon(HWND hWnd, HINSTANCE hInstance, int nIcon, bool big = false)
+	HICON GetLargeIcon(HINSTANCE const & hInstance, UINT const & nID)
 	{
-		HICON icon = (HICON) LoadImage(hInstance, 
-			MAKEINTRESOURCE(nIcon), 
-			IMAGE_ICON,
-			GetSystemMetrics(big ? SM_CXICON : SM_CXSMICON), 
-			GetSystemMetrics(big ? SM_CYICON : SM_CYSMICON), 
-			0);
+		return static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(nID), IMAGE_ICON, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), 0));
+	}
 
+	HICON GetSmallIcon(HINSTANCE const & hInstance, UINT const & nID)
+	{
+		return static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(nID), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0));
+	}
+
+	void SetIcon(HWND const & hWnd, HINSTANCE const & hInstance, int const & nIcon, bool const & big)
+	{
+		HICON icon = NULL;
+		if (big) icon = GetLargeIcon(hInstance, nIcon);
+		else icon = GetSmallIcon(hInstance, nIcon);
 		if (icon) SendMessage(hWnd, WM_SETICON, WPARAM(big ? ICON_BIG : ICON_SMALL), LPARAM(icon));
 	}
 
-	void SetTitle(HWND hWnd, HINSTANCE hInstance, UINT nID)
+	void SetTitle(HWND const & hWnd, HINSTANCE const & hInstance, UINT const & nID)
 	{
 		std::wstring text;
 		WindowHelper::GetResourceString(hInstance, nID, text);
 		SetWindowTextW(hWnd, text.c_str());
 	}
 
-	HFONT CreateFont(HWND hWnd, LPCWSTR const & faceName, double const & points, int const & weight,
+	HFONT CreateFont(HWND const & hWnd, LPCWSTR const & faceName, double const & points, int const & weight,
 		bool const & italic, bool const & underline, bool const & strikeout)
 	{
 		HDC hdc = GetDC(hWnd);
