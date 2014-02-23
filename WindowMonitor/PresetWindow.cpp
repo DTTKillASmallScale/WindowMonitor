@@ -16,6 +16,8 @@ public:
 		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 		wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wcex.hbrBackground = CreateSolidBrush(RGB(240, 240, 240));
+		wcex.hIcon = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
+		wcex.hIconSm = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, false);
 	}
 };
 
@@ -50,8 +52,6 @@ void PresetWindow::OnCreate()
 {
 	// Set window options
 	WindowHelper::SetTitle(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDS_PRESETS);
-	WindowHelper::SetIcon(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
-	WindowHelper::SetIcon(GetWindowHandle(), WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, true);
 	SetWindowPos(GetWindowHandle(), HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
 
 	// Create controls

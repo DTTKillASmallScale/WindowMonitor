@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "WindowHelper.h"
 
 namespace WindowHelper
 {
@@ -17,22 +18,12 @@ namespace WindowHelper
 		str.assign(&buffer[0]);
 	}
 
-	HICON GetLargeIcon(HINSTANCE const & hInstance, UINT const & nID)
+	HICON GetIcon(HINSTANCE const & hInstance, UINT const & nID, bool big)
 	{
-		return static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(nID), IMAGE_ICON, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON), 0));
-	}
-
-	HICON GetSmallIcon(HINSTANCE const & hInstance, UINT const & nID)
-	{
-		return static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(nID), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0));
-	}
-
-	void SetIcon(HWND const & hWnd, HINSTANCE const & hInstance, int const & nIcon, bool const & big)
-	{
-		HICON icon = NULL;
-		if (big) icon = GetLargeIcon(hInstance, nIcon);
-		else icon = GetSmallIcon(hInstance, nIcon);
-		if (icon) SendMessage(hWnd, WM_SETICON, WPARAM(big ? ICON_BIG : ICON_SMALL), LPARAM(icon));
+		return static_cast<HICON>(LoadImage(hInstance, MAKEINTRESOURCE(nID), IMAGE_ICON, 
+			GetSystemMetrics(big ? SM_CXICON : SM_CXSMICON), 
+			GetSystemMetrics(big ? SM_CYICON : SM_CYSMICON), 
+			0));
 	}
 
 	void SetTitle(HWND const & hWnd, HINSTANCE const & hInstance, UINT const & nID)

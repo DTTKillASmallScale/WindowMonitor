@@ -4,9 +4,7 @@ namespace WindowHelper
 {
 	void GetResourceString(HINSTANCE const & hInstance, UINT const & nID, std::wstring & str);
 	void GetResourceString(HINSTANCE const & hInstance, UINT const & nID, std::string & str);
-	HICON GetLargeIcon(HINSTANCE const & hInstance, UINT const & nID);
-	HICON GetSmallIcon(HINSTANCE const & hInstance, UINT const & nID);
-	void SetIcon(HWND const & hWnd, HINSTANCE const & hInstance, int const & nIcon, bool const & big = false);
+	HICON GetIcon(HINSTANCE const & hInstance, UINT const & nID, bool big = false);
 	void SetTitle(HWND const & hWnd, HINSTANCE const & hInstance, UINT const & nID);
 	HFONT CreateFont(HWND const & hWnd, LPCWSTR const & faceName, double const & points, int const & weight,
 		bool const & italic, bool const & underline, bool const & strikeout);

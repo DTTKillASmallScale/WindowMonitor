@@ -18,8 +18,8 @@ public:
 		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 		wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(32512));
 		wcex.hbrBackground = CreateSolidBrush(AppWindow::BackgroundColour);
-		wcex.hIcon = WindowHelper::GetLargeIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
-		wcex.hIconSm = WindowHelper::GetSmallIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
+		wcex.hIcon = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
+		wcex.hIconSm = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, false);
 	}
 };
 
