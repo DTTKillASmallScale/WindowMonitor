@@ -13,8 +13,8 @@
 //
 // Menu resources
 //
-LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 IDR_CTXMENU MENU
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 {
     POPUP "Menu"
     {
@@ -47,8 +47,8 @@ IDR_CTXMENU MENU
 //
 // String Table resources
 //
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 STRINGTABLE
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 {
     IDS_TITLE                     "Window Monitor"
     IDS_NOWINDOWSFOUND            "No windows found"
