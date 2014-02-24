@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "WindowFilter.h"
 #include "WindowHelper.h"
-#include "Shlwapi.h"
 
 WindowFilter::WindowFilter() :
 	blacklistLastWrite(0)
@@ -185,12 +184,9 @@ bool WindowFilter::IsFilteredByBlacklist(std::wstring const & className, std::ws
 void WindowFilter::LoadBlacklist()
 {
 	// Create blacklist path
-	WCHAR path[MAX_PATH];
-	HMODULE hModule = GetModuleHandleW(NULL);
-	GetModuleFileNameW(hModule, path, MAX_PATH);
-	PathRemoveFileSpecW(path);
-	std::wstring filename(path);
-	filename.append(L"\\blacklist.txt");
+	std::wstring filename;
+	WindowHelper::GetPathToExecutable(filename);
+	filename.append(L"blacklist.txt");
 
 	// Get last write time
 	WIN32_FIND_DATA fileData;

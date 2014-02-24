@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PresetManager.h"
-#include "Shlwapi.h"
+#include "WindowHelper.h"
 
 const unsigned char PresetManager::FileVersion = 1;
 
@@ -8,12 +8,8 @@ PresetManager::PresetManager() :
 	lastSaveTime(0)
 {
 	// Create config path
-	WCHAR path[MAX_PATH];
-	HMODULE hModule = GetModuleHandleW(NULL);
-	GetModuleFileNameW(hModule, path, MAX_PATH);
-	PathRemoveFileSpecW(path);
-	filename.assign(path);
-	filename.append(L"\\config.dat");
+	WindowHelper::GetPathToExecutable(filename);
+	filename.append(L"config.dat");
 }
 
 void PresetManager::SavePreset(std::wstring const & name, DoubleRect const & dimensions)

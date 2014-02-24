@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include "WindowHelper.h"
+#include <Strsafe.h>
 
 namespace WindowHelper
 {
@@ -146,5 +147,35 @@ namespace WindowHelper
 		if (GetModuleHandleEx(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS, reinterpret_cast<LPCTSTR>(&GetCurrentModuleHandle), &module))
 			return module;
 		return NULL;
+	}
+
+	void GetPathToExecutable(std::wstring & filePath)
+	{
+		// Get full path to exe
+		WCHAR path[MAX_PATH];
+		HMODULE hModule = GetModuleHandleW(NULL);
+		if (GetModuleFileNameW(hModule, path, MAX_PATH) == 0) return;
+
+		// Get length
+		size_t len = 0;
+		StringCchLength(path, MAX_PATH, &len);
+		if (len < 1) return;
+
+		// Move to end
+		LPWSTR tmp = path + len;
+
+		// Find last slash in path
+		while ((--tmp) >= path)
+		{
+			if (*tmp == L'\\')
+			{
+				// Set string terminator
+				*tmp = L'\0';
+				break;
+			}
+		}
+
+		filePath.assign(path);
+		filePath.append(L"\\");
 	}
 }

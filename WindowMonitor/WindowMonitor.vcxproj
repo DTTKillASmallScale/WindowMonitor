@@ -89,7 +89,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib</AdditionalDependencies>
     </Link>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -133,7 +133,7 @@
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib;Shlwapi.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;shell32.lib;Dwmapi.lib</AdditionalDependencies>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <MergeSections>.rdata=.rtext</MergeSections>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>

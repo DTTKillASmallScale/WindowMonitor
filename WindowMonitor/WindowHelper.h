@@ -15,4 +15,5 @@ namespace WindowHelper
 	void DisplayExceptionMessage(unsigned int const & titleId, unsigned int const & textId, std::exception const & e);
 	HINSTANCE GetCurrentModuleHandle();
 	inline bool IsKeyDown(int virtKey) { return static_cast<unsigned short>(GetKeyState(virtKey)) >> 15 == 1; }
+	void GetPathToExecutable(std::wstring & filePath);
 }
