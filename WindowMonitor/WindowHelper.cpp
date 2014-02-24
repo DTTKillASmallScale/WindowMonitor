@@ -153,7 +153,7 @@ namespace WindowHelper
 	{
 		// Get full path to exe
 		WCHAR path[MAX_PATH];
-		HMODULE hModule = GetModuleHandleW(NULL);
+		HMODULE hModule = GetCurrentModuleHandle();
 		if (GetModuleFileNameW(hModule, path, MAX_PATH) == 0) return;
 
 		// Get length
