@@ -165,15 +165,16 @@ namespace WindowHelper
 		LPWSTR tmp = path + len;
 
 		// Find last slash in path
-		while ((--tmp) >= path)
+		do
 		{
+			tmp--;
 			if (*tmp == L'\\')
 			{
 				// Set string terminator
 				*tmp = L'\0';
 				break;
 			}
-		}
+		} while (tmp > path);
 
 		filePath.assign(path);
 		filePath.append(L"\\");
