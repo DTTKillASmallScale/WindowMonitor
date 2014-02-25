@@ -8,7 +8,7 @@ WindowFilterItem::WindowFilterItem(HWND const & hwnd, std::wstring const & title
 	hwnd(hwnd),
 	title(title),
 	className(className),
-	hash(HwndHash(hwnd) + StringHash(title))
+	hash(HwndHash(hwnd) ^ StringHash(className))
 {
 }
 
