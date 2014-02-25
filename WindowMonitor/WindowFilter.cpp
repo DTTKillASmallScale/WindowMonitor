@@ -80,6 +80,7 @@ size_t WindowFilter::Refresh()
 	// Enum windows
 	windows.clear();
 	EnumWindows(WindowFilter::AddWindowToList, LPARAM(&windows));
+	std::sort(windows.begin(), windows.end());
 
 	// Filter windows
 	HWND hwnd, parent;
