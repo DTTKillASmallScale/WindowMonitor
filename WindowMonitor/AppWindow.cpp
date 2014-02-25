@@ -296,7 +296,7 @@ void AppWindow::OnEventHookTriggered(DWORD const & event, HWND const & hwnd, LON
 {
 	if (obj == OBJID_WINDOW && child == INDEXID_CONTAINER)
 	{
-		windowMonitor->SelectSource(0);
+		windowMonitor->SelectFirstSource();
 	}
 }
 

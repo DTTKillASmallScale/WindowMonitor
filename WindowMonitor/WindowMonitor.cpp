@@ -34,6 +34,22 @@ void WindowMonitor::SelectSourceByHash(std::size_t const & hash)
 	NotifyObservers(WindowMonitorEvent::SourceSelected);
 }
 
+void WindowMonitor::SelectFirstSource()
+{
+	// Get filtered windows
+	sources->Refresh();
+	if (sources->ItemCount() < 1) return;
+
+	// Set selected index
+	selectedSource = sources->GetItem(0);
+
+	// Set dimensions
+	SetDimensionsToSelectedSource();
+
+	// Send update event
+	NotifyObservers(WindowMonitorEvent::SourceSelected);
+}
+
 void WindowMonitor::SelectNextSource()
 {
 	// Get filtered windows

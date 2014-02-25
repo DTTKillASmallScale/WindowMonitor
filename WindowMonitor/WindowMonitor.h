@@ -12,6 +12,7 @@ public:
 
 	size_t UpdateSources();
 	void SelectSourceByHash(std::size_t const & hash);
+	void SelectFirstSource();
 	void SelectNextSource();
 	void SelectPreviousSource();
 	void UpdatePresets();
