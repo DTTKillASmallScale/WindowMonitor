@@ -18,6 +18,21 @@ WindowFilterItem WindowFilter::GetItem(std::size_t const & index)
 	else return WindowFilterItem();
 }
 
+WindowFilterItem WindowFilter::GetItemByHash(std::size_t const & hash)
+{
+	int index = -1;
+	
+	IterateItems([&](WindowFilterItem const & item)
+	{
+		index++;
+		if (item.hash == hash) return true;
+		return false;
+	});
+
+	if (index > -1) return items[index];
+	else return WindowFilterItem();
+}
+
 WindowFilterItem WindowFilter::GetNextItem(WindowFilterItem const & currentItem)
 {
 	std::size_t index = 0;
@@ -65,6 +80,7 @@ size_t WindowFilter::Refresh()
 	// Enum windows
 	windows.clear();
 	EnumWindows(WindowFilter::AddWindowToList, LPARAM(&windows));
+	std::sort(windows.begin(), windows.end());
 
 	// Filter windows
 	HWND hwnd, parent;

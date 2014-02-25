@@ -71,7 +71,7 @@ void AppWindow::OnCreate()
 	windowMonitor->RegisterObserver(this);
 
 	// Select first source
-	windowMonitor->SelectSource(0);
+	windowMonitor->SelectNextSource();
 }
 
 void AppWindow::OnDestroy()
