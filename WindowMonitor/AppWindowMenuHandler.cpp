@@ -243,7 +243,7 @@ void AppWindowMenuHandler::HandleMenuCmd(WPARAM const & wParam, LPARAM const & l
 	// Select source
 	if (menu == contextMenu && selection >= baseMenuItemCount)
 	{
-		windowMonitor->SelectSource(static_cast<size_t>(selection - baseMenuItemCount));
+		windowMonitor->SelectSourceByHash(static_cast<size_t>(mii.wID));
 		return;
 	}
 
