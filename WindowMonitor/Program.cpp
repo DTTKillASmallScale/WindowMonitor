@@ -5,6 +5,10 @@
 #include "PresetWindow.h"
 #include "AppWindow.h"
 
+#ifdef _DEBUG
+#include <vld.h>
+#endif
+
 // WindowMonitor displays a DWM thumbnail for a selected window
 // TV Icon from http://www.iconarchive.com/show/media-icons-by-bevel-and-emboss/tv-icon.html
 
