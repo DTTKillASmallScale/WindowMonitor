@@ -43,6 +43,22 @@ bool DwmThumbnail::Register(HWND const & targetWindow, HWND const & sourceWindow
 	return true;
 }
 
+bool DwmThumbnail::Unregister()
+{
+	// Check
+	if (!IsCreated()) return true;
+
+	// Unregister thumbnail
+	HRESULT hr = DwmUnregisterThumbnail(thumbnail);
+
+	// Check thumbnail is unregistered
+	if (!SUCCEEDED(hr)) return false;
+
+	// Success
+	thumbnail = NULL;
+	return true;
+}
+
 bool DwmThumbnail::Scale(RECT const & destRect)
 {
 	if (!IsCreated()) return false;
@@ -79,20 +95,4 @@ bool DwmThumbnail::InitializeProperties()
 	// Check thumbnail is updated
 	if (!SUCCEEDED(hr)) return false;
 	else return true;
-}
-
-bool DwmThumbnail::Unregister()
-{
-	// Check
-	if (!IsCreated()) return true;
-	
-	// Unregister thumbnail
-	HRESULT hr = DwmUnregisterThumbnail(thumbnail);
-	
-	// Check thumbnail is unregistered
-	if (!SUCCEEDED(hr)) return false;
-	
-	// Success
-	thumbnail = NULL;
-	return true;
 }

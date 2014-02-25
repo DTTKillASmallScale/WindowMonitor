@@ -5,6 +5,7 @@
 #include "CWindowCreateStruct.h"
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
+#include "EventHookManager.h"
 
 const COLORREF AppWindow::BackgroundColour = RGB(255, 255, 255);
 
@@ -52,7 +53,8 @@ AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const p
 	chromeHeight(0),
 	wasSizing(false),
 	borderVisible(true),
-	fullScreen(false)
+	fullScreen(false),
+	hookedSource(NULL)
 {
 	lastPos.x = lastPos.y = 0;
 	SetWindowClass<AppWindowClass>();
@@ -244,6 +246,14 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 	switch (event)
 	{
 	case WindowMonitorEvent::SourceSelected:
+		// If we have an existing source, remove hook
+		if (hookedSource != NULL) EventHookManager::GetInstance().RemoveHook(hookedSource, EVENT_OBJECT_DESTROY, EVENT_OBJECT_DESTROY);
+
+		// Store current source, and add hook if not NULL
+		hookedSource = windowMonitor->GetSourceWindow();
+		if (hookedSource != NULL) EventHookManager::GetInstance().AddHook(hookedSource, EVENT_OBJECT_DESTROY, EVENT_OBJECT_DESTROY, this);
+
+		// Update window
 		adjustableThumbnail.SetThumbnail(GetWindowHandle(), windowMonitor->GetSourceWindow());
 		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
 		break;
@@ -279,6 +289,14 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		break;
 	default:
 		break;
+	}
+}
+
+void AppWindow::OnEventHookTriggered(DWORD const & event, HWND const & hwnd, LONG const & obj, LONG const & child)
+{
+	if (obj == OBJID_WINDOW && child == INDEXID_CONTAINER)
+	{
+		windowMonitor->SelectSource(0);
 	}
 }
 

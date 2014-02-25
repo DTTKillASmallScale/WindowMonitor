@@ -179,6 +179,8 @@
     <ClInclude Include="CWindowCreateStruct.h" />
     <ClInclude Include="CWindowWndClass.h" />
     <ClInclude Include="DoubleRect.h" />
+    <ClInclude Include="EventHookHandler.h" />
+    <ClInclude Include="EventHookManager.h" />
     <ClInclude Include="PresetManager.h" />
     <ClInclude Include="PresetWindow.h" />
     <ClInclude Include="resource.h" />
@@ -202,6 +204,8 @@
     <ClCompile Include="CWindow.cpp" />
     <ClCompile Include="CWindowCreateStruct.cpp" />
     <ClCompile Include="CWindowWndClass.cpp" />
+    <ClCompile Include="EventHookHandler.cpp" />
+    <ClCompile Include="EventHookManager.cpp" />
     <ClCompile Include="PresetManager.cpp" />
     <ClCompile Include="PresetWindow.cpp" />
     <ClCompile Include="Program.cpp" />

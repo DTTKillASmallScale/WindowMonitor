@@ -6,10 +6,11 @@
 #include "WindowMonitorObserver.h"
 #include "AdjustableThumbnail.h"
 #include "PresetWindow.h"
+#include "EventHookHandler.h"
 
 class WindowMonitor;
 
-class AppWindow : public CWindow, public WindowMonitorObserver
+class AppWindow : public CWindow, public WindowMonitorObserver, public EventHookHandler
 {
 	friend class AppWindowMenuHandler;
 public:
@@ -20,6 +21,7 @@ public:
 	void ShowPresetWindow();
 	void OnWindowMonitorEvent(WindowMonitorEvent const & event);
 	static const COLORREF BackgroundColour;
+	virtual void OnEventHookTriggered(DWORD const & event, HWND const & hwnd, LONG const & obj, LONG const & child) override;
 
 protected:
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override;
@@ -45,4 +47,5 @@ private:
 	bool wasSizing, borderVisible, fullScreen;
 	WindowMonitor * windowMonitor;
 	PresetWindow * presetWindow;
+	HWND hookedSource;
 };
