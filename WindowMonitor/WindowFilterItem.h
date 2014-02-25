@@ -14,6 +14,5 @@ public:
 	bool operator==(WindowFilterItem const & rhs) const;
 
 private:
-	static const std::hash<HWND> HwndHash;
-	static const std::hash<std::wstring> StringHash;
+	static size_t MakeHash(HWND const & hwnd, std::wstring const & className);
 };

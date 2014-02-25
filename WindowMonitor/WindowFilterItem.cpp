@@ -1,14 +1,11 @@
 #include "stdafx.h"
 #include "WindowFilterItem.h"
 
-const std::hash<HWND> WindowFilterItem::HwndHash;
-const std::hash<std::wstring> WindowFilterItem::StringHash;
-
 WindowFilterItem::WindowFilterItem(HWND const & hwnd, std::wstring const & title, std::wstring const & className) :
 	hwnd(hwnd),
 	title(title),
 	className(className),
-	hash(HwndHash(hwnd) ^ StringHash(className))
+	hash(MakeHash(hwnd, className))
 {
 }
 
@@ -20,4 +17,11 @@ bool WindowFilterItem::operator<(WindowFilterItem const & rhs) const
 bool WindowFilterItem::operator == (WindowFilterItem const & rhs) const
 {
 	return hash == rhs.hash;
+}
+
+size_t WindowFilterItem::MakeHash(HWND const & hwnd, std::wstring const & className)
+{
+	static const std::hash<HWND> hwndHash;
+	static const std::hash<std::wstring> stringHash;
+	return hwndHash(hwnd) ^ stringHash(className);
 }

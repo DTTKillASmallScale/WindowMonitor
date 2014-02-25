@@ -9,7 +9,7 @@ class WindowFilter
 public:
 	WindowFilter();
 	std::size_t ItemCount();
-	WindowFilterItem GetItem(std::size_t const & index);
+	WindowFilterItem GetItemByHash(std::size_t const & hash);
 	WindowFilterItem GetNextItem(WindowFilterItem const & currentItem);
 	WindowFilterItem GetPreviousItem(WindowFilterItem const & currentItem);
 	void IterateItems(WindowFilterIterateAction action);
@@ -21,6 +21,7 @@ private:
 	std::vector<WindowFilterBlacklistItem> blacklist;
 	unsigned long long blacklistLastWrite;
 
+	WindowFilterItem GetItem(std::size_t const & index);
 	bool IsFilteredByClassName(std::wstring const & className);
 	bool EmptyTitleAllowedByClassName(std::wstring const & className);
 	bool OwnsWindowWithClassName(HWND const & ownerHwnd, std::wstring const & ownedClassName);

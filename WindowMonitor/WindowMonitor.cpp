@@ -18,14 +18,14 @@ WindowMonitor::~WindowMonitor()
 {
 }
 
-void WindowMonitor::SelectSource(std::size_t const & index)
+void WindowMonitor::SelectSourceByHash(std::size_t const & hash)
 {
 	// Get filtered windows
 	sources->Refresh();
 	if (sources->ItemCount() < 1) return;
 
 	// Set selected index
-	selectedSource = sources->GetItem(index);
+	selectedSource = sources->GetItemByHash(hash);
 
 	// Set dimensions
 	SetDimensionsToSelectedSource();

@@ -11,7 +11,7 @@ public:
 	~WindowMonitor();
 
 	size_t UpdateSources();
-	void SelectSource(std::size_t const & index);
+	void SelectSourceByHash(std::size_t const & hash);
 	void SelectNextSource();
 	void SelectPreviousSource();
 	void UpdatePresets();
