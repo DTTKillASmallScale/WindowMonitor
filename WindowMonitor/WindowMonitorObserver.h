@@ -32,7 +32,7 @@ inline WindowMonitorEvent operator|(WindowMonitorEvent const & lhs, WindowMonito
 inline void DebugWindowMonitorEventValue(WindowMonitorEvent const & event)
 {
 	std::wstringstream ss;
-	ss << time(NULL) << "\t";
+	ss << time(NULL) << L"\t";
 	if (WindowMonitorEvent::Moved & event) ss << L"Moved ";
 	if (WindowMonitorEvent::Cropped & event) ss << L"Cropped ";
 	if (WindowMonitorEvent::Scaled & event) ss << L"Scaled ";
@@ -46,7 +46,7 @@ inline void DebugWindowMonitorEventValue(WindowMonitorEvent const & event)
 	if (WindowMonitorEvent::PresetSaved & event) ss << L"PresetSaved ";
 	if (WindowMonitorEvent::PresetDeleted & event) ss << L"PresetDeleted ";
 	if (WindowMonitorEvent::PresetsUpdated & event) ss << L"PresetsUpdated ";
-	ss << "\n";
+	ss << L"\n";
 	OutputDebugStringW(ss.str().c_str());
 }
 #endif

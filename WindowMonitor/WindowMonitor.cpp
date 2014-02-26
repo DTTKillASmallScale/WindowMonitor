@@ -299,6 +299,12 @@ void WindowMonitor::NotifyObservers(WindowMonitorEvent const & event)
 {
 #ifdef _DEBUG
 	DebugWindowMonitorEventValue(event);
+	if (event & WindowMonitorEvent::SourceSelected)
+	{
+		std::wstringstream ss;
+		ss << time(NULL) << L"\t" << selectedSource.title << L"\n";
+		OutputDebugStringW(ss.str().c_str());
+	}
 #endif
 
 	for (auto it = observers.begin(); it != observers.end(); ++it)
