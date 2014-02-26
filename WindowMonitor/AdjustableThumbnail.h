@@ -8,7 +8,6 @@ public:
 	~AdjustableThumbnail(void);
 
 	bool SetThumbnail(HWND const & target, HWND const & source);
-	bool UnsetThumbnail();
 	bool SetSize(RECT const & rect);
 
 private:

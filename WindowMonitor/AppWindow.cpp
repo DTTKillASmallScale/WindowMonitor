@@ -84,9 +84,6 @@ void AppWindow::OnDestroy()
 	// Close preset window
 	presetWindow->Destroy();
 
-	// Clean up resources
-	adjustableThumbnail.UnsetThumbnail();
-
 	// Close program
 	PostQuitMessage(0);
 }

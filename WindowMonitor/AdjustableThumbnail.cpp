@@ -8,15 +8,10 @@ AdjustableThumbnail::AdjustableThumbnail(void) :
 
 AdjustableThumbnail::~AdjustableThumbnail(void)
 {
-	UnsetThumbnail();
 }
 
 bool AdjustableThumbnail::SetThumbnail(HWND const & target, HWND const & source)
 {
-	// Check
-	if (target == NULL) return false;
-	if (source == NULL) return false;
-
 	// Register thumbnail
 	bool success = thumbnail.Register(target, source);
 
@@ -34,11 +29,6 @@ bool AdjustableThumbnail::SetThumbnail(HWND const & target, HWND const & source)
 
 	// Done
 	return success;
-}
-
-bool AdjustableThumbnail::UnsetThumbnail()
-{
-	return thumbnail.Unregister();
 }
 
 bool AdjustableThumbnail::SetSize(RECT const & rect)

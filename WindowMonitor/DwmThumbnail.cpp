@@ -19,62 +19,41 @@ bool DwmThumbnail::IsCreated() const
 
 bool DwmThumbnail::Register(HWND const & targetWindow, HWND const & sourceWindow)
 {
+	// Unregister exisiting thumbnail
+	Unregister();
+
 	// Check
 	if (targetWindow == NULL) return false;
 	if (sourceWindow == NULL) return false;
-
-	// Unregister exisiting thumbnail
-	if (IsCreated()) Unregister();
 
 	// Register thumbnail
 	HRESULT hr = DwmRegisterThumbnail(targetWindow, sourceWindow, &thumbnail);
 
 	// Check thumbnail is registered
-	if (!SUCCEEDED(hr))
+	if (SUCCEEDED(hr))
+	{
+		InitializeProperties();
+		return true;
+	}
+	else
 	{
 		thumbnail = NULL;
 		return false;
 	}
-
-	// Update props
-	InitializeProperties();
-
-	// Done
-	return true;
 }
 
 bool DwmThumbnail::Unregister()
 {
-	// Check
-	if (!IsCreated()) return true;
+	bool success = false;
 
-	// Unregister thumbnail
-	HRESULT hr = DwmUnregisterThumbnail(thumbnail);
+	if (thumbnail != NULL) 
+	{
+		HRESULT hr = DwmUnregisterThumbnail(thumbnail);
+		success = SUCCEEDED(hr);
+	}
 
-	// Check thumbnail is unregistered
-	if (!SUCCEEDED(hr)) return false;
-
-	// Success
 	thumbnail = NULL;
-	return true;
-}
-
-bool DwmThumbnail::Scale(RECT const & destRect)
-{
-	if (!IsCreated()) return false;
-
-	// Set thumb props
-	DWM_THUMBNAIL_PROPERTIES thumbProps;
-	SecureZeroMemory(&thumbProps, sizeof(DWM_THUMBNAIL_PROPERTIES));
-	thumbProps.dwFlags = DWM_TNP_RECTDESTINATION;
-	thumbProps.rcDestination = destRect;
-
-	// Update thumb props
-	HRESULT hr = DwmUpdateThumbnailProperties(thumbnail, &thumbProps);
-
-	// Check thumbnail is updated
-	if (!SUCCEEDED(hr)) return false;
-	else return true;
+	return success;
 }
 
 bool DwmThumbnail::InitializeProperties()
@@ -91,8 +70,20 @@ bool DwmThumbnail::InitializeProperties()
 
 	// Update thumb props
 	HRESULT hr = DwmUpdateThumbnailProperties(thumbnail, &thumbProps);
+	return SUCCEEDED(hr);
+}
 
-	// Check thumbnail is updated
-	if (!SUCCEEDED(hr)) return false;
-	else return true;
+bool DwmThumbnail::Scale(RECT const & destRect)
+{
+	if (!IsCreated()) return false;
+
+	// Set thumb props
+	DWM_THUMBNAIL_PROPERTIES thumbProps;
+	SecureZeroMemory(&thumbProps, sizeof(DWM_THUMBNAIL_PROPERTIES));
+	thumbProps.dwFlags = DWM_TNP_RECTDESTINATION;
+	thumbProps.rcDestination = destRect;
+
+	// Update thumb props
+	HRESULT hr = DwmUpdateThumbnailProperties(thumbnail, &thumbProps);
+	return SUCCEEDED(hr);
 }
