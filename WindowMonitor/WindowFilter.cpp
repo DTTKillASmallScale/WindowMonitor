@@ -86,7 +86,7 @@ size_t WindowFilter::Refresh()
 	std::wstring className;
 	std::wstring title;
 	RECT clientRect;
-	size_t checksum(0);
+	size_t checksum(1);
 
 	// Clear set
 	items.clear();
@@ -149,8 +149,7 @@ size_t WindowFilter::Refresh()
 		checksum ^= strHash(title);
 	}
 
-	static const auto comparator = [](WindowFilterItem const & x, WindowFilterItem const & y){ return x.title < y.title; };
-	std::sort(items.begin(), items.end(), comparator);
+	std::sort(items.begin(), items.end(), [](WindowFilterItem const & x, WindowFilterItem const & y){ return x.title < y.title; });
 	return checksum;
 }
 
