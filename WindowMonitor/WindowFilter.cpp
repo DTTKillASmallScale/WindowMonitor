@@ -80,7 +80,6 @@ size_t WindowFilter::Refresh()
 	// Enum windows
 	windows.clear();
 	EnumWindows(WindowFilter::AddWindowToList, LPARAM(&windows));
-	std::sort(windows.begin(), windows.end());
 
 	// Filter windows
 	HWND hwnd, parent;
@@ -145,9 +144,13 @@ size_t WindowFilter::Refresh()
 		items.insert(items.begin(), item);
 
 		// Update checksum
-		checksum += item.hash;
+		static const std::hash<std::wstring> strHash;
+		checksum ^= item.hash;
+		checksum ^= strHash(title);
 	}
 
+	static const auto comparator = [](WindowFilterItem const & x, WindowFilterItem const & y){ return x.title < y.title; };
+	std::sort(items.begin(), items.end(), comparator);
 	return checksum;
 }
 
