@@ -65,6 +65,7 @@ void PresetManager::IterateNames(PresetManagerIterateAction action)
 		action(it->first);
 	}
 }
+
 void PresetManager::SaveToBinaryFile()
 {
 	// Open file
@@ -106,12 +107,28 @@ void PresetManager::SaveToBinaryFile()
 
 bool PresetManager::LoadFromBinaryFile(bool const & skipIfCurrent)
 {
+	LoadStatus result = LoadStatus::NotLoaded;
+	bool continueProcessing = false;
+	unsigned long long count = 0;
+
 	// Open file
 	std::ifstream in(filename, std::ios::binary);
+	if (in) continueProcessing = true;
+	else presets.clear();
 
-	// Check file is open
-	if (!in) return false;
+	// Process file
+	if (continueProcessing) ReadFileVersion(in, result, continueProcessing);
+	if (continueProcessing) CompareSaveTimes(in, skipIfCurrent, result, continueProcessing);
+	if (continueProcessing) CheckItemCount(in, count, result, continueProcessing);
+	if (continueProcessing) LoadItems(in, count, result, continueProcessing);
 
+	// Done
+	in.close();
+	return result != LoadStatus::NotUpdated;
+}
+
+void PresetManager::ReadFileVersion(std::ifstream & in, LoadStatus & result, bool & continueProcessing)
+{
 	// Read file version
 	unsigned char version = 0;
 	in.read(reinterpret_cast<char*>(&version), sizeof(version));
@@ -120,27 +137,52 @@ bool PresetManager::LoadFromBinaryFile(bool const & skipIfCurrent)
 	if (version != PresetManager::FileVersion)
 	{
 		throw std::runtime_error("Preset Manager: File version is unsupported");
-		return false;
+		result = LoadStatus::NotLoaded;
+		continueProcessing = false;
 	}
+	else
+	{
+		continueProcessing = true;
+	}
+}
 
+void PresetManager::CompareSaveTimes(std::ifstream & in, bool const & skipIfCurrent, LoadStatus & result, bool & continueProcessing)
+{
 	// Read save time
 	time_t fileTime;
 	in.read(reinterpret_cast<char*>(&fileTime), sizeof(fileTime));
 
 	// Compare times
-	if (skipIfCurrent == true && fileTime <= lastSaveTime) return false;
-	else lastSaveTime = fileTime;
+	if (skipIfCurrent == true && fileTime <= lastSaveTime)
+	{
+		result = LoadStatus::NotUpdated;
+		continueProcessing = false;
+	}
+	else
+	{
+		continueProcessing = true;
+	}
 
+	lastSaveTime = fileTime;
+}
+
+void PresetManager::CheckItemCount(std::ifstream & in, unsigned long long & count, LoadStatus & result, bool & continueProcessing)
+{
 	// Read item count
-	unsigned long long count = 0;
 	in.read(reinterpret_cast<char*>(&count), sizeof(count));
 
-	// Check file has items
-	if (count < 1) return false;
-
-	// Clear presets
+	// Store old item count and clear
+	auto oldItemCount = presets.size();
 	presets.clear();
 
+	// Check file has items
+	if (count < 1) continueProcessing = false;
+	else continueProcessing = true;
+	result = LoadStatus::Updated;
+}
+
+void PresetManager::LoadItems(std::ifstream & in, unsigned long long & count, LoadStatus & result, bool & continueProcessing)
+{
 	// Read items
 	while (in && count--)
 	{
@@ -155,7 +197,7 @@ bool PresetManager::LoadFromBinaryFile(bool const & skipIfCurrent)
 		if (in && size)
 		{
 			// Create buffer for wstring with space for null terminator
-			size_t count = static_cast<size_t>(size) / sizeof(wchar_t) + 1;
+			size_t count = static_cast<size_t>(size) / sizeof(wchar_t)+1;
 			std::vector<wchar_t> buffer(count, '\0');
 
 			// Read data
@@ -168,7 +210,10 @@ bool PresetManager::LoadFromBinaryFile(bool const & skipIfCurrent)
 		{
 			if (!in) throw std::runtime_error("Preset Manager: Stream ended when reading preset name");
 			if (!size) throw std::runtime_error("Preset Manager: Preset name length was zero");
-			return false;
+			presets.clear();
+			result = LoadStatus::NotLoaded;
+			continueProcessing = false;
+			return;
 		}
 
 		// Read dimensions
@@ -181,6 +226,6 @@ bool PresetManager::LoadFromBinaryFile(bool const & skipIfCurrent)
 		presets.emplace(std::make_pair(name, dimensions));
 	}
 
-	// Items were loaded
-	return true;
+	result = LoadStatus::Updated;
+	continueProcessing = true;
 }

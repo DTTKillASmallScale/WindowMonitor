@@ -83,10 +83,7 @@ void AppWindowMenuHandler::OnContextMenu(WPARAM const & wParam, LPARAM const & l
 	SetMenuItemInfo(contextMenu, ID_MENU_FULLSCREEN, FALSE, &mii);
 
 	// Update sources
-	size_t checksum = windowMonitor->UpdateSources();
-	if (lastChecksum == checksum) RefreshSourceMenu();
-	else ReloadSourceMenu();
-	lastChecksum = checksum;
+	windowMonitor->UpdateSources();
 
 	// Update presets
 	windowMonitor->UpdatePresets();
@@ -269,19 +266,29 @@ void AppWindowMenuHandler::HandleMenuCmd(WPARAM const & wParam, LPARAM const & l
 
 void AppWindowMenuHandler::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 {
+	if (event & WindowMonitorEvent::SourcesUpdated)
+	{
+		ReloadSourceMenu();
+		RefreshPresetMenu();
+		return;
+	}
+	else if (event & WindowMonitorEvent::SourceSelected)
+	{
+		RefreshSourceMenu();
+		RefreshPresetMenu();
+		return;
+	}
+
 	switch (event)
 	{
 	case WindowMonitorEvent::DimensionsReset:
-	case WindowMonitorEvent::SourceSelected:
 	case WindowMonitorEvent::PresetSelected:
 	case WindowMonitorEvent::PresetDeselected:
-		// Refresh
 		RefreshPresetMenu();
 		break;
 	case WindowMonitorEvent::PresetSaved:
 	case WindowMonitorEvent::PresetDeleted:
 	case WindowMonitorEvent::PresetsUpdated:
-		// Reload
 		ReloadPresetMenu();
 		break;
 	}

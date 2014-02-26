@@ -3,7 +3,8 @@
 #include "WindowHelper.h"
 
 WindowFilter::WindowFilter() :
-	blacklistLastWrite(0)
+	blacklistLastWrite(0),
+	lastChecksum(0)
 {
 }
 
@@ -72,7 +73,7 @@ void WindowFilter::IterateItems(WindowFilterIterateAction action)
 	}
 }
 
-size_t WindowFilter::Refresh()
+bool WindowFilter::Refresh()
 {
 	// Load blacklist
 	LoadBlacklist();
@@ -83,8 +84,7 @@ size_t WindowFilter::Refresh()
 
 	// Filter windows
 	HWND hwnd, parent;
-	std::wstring className;
-	std::wstring title;
+	std::wstring className, title;
 	RECT clientRect;
 	size_t checksum(1);
 
@@ -149,8 +149,11 @@ size_t WindowFilter::Refresh()
 		checksum ^= strHash(title);
 	}
 
+	bool updated = (checksum != lastChecksum);
+	lastChecksum = checksum;
+
 	std::sort(items.begin(), items.end(), [](WindowFilterItem const & x, WindowFilterItem const & y){ return x.title < y.title; });
-	return checksum;
+	return updated;
 }
 
 bool WindowFilter::IsFilteredByClassName(std::wstring const & className)

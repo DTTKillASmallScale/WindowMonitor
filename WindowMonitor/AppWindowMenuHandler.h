@@ -17,7 +17,6 @@ private:
 
 	HMENU entireMenu, contextMenu, presetMenu, zoomMenu;
 	int baseMenuItemCount;
-	size_t lastChecksum;
 
 	void OnContextMenu(WPARAM const & wParam, LPARAM const & lParam);
 	void HandleMenuCmd(WPARAM const & wParam, LPARAM const & lParam);

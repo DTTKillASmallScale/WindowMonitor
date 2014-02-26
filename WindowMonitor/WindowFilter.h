@@ -14,13 +14,14 @@ public:
 	WindowFilterItem GetNextItem(WindowFilterItem const & currentItem);
 	WindowFilterItem GetPreviousItem(WindowFilterItem const & currentItem);
 	void IterateItems(WindowFilterIterateAction action);
-	size_t Refresh();
+	bool Refresh();
 
 private:
 	std::vector<HWND> windows;
 	std::vector<WindowFilterItem> items;
 	std::vector<WindowFilterBlacklistItem> blacklist;
 	unsigned long long blacklistLastWrite;
+	size_t lastChecksum;
 
 	bool IsFilteredByClassName(std::wstring const & className);
 	bool EmptyTitleAllowedByClassName(std::wstring const & className);

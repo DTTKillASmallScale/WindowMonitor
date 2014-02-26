@@ -243,9 +243,8 @@ bool AppWindow::OnSizing(WPARAM const & wParam, LPARAM const & lParam)
 
 void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 {
-	switch (event)
+	if (event & WindowMonitorEvent::SourceSelected)
 	{
-	case WindowMonitorEvent::SourceSelected:
 		// If we have an existing source, remove hook
 		if (hookedSource != NULL) EventHookManager::GetInstance().RemoveHook(hookedSource, EVENT_OBJECT_DESTROY, EVENT_OBJECT_DESTROY);
 
@@ -256,7 +255,11 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		// Update window
 		adjustableThumbnail.SetThumbnail(GetWindowHandle(), windowMonitor->GetSourceWindow());
 		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
-		break;
+		return;
+	}
+
+	switch (event)
+	{
 	case WindowMonitorEvent::Moved:
 		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
 		break;

@@ -21,65 +21,93 @@ WindowMonitor::~WindowMonitor()
 void WindowMonitor::SelectSourceByHash(std::size_t const & hash)
 {
 	// Get filtered windows
-	sources->Refresh();
-	if (sources->ItemCount() < 1) return;
+	bool sourcesUpdated = sources->Refresh();
+	
+	if (sources->ItemCount() != 0)
+	{
+		// Set selected index
+		selectedSource = sources->GetItemByHash(hash);
 
-	// Set selected index
-	selectedSource = sources->GetItemByHash(hash);
+		// Set dimensions
+		SetDimensionsToSelectedSource();
 
-	// Set dimensions
-	SetDimensionsToSelectedSource();
-
-	// Send update event
-	NotifyObservers(WindowMonitorEvent::SourceSelected);
+		// Send update event
+		NotifyObservers(WindowMonitorEvent::SourceSelected | (sourcesUpdated ? WindowMonitorEvent::SourcesUpdated : WindowMonitorEvent::Nothing));
+	}
+	else
+	{
+		// Send update event
+		if (sourcesUpdated) NotifyObservers(WindowMonitorEvent::SourcesUpdated);
+	}
 }
 
 void WindowMonitor::SelectFirstSource()
 {
 	// Get filtered windows
-	sources->Refresh();
-	if (sources->ItemCount() < 1) return;
+	bool sourcesUpdated = sources->Refresh();
 
-	// Set selected index
-	selectedSource = sources->GetItem(0);
+	if (sources->ItemCount() != 0)
+	{
+		// Set selected index
+		selectedSource = sources->GetItem(0);
 
-	// Set dimensions
-	SetDimensionsToSelectedSource();
+		// Set dimensions
+		SetDimensionsToSelectedSource();
 
-	// Send update event
-	NotifyObservers(WindowMonitorEvent::SourceSelected);
+		// Send update event
+		NotifyObservers(WindowMonitorEvent::SourceSelected | (sourcesUpdated ? WindowMonitorEvent::SourcesUpdated : WindowMonitorEvent::Nothing));
+	}
+	else
+	{
+		// Send update event
+		if (sourcesUpdated) NotifyObservers(WindowMonitorEvent::SourcesUpdated);
+	}
 }
 
 void WindowMonitor::SelectNextSource()
 {
 	// Get filtered windows
-	sources->Refresh();
-	if (sources->ItemCount() < 1) return;
+	bool sourcesUpdated = sources->Refresh();
 
-	// Get next item
-	selectedSource = sources->GetNextItem(selectedSource);
+	if (sources->ItemCount() != 0)
+	{
+		// Get next item
+		selectedSource = sources->GetNextItem(selectedSource);
 
-	// Set dimensions
-	SetDimensionsToSelectedSource();
+		// Set dimensions
+		SetDimensionsToSelectedSource();
 
-	// Send update event
-	NotifyObservers(WindowMonitorEvent::SourceSelected);
+		// Send update event
+		NotifyObservers(WindowMonitorEvent::SourceSelected | (sourcesUpdated ? WindowMonitorEvent::SourcesUpdated : WindowMonitorEvent::Nothing));
+	}
+	else
+	{
+		// Send update event
+		if (sourcesUpdated) NotifyObservers(WindowMonitorEvent::SourcesUpdated);
+	}
 }
 
 void WindowMonitor::SelectPreviousSource()
 {
 	// Get filtered windows
-	sources->Refresh();
-	if (sources->ItemCount() < 1) return;
+	bool sourcesUpdated = sources->Refresh();
 
-	// Get previous item
-	selectedSource = sources->GetPreviousItem(selectedSource);
+	if (sources->ItemCount() != 0)
+	{
+		// Get previous item
+		selectedSource = sources->GetPreviousItem(selectedSource);
 
-	// Set dimensions
-	SetDimensionsToSelectedSource();
+		// Set dimensions
+		SetDimensionsToSelectedSource();
 
-	// Send update event
-	NotifyObservers(WindowMonitorEvent::SourceSelected);
+		// Send update event
+		NotifyObservers(WindowMonitorEvent::SourceSelected | (sourcesUpdated ? WindowMonitorEvent::SourcesUpdated : WindowMonitorEvent::Nothing));
+	}
+	else
+	{
+		// Send update event
+		if (sourcesUpdated) NotifyObservers(WindowMonitorEvent::SourcesUpdated);
+	}
 }
 
 void WindowMonitor::SelectPreset(std::wstring const & name)
@@ -222,27 +250,9 @@ RECT WindowMonitor::GetScaledRect()
 	return rect;
 }
 
-size_t WindowMonitor::UpdateSources()
+void WindowMonitor::UpdateSources()
 {
-	return sources->Refresh();
-}
-
-void WindowMonitor::IterateSources(std::function<void(WindowFilterItem const & item, bool const & selected)> action)
-{
-	sources->IterateItems([&](WindowFilterItem const & item)
-	{
-		action(item, (item == selectedSource));
-		return false;
-	});
-}
-
-void WindowMonitor::IteratePresets(std::function<void(std::wstring const & text, bool const & selected)> action)
-{
-	UpdatePresets();
-	presets->IterateNames([&](std::wstring const & name)
-	{
-		action(name, (name == selectedPreset));
-	});
+	if (sources->Refresh()) NotifyObservers(WindowMonitorEvent::SourcesUpdated);
 }
 
 void WindowMonitor::UpdatePresets()
@@ -258,6 +268,23 @@ void WindowMonitor::UpdatePresets()
 	}
 }
 
+void WindowMonitor::IterateSources(std::function<void(WindowFilterItem const & item, bool const & selected)> action)
+{
+	sources->IterateItems([&](WindowFilterItem const & item)
+	{
+		action(item, (item == selectedSource));
+		return false;
+	});
+}
+
+void WindowMonitor::IteratePresets(std::function<void(std::wstring const & text, bool const & selected)> action)
+{
+	presets->IterateNames([&](std::wstring const & name)
+	{
+		action(name, (name == selectedPreset));
+	});
+}
+
 void WindowMonitor::RegisterObserver(WindowMonitorObserver * observer)
 {
 	observers.push_back(observer);
@@ -271,9 +298,7 @@ void WindowMonitor::UnregisterObserver(WindowMonitorObserver * observer)
 void WindowMonitor::NotifyObservers(WindowMonitorEvent const & event)
 {
 #ifdef _DEBUG
-	std::wstringstream ss;
-	ss << time(NULL) << "\t" << WindowMonitorEventNames[static_cast<int>(event)] << "\n";
-	OutputDebugStringW(ss.str().c_str());
+	DebugWindowMonitorEventValue(event);
 #endif
 
 	for (auto it = observers.begin(); it != observers.end(); ++it)

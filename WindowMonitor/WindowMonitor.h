@@ -10,7 +10,7 @@ public:
 	WindowMonitor(WindowFilter * sources, PresetManager * presets);
 	~WindowMonitor();
 
-	size_t UpdateSources();
+	void UpdateSources();
 	void SelectSourceByHash(std::size_t const & hash);
 	void SelectFirstSource();
 	void SelectNextSource();
