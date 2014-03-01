@@ -76,10 +76,10 @@ void AppWindowMenuHandler::OnContextMenu(WPARAM const & wParam, LPARAM const & l
 	mii.cbSize = sizeof(MENUITEMINFO);
 	mii.fMask = MIIM_STATE;
 
-	mii.fState = MFS_ENABLED | (appWindow->borderVisible ? MFS_CHECKED : 0);
+	mii.fState = MFS_ENABLED | (appWindow->IsBorderVisible() ? MFS_CHECKED : 0);
 	SetMenuItemInfo(contextMenu, ID_MENU_TOGGLEBORDER, FALSE, &mii);
 
-	mii.fState = MFS_ENABLED | (appWindow->fullScreen ? MFS_CHECKED : 0);
+	mii.fState = MFS_ENABLED | (appWindow->IsFullscreen() ? MFS_CHECKED : 0);
 	SetMenuItemInfo(contextMenu, ID_MENU_FULLSCREEN, FALSE, &mii);
 
 	// Update sources

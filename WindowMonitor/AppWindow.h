@@ -12,13 +12,14 @@ class WindowMonitor;
 
 class AppWindow : public CWindow, public WindowMonitorObserver, public EventHookHandler
 {
-	friend class AppWindowMenuHandler;
 public:
 	AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const presetWindow);
 	void ToggleBorder();
 	void ToggleFullscreen();
 	void ToggleClickThrough();
 	void ShowPresetWindow();
+	inline bool IsBorderVisible() { return borderVisible; }
+	inline bool IsFullscreen() { return fullScreen; }
 	void OnWindowMonitorEvent(WindowMonitorEvent const & event);
 	static const COLORREF BackgroundColour;
 	virtual void OnEventHookTriggered(DWORD const & event, HWND const & hwnd, LONG const & obj, LONG const & child) override;
