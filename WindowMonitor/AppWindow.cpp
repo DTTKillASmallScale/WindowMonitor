@@ -250,7 +250,18 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		if (hookedSource != NULL) EventHookManager::GetInstance().AddHook(hookedSource, EVENT_OBJECT_DESTROY, EVENT_OBJECT_DESTROY, this);
 
 		// Update window
-		adjustableThumbnail.SetThumbnail(GetWindowHandle(), windowMonitor->GetSourceWindow());
+		if (adjustableThumbnail.Register(GetWindowHandle(), windowMonitor->GetSourceWindow()))
+		{
+			RECT sourceRect;
+			GetClientRect(windowMonitor->GetSourceWindow(), &sourceRect);
+			sourceRect.right -= sourceRect.left;
+			sourceRect.bottom -= sourceRect.top;
+			sourceRect.left = 0;
+			sourceRect.top = 0;
+			adjustableThumbnail.Scale(sourceRect);
+		}
+
+		// Resize
 		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
 		return;
 	}
@@ -258,14 +269,14 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 	switch (event)
 	{
 	case WindowMonitorEvent::Moved:
-		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
+		adjustableThumbnail.Scale(windowMonitor->GetScaledRect());
 		break;
 	case WindowMonitorEvent::Cropped:
 		UpdateWindow();
 		break;
 	case WindowMonitorEvent::PresetSelected:
 	case WindowMonitorEvent::Scaled:
-		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
+		adjustableThumbnail.Scale(windowMonitor->GetScaledRect());
 		UpdateWindow();
 		break;
 	case WindowMonitorEvent::DimensionsReset:
@@ -280,12 +291,12 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		// Continue onto next case
 	}
 	case WindowMonitorEvent::ScaledToMonitor:
-		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
+		adjustableThumbnail.Scale(windowMonitor->GetScaledRect());
 		UpdateWindow();
 		CenterWindow();
 		break;
 	case WindowMonitorEvent::ScaledToWindow:
-		adjustableThumbnail.SetSize(windowMonitor->GetScaledRect());
+		adjustableThumbnail.Scale(windowMonitor->GetScaledRect());
 		break;
 	default:
 		break;

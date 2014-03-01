@@ -4,7 +4,7 @@
 #include "AppWindowCursorHandler.h"
 #include "AppWindowMenuHandler.h"
 #include "WindowMonitorObserver.h"
-#include "AdjustableThumbnail.h"
+#include "DwmThumbnail.h"
 #include "PresetWindow.h"
 #include "EventHookHandler.h"
 
@@ -41,7 +41,7 @@ private:
 	void CenterWindow();
 
 	// Vars
-	AdjustableThumbnail adjustableThumbnail;
+	DwmThumbnail adjustableThumbnail;
 	POINTS lastPos;
 	int chromeWidth, chromeHeight;
 	bool wasSizing, borderVisible, fullScreen;
