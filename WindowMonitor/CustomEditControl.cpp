@@ -1,26 +1,21 @@
 #include "stdafx.h"
 #include "CustomEditControl.h"
+#include "Application.h"
 #include "PresetWindow.h"
 #include "WindowHelper.h"
 
-CustomEditControl::CustomEditControl(int const & x, int const & y, int const & cx, int const & cy) :
-	originalProc(NULL)
+CustomEditControl::CustomEditControl(WindowBase * parent) :
+	Control(parent),
+	x(0), y(0), cx(100), cy(20)
 {
-	SecureZeroMemory(&cs, sizeof(CREATESTRUCT));
-	cs.hMenu = NULL;
-	cs.lpszName = _T("");
-	cs.lpszClass = _T("EDIT");
-	cs.x = x;
-	cs.y = y;
-	cs.cx = cx;
-	cs.cy = cy;
-	cs.style = WS_CHILD | WS_VISIBLE | SS_LEFT;
-	cs.dwExStyle = WS_EX_CLIENTEDGE;
 }
 
-void CustomEditControl::SetParent(HWND const & parent)
+void CustomEditControl::SetCoords(int const & _x, int const & _y, int const & _cx, int const & _cy)
 {
-	cs.hwndParent = parent;
+	x = _x;
+	y = _y;
+	cx = _cx;
+	cy = _cy;
 }
 
 void CustomEditControl::Create()
@@ -28,14 +23,19 @@ void CustomEditControl::Create()
 	// Check current window handle
 	if (GetWindowHandle() != NULL) return;
 
-	// Create window
-	SetWindowHandle(CreateWindowEx(cs.dwExStyle, cs.lpszClass, cs.lpszName, cs.style, cs.x, cs.y, cs.cx, cs.cy, cs.hwndParent, cs.hMenu, WindowHelper::GetCurrentModuleHandle(), cs.lpCreateParams));
+	static const auto configureWindowStruct = [&](CREATESTRUCT & cs)
+	{
+		cs.lpszName = L"";
+		cs.lpszClass = L"EDIT";
+		cs.style = WS_CHILD | WS_VISIBLE | SS_LEFT;
+		cs.dwExStyle = WS_EX_CLIENTEDGE;
+		cs.x = x;
+		cs.y = y;
+		cs.cx = cx;
+		cs.cy = cy;
+	};
 
-	// Set user data for StaticWndProc
-	SetWindowLongPtr(GetWindowHandle(), GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
-
-	// Re-wire to use StaticWndProc
-	originalProc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(GetWindowHandle(), GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(&CWindow::StaticWndProc)));
+	Control::Create(configureWindowStruct);
 }
 
 LRESULT CustomEditControl::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -53,5 +53,5 @@ LRESULT CustomEditControl::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARA
 		}
 	}
 
-	return CallWindowProc(originalProc, hWnd, message, wParam, lParam);
+	return CallWindowProc(controlWndProc, hWnd, message, wParam, lParam);
 }

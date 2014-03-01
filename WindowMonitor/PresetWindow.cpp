@@ -1,30 +1,31 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "PresetWindow.h"
-#include "CWindowWndClass.h"
-#include "CWindowCreateStruct.h"
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
 
-class PresetWindowClass : public CWindowWndClass
+PresetWindow::PresetWindow(WindowMonitor * const windowMonitor) :
+	windowMonitor(windowMonitor),
+	previousListboxSelection(-1),
+	titleText(this)
 {
-public:
-	PresetWindowClass() : CWindowWndClass(L"DwmWindowMonitorPresets") { }
+}
 
-	virtual void Configure(WNDCLASSEX & wcex) override
+void PresetWindow::Create()
+{
+	if (GetWindowHandle() != NULL) return;
+
+	static const auto configureWindowClass = [&](WNDCLASSEX & wcex)
 	{
+		wcex.lpszClassName = L"DwmWindowMonitorPresets";
 		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
 		wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 		wcex.hbrBackground = CreateSolidBrush(RGB(240, 240, 240));
 		wcex.hIcon = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
 		wcex.hIconSm = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, false);
-	}
-};
+	};
 
-class PresetWindowStruct : public CWindowCreateStruct
-{
-public:
-	virtual void Configure(CREATESTRUCT & cs) override
+	static const auto configureWindowStruct = [&](CREATESTRUCT & cs)
 	{
 		RECT monitorRect;
 		WindowHelper::GetMonitorRect(FindWindow(L"DwmWindowMonitorApp", NULL), monitorRect);
@@ -34,19 +35,11 @@ public:
 		cs.cy = 220;
 		cs.x = (monitorRect.right + monitorRect.left - cs.cx) / 2;
 		cs.y = (monitorRect.bottom + monitorRect.top - cs.cy) / 2;
-	}
-};
+	};
 
-
-PresetWindow::PresetWindow(WindowMonitor * const windowMonitor) :
-	CWindow(),
-	windowMonitor(windowMonitor),
-	previousListboxSelection(-1),
-	titleText(195, 28, 175, 20)
-{
-	SetWindowClass<PresetWindowClass>();
-	SetWindowStruct<PresetWindowStruct>();
+	Window::Create(configureWindowClass, configureWindowStruct);
 }
+
 
 void PresetWindow::OnCreate()
 {
@@ -65,7 +58,7 @@ void PresetWindow::OnCreate()
 	widthText = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | SS_LEFT | ES_READONLY, 314, 90, 50, 20, GetWindowHandle(), NULL, WindowHelper::GetCurrentModuleHandle(), NULL);
 	saveButton = CreateWindow(L"Button", L"Save", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 297, 146, 75, 23, GetWindowHandle(), reinterpret_cast<HMENU>(PresetCommand::SavePreset), WindowHelper::GetCurrentModuleHandle(), NULL);
 
-	titleText.SetParent(GetWindowHandle());
+	titleText.SetCoords(195, 28, 175, 20);
 	titleText.Create();
 
 	// Set fonts

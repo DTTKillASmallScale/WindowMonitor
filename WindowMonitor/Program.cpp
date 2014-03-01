@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Application.h"
 #include "WindowFilter.h"
 #include "PresetManager.h"
 #include "WindowMonitor.h"
@@ -26,7 +27,7 @@ int APIENTRY WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int)
 	appWindow.Create();
 
 	// Run loop
-	CWindow::Run();
+	Application::Run();
 	
 	return 0;
 }

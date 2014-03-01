@@ -1,18 +1,17 @@
 #pragma once
-#include "CWindow.h"
-class CustomEditControl :
-	public CWindow
+#include "Control.h"
+
+class CustomEditControl : public Control
 {
 public:
-	CustomEditControl(int const & x, int const & y, int const & cx, int const & cy);
-	void SetParent(HWND const & parent);
+	CustomEditControl(WindowBase * parent);
+	void SetCoords(int const & x, int const & y, int const & cx, int const & cy);
 	virtual void Create() override;
 
 protected:
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override;
 
 private:
-	CREATESTRUCT cs;
-	WNDPROC originalProc;
+	int cx, cy, x, y;
 };
 

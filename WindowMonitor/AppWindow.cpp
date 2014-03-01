@@ -1,48 +1,13 @@
 #include "stdafx.h"
 #include "Resource.h"
 #include "AppWindow.h"
-#include "CWindowWndClass.h"
-#include "CWindowCreateStruct.h"
 #include "WindowMonitor.h"
 #include "WindowHelper.h"
 #include "EventHookManager.h"
 
 const COLORREF AppWindow::BackgroundColour = RGB(255, 255, 255);
 
-class AppWindowClass : public CWindowWndClass
-{
-public:
-	AppWindowClass() : CWindowWndClass(L"DwmWindowMonitorApp") { }
-
-	virtual void Configure(WNDCLASSEX & wcex) override
-	{
-		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-		wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(32512));
-		wcex.hbrBackground = CreateSolidBrush(AppWindow::BackgroundColour);
-		wcex.hIcon = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
-		wcex.hIconSm = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, false);
-	}
-};
-
-class AppWindowStruct : public CWindowCreateStruct
-{
-public:
-	virtual void Configure(CREATESTRUCT & cs) override
-	{
-		cs.lpszClass = L"DwmWindowMonitorApp";
-		cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER | WS_MINIMIZEBOX;
-		cs.dwExStyle = NULL;
-		cs.hwndParent = NULL;
-		cs.x = 0;
-		cs.y = 0;
-		cs.cx = 640;
-		cs.cy = 480;
-		cs.hMenu = NULL;
-	}
-};
-
 AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const presetWindow) :
-	CWindow(),
 	cursorHandler(this, windowMonitor),
 	acceleratorhandler(this, windowMonitor),
 	menuHandler(this, windowMonitor),
@@ -57,9 +22,37 @@ AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const p
 	hookedSource(NULL)
 {
 	lastPos.x = lastPos.y = 0;
-	SetWindowClass<AppWindowClass>();
-	SetWindowStruct<AppWindowStruct>();
 	SetAccelerators(IDW_MAIN);
+}
+
+void AppWindow::Create()
+{
+	if (GetWindowHandle() != NULL) return;
+
+	static const auto configureWindowClass = [&](WNDCLASSEX & wcex)
+	{
+		wcex.lpszClassName = L"DwmWindowMonitorApp";
+		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+		wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(32512));
+		wcex.hbrBackground = CreateSolidBrush(AppWindow::BackgroundColour);
+		wcex.hIcon = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
+		wcex.hIconSm = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN, false);
+	};
+
+	static const auto configureWindowStruct = [&](CREATESTRUCT & cs)
+	{
+		cs.lpszClass = L"DwmWindowMonitorApp";
+		cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER | WS_MINIMIZEBOX;
+		cs.dwExStyle = NULL;
+		cs.hwndParent = NULL;
+		cs.x = 0;
+		cs.y = 0;
+		cs.cx = 640;
+		cs.cy = 480;
+		cs.hMenu = NULL;
+	};
+
+	Window::Create(configureWindowClass, configureWindowStruct);
 }
 
 void AppWindow::OnCreate()

@@ -1,5 +1,5 @@
 #pragma once
-#include "CWindow.h"
+#include "Window.h"
 #include "WindowMonitorObserver.h"
 #include "CustomEditControl.h"
 
@@ -12,11 +12,12 @@ enum class PresetCommand
 	ListboxSelect
 };
 
-class PresetWindow : public CWindow, public WindowMonitorObserver
+class PresetWindow : public Window, public WindowMonitorObserver
 {
 public:
 	PresetWindow(WindowMonitor * const windowMonitor);
-	void OnWindowMonitorEvent(WindowMonitorEvent const & event);
+	virtual void Create() override;
+	virtual void OnWindowMonitorEvent(WindowMonitorEvent const & event) override;
 
 protected:
 	virtual LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override;
