@@ -13,7 +13,7 @@ WindowMonitor displays a scalable DWM thumbnail for a selected window.
 * `F5` resets view
 * `F6` toggles fullscreen mode
 
-#### Main features for v1.0.11
+#### Main features for v1.1.0
 * Presets context menu
 * Fullscreen menu option
 * Checkmark indicators for selected menu options
