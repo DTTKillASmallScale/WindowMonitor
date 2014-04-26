@@ -35,7 +35,13 @@ public:
 	inline double GetHeight() { return dimensions.bottom - dimensions.top; }
 	inline double GetScaledWidth() { return (dimensions.right - dimensions.left) * scale; }
 	inline double GetScaledHeight() { return (dimensions.bottom - dimensions.top) * scale; }
-	inline double GetAspect(){ return (dimensions.right - dimensions.left) / (dimensions.bottom - dimensions.top); }
+	inline double GetAspect()
+	{ 
+		double width = dimensions.right - dimensions.left;
+		double height = dimensions.bottom - dimensions.top;
+		if (width <= 0.0 || height <= 0.0) return 1.0;
+		return width / height;
+	}
 	inline DoubleRect GetDimensions() { return dimensions; }
 	RECT GetScaledRect();
 
