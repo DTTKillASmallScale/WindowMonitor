@@ -105,6 +105,14 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	case WM_MOUSEMOVE:
 		if (OnMouseMove(wParam, lParam)) return 0;
 		break;
+	case WM_GETMINMAXINFO:
+	{
+		DefWindowProc(hWnd, message, wParam, lParam);
+		LPMINMAXINFO info = reinterpret_cast<LPMINMAXINFO>(lParam);
+		info->ptMinTrackSize.x = 0;
+		info->ptMinTrackSize.y = 0;
+		break;
+	}
 	case WM_SIZING:
 		wasSizing = true;
 		if (OnSizing(wParam, lParam)) return TRUE;
