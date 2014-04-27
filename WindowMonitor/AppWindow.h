@@ -40,6 +40,7 @@ private:
 	// Methods
 	void UpdateWindow();
 	void CenterWindow();
+	void DrawBackground();
 
 	// Vars
 	DwmThumbnail adjustableThumbnail;
@@ -49,5 +50,6 @@ private:
 	WindowMonitor * windowMonitor;
 	PresetWindow * presetWindow;
 	HWND hookedSource;
+	bool drawBackground;
 	static const COLORREF BackgroundColour;
 };

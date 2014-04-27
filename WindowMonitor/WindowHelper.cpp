@@ -179,4 +179,11 @@ namespace WindowHelper
 		filePath.assign(path);
 		filePath.append(L"\\");
 	}
+
+	void FillRegion(HDC const & hdc, HBRUSH const & brush, int const & x1, int const & y1, int const & x2, int const & y2)
+	{
+		HRGN region = CreateRectRgn(x1, y1, x2, y2);
+		FillRgn(hdc, region, brush);
+		DeleteObject(region);
+	}
 }

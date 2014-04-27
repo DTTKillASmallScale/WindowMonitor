@@ -16,4 +16,5 @@ namespace WindowHelper
 	HINSTANCE GetCurrentModuleHandle();
 	inline bool IsKeyDown(int virtKey) { return static_cast<unsigned short>(GetKeyState(virtKey)) >> 15 == 1; }
 	void GetPathToExecutable(std::wstring & filePath);
+	void FillRegion(HDC const & hdc, HBRUSH const & brush, int const & x1, int const & y1, int const & x2, int const & y2);
 }

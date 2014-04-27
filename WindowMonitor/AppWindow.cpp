@@ -19,7 +19,8 @@ AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const p
 	wasSizing(false),
 	borderVisible(true),
 	fullScreen(false),
-	hookedSource(NULL)
+	hookedSource(NULL),
+	drawBackground(true)
 {
 	lastPos.x = lastPos.y = 0;
 	SetAccelerators(IDW_MAIN);
@@ -32,7 +33,7 @@ void AppWindow::Create()
 	static const auto configureWindowClass = [&](WNDCLASSEX & wcex)
 	{
 		wcex.lpszClassName = L"DwmWindowMonitorApp";
-		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+		wcex.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS | CS_OWNDC;
 		wcex.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(32512));
 		wcex.hbrBackground = CreateSolidBrush(AppWindow::BackgroundColour);
 		wcex.hIcon = WindowHelper::GetIcon(WindowHelper::GetCurrentModuleHandle(), IDW_MAIN);
@@ -130,6 +131,9 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		// Suppress alt-key menu activation
 		if (wParam == SC_KEYMENU && (lParam >> 16) <= 0) return 0;
 		break;
+	case WM_PAINT:
+		DrawBackground();
+		return 0;
 	case WM_CREATE:
 		OnCreate();
 		return 0;
@@ -264,6 +268,8 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 
 		// Resize
 		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
+		drawBackground = false;
+		InvalidateRect(GetWindowHandle(), NULL, TRUE);
 		return;
 	}
 
@@ -308,7 +314,8 @@ void AppWindow::OnEventHookTriggered(DWORD const & event, HWND const & hwnd, LON
 {
 	if (obj == OBJID_WINDOW && child == INDEXID_CONTAINER)
 	{
-		windowMonitor->SelectFirstSource();
+		drawBackground = true;
+		InvalidateRect(GetWindowHandle(), NULL, TRUE);
 	}
 }
 
@@ -368,6 +375,68 @@ void AppWindow::UpdateWindow()
 	// Get size of window chrome
 	chromeWidth = (windowRect.right - windowRect.left) - width;
 	chromeHeight = (windowRect.bottom - windowRect.top) - height;
+}
+
+void AppWindow::DrawBackground()
+{
+	// Set up
+	PAINTSTRUCT ps;
+	HWND hwnd = GetWindowHandle();
+	HDC hdc = BeginPaint(hwnd, &ps);
+
+	if (drawBackground)
+	{
+		HBRUSH brush;
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+
+		// Calc size
+		int barWidth = static_cast<int>(ceil(static_cast<double>(rect.right) / 7.0));
+		int barHeight = static_cast<int>(ceil(static_cast<double>(rect.bottom) * 0.8));
+
+		// Draw black
+		brush = CreateSolidBrush(RGB(0, 0, 0));
+		WindowHelper::FillRegion(hdc, brush, barWidth, barHeight, barWidth * 2, rect.bottom);
+		WindowHelper::FillRegion(hdc, brush, barWidth * 3, barHeight, barWidth * 4, rect.bottom);
+		WindowHelper::FillRegion(hdc, brush, barWidth * 5, barHeight, barWidth * 6, rect.bottom);
+		DeleteObject(brush);
+
+		// Draw blue
+		brush = CreateSolidBrush(RGB(0, 0, 255));
+		WindowHelper::FillRegion(hdc, brush, 0, barHeight, barWidth, rect.bottom);
+		WindowHelper::FillRegion(hdc, brush, barWidth * 6, 0, barWidth * 7, barHeight);
+		DeleteObject(brush);
+
+		// Draw cyan
+		brush = CreateSolidBrush(RGB(0, 255, 255));
+		WindowHelper::FillRegion(hdc, brush, barWidth * 2, 0, barWidth * 3, barHeight);
+		WindowHelper::FillRegion(hdc, brush, barWidth * 4, barHeight, barWidth * 5, rect.bottom);
+		DeleteObject(brush);
+
+		// Draw magenta
+		brush = CreateSolidBrush(RGB(255, 0, 255));
+		WindowHelper::FillRegion(hdc, brush, barWidth * 4, 0, barWidth * 5, barHeight);
+		WindowHelper::FillRegion(hdc, brush, barWidth * 2, barHeight, barWidth * 3, rect.bottom);
+		DeleteObject(brush);
+
+		// Draw yellow
+		brush = CreateSolidBrush(RGB(255, 255, 0));
+		WindowHelper::FillRegion(hdc, brush, barWidth, 0, barWidth * 2, barHeight);
+		DeleteObject(brush);
+
+		// Draw green
+		brush = CreateSolidBrush(RGB(0, 255, 0));
+		WindowHelper::FillRegion(hdc, brush, barWidth * 3, 0, barWidth * 4, barHeight);
+		DeleteObject(brush);
+
+		// Draw red
+		brush = CreateSolidBrush(RGB(255, 0, 0));
+		WindowHelper::FillRegion(hdc, brush, barWidth * 5, 0, barWidth * 6, barHeight);
+		DeleteObject(brush);
+	}
+
+	// Finish
+	EndPaint(hwnd, &ps);
 }
 
 void AppWindow::CenterWindow()
