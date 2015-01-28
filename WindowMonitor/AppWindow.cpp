@@ -44,7 +44,7 @@ void AppWindow::Create()
 	static const auto configureWindowStruct = [&](CREATESTRUCT & cs)
 	{
 		cs.lpszClass = L"DwmWindowMonitorApp";
-		cs.style = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_THICKFRAME | WS_BORDER | WS_MINIMIZEBOX;
+		cs.style = WS_VISIBLE | WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX;
 		cs.dwExStyle = NULL;
 		cs.hwndParent = NULL;
 		cs.x = 0;
@@ -341,6 +341,7 @@ void AppWindow::ToggleBorder()
 	DWORD style = static_cast<DWORD>(GetWindowLong(GetWindowHandle(), GWL_STYLE));
 	style ^= WS_THICKFRAME;
 	style ^= WS_BORDER;
+	style ^= WS_DLGFRAME;
 	SetWindowLongPtr(GetWindowHandle(), GWL_STYLE, style);
 
 	// Update window
