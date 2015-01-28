@@ -20,7 +20,8 @@ AppWindow::AppWindow(WindowMonitor * const windowMonitor, PresetWindow * const p
 	borderVisible(true),
 	fullScreen(false),
 	hookedSource(NULL),
-	drawBackground(true)
+	drawBackground(false),
+	tmpPreset()
 {
 	lastPos.x = lastPos.y = 0;
 	SetAccelerators(IDW_MAIN);
@@ -67,7 +68,9 @@ void AppWindow::OnCreate()
 	windowMonitor->RegisterObserver(this);
 
 	// Select first source
-	windowMonitor->SelectFirstSource();
+	windowMonitor->UpdateSources();
+	if (windowMonitor->GetSourceCount() > 0) windowMonitor->SelectFirstSource();
+	else drawBackground = true;
 }
 
 void AppWindow::OnDestroy()
@@ -257,17 +260,26 @@ void AppWindow::OnWindowMonitorEvent(WindowMonitorEvent const & event)
 		// Update window
 		if (adjustableThumbnail.Register(GetWindowHandle(), windowMonitor->GetSourceWindow()))
 		{
-			RECT sourceRect;
-			GetClientRect(windowMonitor->GetSourceWindow(), &sourceRect);
-			sourceRect.right -= sourceRect.left;
-			sourceRect.bottom -= sourceRect.top;
-			sourceRect.left = 0;
-			sourceRect.top = 0;
-			adjustableThumbnail.Scale(sourceRect);
+			if (tmpPreset.right - tmpPreset.left > 0)
+			{
+				windowMonitor->SetDimensions(tmpPreset);
+				adjustableThumbnail.Scale(windowMonitor->GetScaledRect());
+			}
+			else
+			{
+				RECT sourceRect;
+				GetClientRect(windowMonitor->GetSourceWindow(), &sourceRect);
+				sourceRect.right -= sourceRect.left;
+				sourceRect.bottom -= sourceRect.top;
+				sourceRect.left = 0;
+				sourceRect.top = 0;
+				adjustableThumbnail.Scale(sourceRect);
+			}
 		}
 
 		// Resize
-		windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
+		if (tmpPreset.right - tmpPreset.left <= 0) windowMonitor->ResetAndScaleToFitMonitor(GetWindowHandle());
+		tmpPreset.bottom = tmpPreset.left = tmpPreset.right = tmpPreset.top = 0;
 		drawBackground = false;
 		InvalidateRect(GetWindowHandle(), NULL, TRUE);
 		return;
@@ -314,6 +326,7 @@ void AppWindow::OnEventHookTriggered(DWORD const & event, HWND const & hwnd, LON
 {
 	if (obj == OBJID_WINDOW && child == INDEXID_CONTAINER)
 	{
+		tmpPreset.CopyFrom(windowMonitor->GetDimensions());
 		drawBackground = true;
 		InvalidateRect(GetWindowHandle(), NULL, TRUE);
 	}

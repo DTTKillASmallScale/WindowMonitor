@@ -28,6 +28,7 @@ public:
 	void ScaleToFitMonitor(HWND const & hWnd, bool const & maximize = false);
 	void ResetAndScaleToFitMonitor(HWND const & hWnd);
 
+	inline size_t GetSourceCount() { return sources->ItemCount(); }
 	inline size_t GetSourceHash() { return selectedSource.hash; }
 	inline HWND GetSourceWindow() { return selectedSource.hwnd; }
 	inline std::wstring GetSelectedPresetName() { return selectedPreset; }
@@ -43,6 +44,7 @@ public:
 		return width / height;
 	}
 	inline DoubleRect GetDimensions() { return dimensions; }
+	inline void SetDimensions(DoubleRect const & input) { dimensions.CopyFrom(input); }
 	RECT GetScaledRect();
 
 	void IterateSources(std::function<void(WindowFilterItem const & item, bool const & selected)> action);

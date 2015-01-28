@@ -7,6 +7,7 @@
 #include "DwmThumbnail.h"
 #include "PresetWindow.h"
 #include "EventHookHandler.h"
+#include "DoubleRect.h"
 
 class WindowMonitor;
 
@@ -51,5 +52,6 @@ private:
 	PresetWindow * presetWindow;
 	HWND hookedSource;
 	bool drawBackground;
+	DoubleRect tmpPreset;
 	static const COLORREF BackgroundColour;
 };
