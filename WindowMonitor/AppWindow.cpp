@@ -132,7 +132,7 @@ LRESULT AppWindow::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		return 0;
 	case WM_SYSCOMMAND:
 		// Suppress alt-key menu activation
-		if (wParam == SC_KEYMENU && (lParam >> 16) <= 0) return 0;
+		//if (wParam == SC_KEYMENU && (lParam >> 16) <= 0) return 0;
 		break;
 	case WM_PAINT:
 		DrawBackground();
