@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "WindowFilter.h"
 #include "WindowHelper.h"
+#include <fstream>
 
 WindowFilter::WindowFilter() :
 	blacklistLastWrite(0),

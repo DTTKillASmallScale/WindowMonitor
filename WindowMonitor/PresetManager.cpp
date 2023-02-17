@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PresetManager.h"
 #include "WindowHelper.h"
+#include <fstream>
 
 const unsigned char PresetManager::FileVersion = 1;
 

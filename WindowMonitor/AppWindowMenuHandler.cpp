@@ -134,8 +134,8 @@ void AppWindowMenuHandler::ReloadSourceMenu()
 		mii.fType = MFT_STRING | (breakMenu ? MF_MENUBARBREAK : 0);
 		mii.fState = MFS_ENABLED | (selected ? MFS_CHECKED : 0);
 		mii.dwTypeData = const_cast<LPWSTR>(text.c_str());
-		mii.cch = text.length();
-		mii.wID = item.hash;
+		mii.cch = static_cast<unsigned int>(text.length());
+		mii.wID = static_cast<unsigned int>(item.hash);
 		InsertMenuItem(contextMenu, identifier, true, &mii);
 
 		// Next item
@@ -214,7 +214,7 @@ void AppWindowMenuHandler::HandleMenuCmd(WPARAM const & wParam, LPARAM const & l
 	MENUITEMINFO mii;
 	mii.cbSize = sizeof(MENUITEMINFO);
 	mii.fMask = MIIM_ID;
-	GetMenuItemInfo(menu, wParam, TRUE, &mii);
+	GetMenuItemInfo(menu, static_cast<UINT>(wParam), TRUE, &mii);
 
 	switch (mii.wID)
 	{
